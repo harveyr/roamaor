@@ -16,6 +16,7 @@ type Being struct {
     Name string
     Level int
     Location *location.Point
+    Destination *location.Point
     baseSpeed int
     beingType uint8
 }
@@ -23,6 +24,7 @@ type Being struct {
 func NewToon(name string) *Being {
 	t := &Being{Name: name, beingType: TOON}
 	t.Location = location.NewPoint(0, 0)
+	t.Destination = nil
 	return t
 }
 

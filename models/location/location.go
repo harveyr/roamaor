@@ -35,12 +35,3 @@ func (l *Location) Center() *Point {
 	y := l.Start.Y + float32(l.H) / 2
 	return NewPoint(x, y)
 }
-
-// func (l *Location) Bounds() map[string]float64 {
-// 	return map[string]float64{
-// 		"X1": float64(l.X),
-// 		"Y1": float64(l.Y),
-// 		"X2": float64(l.X + l.W),
-// 		"Y2": float64(l.Y + l.H),
-// 	}
-// }
