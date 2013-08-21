@@ -10,3 +10,11 @@ func TestDiceRoll(t *testing.T) {
 		t.Errorf("Invalid damage roll for %s: %d", w, damageRoll)
 	}
 }
+
+
+func TestRandName(t *testing.T) {
+	name := RandName(1)
+	if len(name) < 3 {
+		t.Errorf("Invalid random name: %s", name)
+	}
+}

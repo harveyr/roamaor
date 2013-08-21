@@ -2,8 +2,11 @@ package main
 
 import (
     "fmt"
+    "time"
+    "math/rand"
     "./models/being"
     "./models/location"
+    "./models/weapon"
     "./travel"
 )
 
@@ -18,10 +21,14 @@ func TickBeing(b *being.Being, time int) {
 }
 
 func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
     b := being.NewToon("Purto")
     b.SetBaseSpeed(1)
     l := location.New("Blarney", 50, 130, 5, 5)
     TickBeing(b, 60)
     b.Destination = l.Start
     TickBeing(b, 60)
+
+    w := weapon.NewWeapon(5)
+    fmt.Printf("%s", w)
 }

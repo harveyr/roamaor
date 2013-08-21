@@ -31,6 +31,7 @@ var namePrefixes = []string{
 	"Vengeful",
 	"Punishing",
 	"Widowing",
+	"Sadistic",
 }
 
 func FromSliceByLevel(level uint16, slice []string) string {
