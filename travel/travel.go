@@ -3,7 +3,7 @@ package travel
 import (
 	"log"
 	"math"
-    "../models/toon"
+    "../models/being"
     "../models/location"
 )
 
@@ -15,23 +15,19 @@ func Distance(x1 float64, y1 float64, x2 float64, y2 float64) (d float64) {
 	return
 }
 
-func MoveToward(t *toon.Toon, l *location.Location, time int) {
+func MoveToward(b *being.Being, l *location.Location, time int) {
     log.Print("Moving")
-    tX := float64(t.X)
-    tY := float64(t.Y)
+    bX := float64(b.X)
+    bY := float64(b.Y)
     lX := float64(l.X)
     lY := float64(l.Y)
     // slope := float32(l.Y - t.Y) / float32(l.X - t.X)
-    potentialDistance := t.Speed() * float64(time) / 5
+    potentialDistance := b.Speed() * float64(time) / 5
 	potentialDistance = math.Min(1, potentialDistance)
-    log.Print("potentialDistance ", potentialDistance)
-
-    distanceToLocation := Distance(tX, tY, lX, lY)
-    log.Print("distanceToLocation: ", distanceToLocation)
 
     var xMove, yMove float64 = 0, 0
-    xDiff := (lX - tX)
-    yDiff := (lY - tY)
+    xDiff := (lX - bX)
+    yDiff := (lY - bY)
 
     if xDiff == 0 && yDiff == 0 {
     	// We're there!
@@ -48,6 +44,11 @@ func MoveToward(t *toon.Toon, l *location.Location, time int) {
     	yMove = potentialDistance * yDiff / totalDiff
     	xMove = potentialDistance - yMove
     }
+
+    yMove = math.Min(yMove, math.Abs(lY - bY))
+    xMove = math.Min(xMove, math.Abs(lX - bX))
 	log.Print("yMove: ", yMove)
 	log.Print("xMove: ", xMove)
+	b.X += float32(xMove)
+	b.Y += float32(yMove)
 }
