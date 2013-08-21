@@ -4,7 +4,6 @@ import (
 	"log"
 	"math"
 	"fmt"
-    "../models"
     "../models/being"
     "../models/location"
 )
@@ -17,18 +16,17 @@ func Distance(x1 float64, y1 float64, x2 float64, y2 float64) (d float64) {
 	return
 }
 
-func DistBetw(p1 location.Point, p2 location.Point) float64 {
+func DistBetw(p1 *location.Point, p2 *location.Point) float64 {
 	return Distance(float64(p1.X), float64(p1.Y), float64(p2.X), float64(p2.Y))
 }
 
 func MoveToward(b *being.Being, l *location.Location, time int) {
     log.Print(fmt.Sprintf("Moving %s toward %s", b, l))
-    bX := float64(b.X)
-    bY := float64(b.Y)
-    lX := float64(l.X)
-    lY := float64(l.Y)
-    // log.Print(fmt.Sprintf("%s begins at distance %f", b, Distance()))
-    DistBetw(b, l)
+    bX := float64(b.Location.X)
+    bY := float64(b.Location.Y)
+    lX := float64(l.Start.X)
+    lY := float64(l.Start.Y)
+    log.Print(fmt.Sprintf("%s begins at distance %f", b, DistBetw(b.Location, l.Start)))
 
     potentialDistance := math.Min(1, b.Speed() * float64(time) / 5)
 
@@ -56,6 +54,8 @@ func MoveToward(b *being.Being, l *location.Location, time int) {
     xMove = math.Min(xMove, math.Abs(lX - bX))
 	// log.Print("yMove: ", yMove)
 	// log.Print("xMove: ", xMove)
-	b.X += float32(xMove)
-	b.Y += float32(yMove)
+	b.Location.X += float32(xMove)
+	b.Location.Y += float32(yMove)
+    log.Print(fmt.Sprintf("... %s ends at distance %f", b, DistBetw(b.Location, l.Start)))
+
 }

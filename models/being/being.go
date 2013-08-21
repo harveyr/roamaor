@@ -3,6 +3,7 @@ package being
 import (
     // "log"
     "fmt"
+    "../location"
 )
 
 const (
@@ -13,14 +14,16 @@ const (
 
 type Being struct {
     Name string
-    X, Y float32
     Level int
+    Location *location.Point
     baseSpeed int
     beingType uint8
 }
 
 func NewToon(name string) *Being {
-	return &Being{Name: name, beingType: TOON}
+	t := &Being{Name: name, beingType: TOON}
+	t.Location = location.NewPoint(0, 0)
+	return t
 }
 
 func (b *Being) String() (repr string) {
@@ -41,13 +44,3 @@ func (b *Being) SetBaseSpeed(speed int) {
 	b.baseSpeed = speed
 	return
 }
-
-func (b *Being) Bounds() map[string]float64 {
-	return map[string]float64{
-		"X1": float64(b.X),
-		"Y1": float64(b.Y),
-		"X2": float64(b.X),
-		"Y2": float64(b.Y),
-	}
-}
-
