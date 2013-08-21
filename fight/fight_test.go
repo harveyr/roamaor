@@ -5,7 +5,6 @@ import (
 	"../models/being"
 )
 
-
 func TestHit(t *testing.T) {
 	attacker := being.NewToon("Attacking Toon")
 	victim := being.NewToon("Defending Toon")
