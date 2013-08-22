@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"./api"
 )
 
 var webappPath string = os.Getenv("ROAMAOR_WEBAPP")
@@ -18,6 +19,10 @@ func assetsHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filepath.Join(webappPath, r.URL.Path))
 }
 
+func apiHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func main() {
 	_, err := os.Stat(indexPage)
 	if err != nil {
@@ -25,5 +30,8 @@ func main() {
 	}
 	http.HandleFunc("/app", appHandler)
 	http.HandleFunc("/static/", assetsHandler)
+
+	api.RegisterHandlers()
+	
 	http.ListenAndServe(":8080", nil)
 }
