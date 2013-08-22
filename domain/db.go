@@ -6,7 +6,6 @@ import (
 	"labix.org/v2/mgo/bson"
 )
 
-
 var _session *mgo.Session = nil
 var _db *mgo.Database = nil
 
@@ -42,6 +41,15 @@ func GetQueryObject() *bson.M {
 	return new(bson.M)
 }
 
+func DocExists(collection string, doc map[string]interface{}) bool {
+	c := GetCollection(collection)
+	count, err := c.Find(doc).Count()
+	if err != nil {
+		panic("Error while checking doc existence")
+	}
+	return count > 0
+}
+
 func InsertDoc(collection string, doc map[string]interface{}) bson.ObjectId {
 	c := GetCollection(collection)
 	id := bson.NewObjectId()
@@ -52,7 +60,6 @@ func InsertDoc(collection string, doc map[string]interface{}) bson.ObjectId {
 	}
 	return id
 }
-
 
 func DeleteDoc(collection string, docId bson.ObjectId) {
 	c := GetCollection(collection)

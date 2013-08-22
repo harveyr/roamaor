@@ -33,7 +33,7 @@ func TestInitDb(t *testing.T) {
 	CloseSession()
 }
 
-func TestInsertAndDeleteDoc(t *testing.T) {
+func TestInsertedDocExistsAndDeletes(t *testing.T) {
 	InitTestDb()
 	collection := "fakedocs"
 	doc := new(FakeDoc)
@@ -42,6 +42,11 @@ func TestInsertAndDeleteDoc(t *testing.T) {
 	if reflect.TypeOf(id).Name() != "ObjectId" {
 		panic("Returned id is not an ObjectId")
 	}
+
+	if !DocExists(collection, doc.Serialize()) {
+		panic("Doc does not exist in db")
+	}
+
 	DeleteDoc(collection, id)
 }
 
