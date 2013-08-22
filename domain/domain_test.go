@@ -1,8 +1,28 @@
 package domain
 
-import "testing"
+import (
+	"testing"
+	"reflect"
+	"fmt"
+	// "labix.org/v2/mgo/bson"
+)
 
 const TESTDB = "roamaor_test"
+
+type FakeDoc struct {
+	Name string
+}
+
+func (f *FakeDoc) String() string {
+	return fmt.Sprintf("<FakeDoc: %s>", f.Name)
+}
+
+func (f *FakeDoc) Serialize() map[string]interface{} {
+	m := make(map[string]interface{})
+	m["Name"] = f.Name
+	return m
+}
+
 
 func InitTestDb() {
 	InitDb("localhost", TESTDB)
@@ -13,11 +33,16 @@ func TestInitDb(t *testing.T) {
 	CloseSession()
 }
 
-func TestDbInsert(t *testing.T) {
+func TestInsertAndDeleteDoc(t *testing.T) {
 	InitTestDb()
-	doc := make(map[string]interface{})
-	doc["Bingo"] = "Bongo"
-	InsertObject(TESTDB, doc)
+	collection := "fakedocs"
+	doc := new(FakeDoc)
+	doc.Name = "Bongo"
+	id := InsertDoc(collection, doc.Serialize())
+	if reflect.TypeOf(id).Name() != "ObjectId" {
+		panic("Returned id is not an ObjectId")
+	}
+	DeleteDoc(collection, id)
 }
 
 func TestNamePrefixes(t *testing.T) {

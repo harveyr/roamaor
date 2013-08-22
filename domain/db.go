@@ -42,10 +42,19 @@ func GetQueryObject() *bson.M {
 	return new(bson.M)
 }
 
-func InsertObject(collection string, doc interface{}) {
+func InsertDoc(collection string, doc map[string]interface{}) bson.ObjectId {
 	c := GetCollection(collection)
+	id := bson.NewObjectId()
+	doc["_id"] = id
 	err := c.Insert(doc)
 	if err != nil {
 		panic(err)
 	}
+	return id
+}
+
+
+func DeleteDoc(collection string, docId bson.ObjectId) {
+	c := GetCollection(collection)
+	c.RemoveId(docId)
 }
