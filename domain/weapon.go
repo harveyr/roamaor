@@ -19,13 +19,13 @@ var names = []string{
 	"Blarneystone",
 }
 
-func RandName(level uint16) string {
+func RandName(level int) string {
 	return PrefixedItemName(FromSliceByLevel(level, names), level)
 }
 
 type Weapon struct {
 	Name string
-	Level uint16
+	Level int
 	Damage *DiceRoll
 }
 
@@ -38,11 +38,11 @@ func (w *Weapon) String() string {
 // 	c.Find(bson.M{"name": name}).One(&result)
 // }
 
-func NewWeapon(level uint16) *Weapon {
+func NewWeapon(level int) *Weapon {
 	name := RandName(level)
 	w := new(Weapon)
 	w.Name = name
 	w.Level = level
-	w.Damage = NewDiceRoll(2, 6, uint8(level))
+	w.Damage = NewDiceRoll(2, 6, level)
 	return w
 }

@@ -10,7 +10,7 @@ import (
 func Hit(hitter *Being, hittee *Being) {
 	damage := hitter.DamageDice().Roll()
 	// fmt.Printf("damage: %d\n", damage)
-	hittee.TakeDamage(uint32(damage))
+	hittee.TakeDamage(damage)
 	return
 }
 

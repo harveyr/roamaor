@@ -2,9 +2,10 @@ package domain
 
 import (
 	"testing"
-	"reflect"
 	"fmt"
-	// "labix.org/v2/mgo/bson"
+	"log"
+	"strings"
+	"labix.org/v2/mgo/bson"
 )
 
 const TESTDB = "roamaor_test"
@@ -17,41 +18,47 @@ func (f *FakeDoc) String() string {
 	return fmt.Sprintf("<FakeDoc: %s>", f.Name)
 }
 
-func (f *FakeDoc) Serialize() map[string]interface{} {
-	m := make(map[string]interface{})
-	m["Name"] = f.Name
-	return m
-}
-
-
 func InitTestDb() {
 	InitDb("localhost", TESTDB)
+	err := _db.DropDatabase()
+	if err != nil {
+		log.Fatal("Failed to wipe db")
+	}
 }
 
 func TestInitDb(t *testing.T) {
 	InitTestDb()
 	CloseSession()
+	InitTestDb()
 }
 
 func TestInsertedDocExistsAndDeletes(t *testing.T) {
-	InitTestDb()
+	// InitTestDb()
 	collection := "fakedocs"
 	doc := FakeDoc{Name: "Bongo"}
-
-	if DocExists(collection, doc.Serialize()) {
-		panic("Doc exists but has not been inserted")
+	docMap := make(map[string]interface{})
+	docMap["name"] = doc.Name
+	
+	if DocExists(collection, docMap) {
+		log.Fatal("Doc exists but has not been inserted")
 	}
 
-	id := InsertDoc(collection, doc.Serialize())
-	if reflect.TypeOf(id).Name() != "ObjectId" {
-		panic("Returned id is not an ObjectId")
+	InsertDoc(collection, doc)
+	// if reflect.TypeOf(id).Name() != "ObjectId" {
+	// 	log.Fatal("Returned id is not an ObjectId")
+	// }
+
+	if !DocExists(collection, docMap) {
+		log.Fatal("Doc does not exist in db after insert")
 	}
 
-	if !DocExists(collection, doc.Serialize()) {
-		panic("Doc does not exist in db")
-	}
+	fetched := FetchOne(collection, docMap)
 
-	DeleteDoc(collection, id)
+	objId, ok := fetched["_id"].(bson.ObjectId)
+	if !ok {
+		log.Fatal("_id in fetched map is not an ObjectId")
+	}
+	DeleteDoc(collection, objId)
 }
 
 func TestNamePrefixes(t *testing.T) {
@@ -64,7 +71,7 @@ func TestNamePrefixes(t *testing.T) {
 func TestPrefixedName(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		suffix := "Stabber"
-		name := PrefixedItemName(suffix, uint16(i))
+		name := PrefixedItemName(suffix, i)
 		if len(name) <= (len(suffix) + 1) {
 			t.Errorf("Prefixed name '%s' is no longer than suffix '%s'", name, suffix)
 		}
@@ -90,7 +97,7 @@ func TestRandName(t *testing.T) {
 func TestDiceRoll(t *testing.T) {
 	attempts := 100
 	uniqueCount := 0
-	rolls := make([]uint16, attempts)
+	rolls := make([]int, attempts)
 	for i := 0; i < attempts; i++ {
 		d := NewDiceRoll(2, 6, 2)
 		roll := d.Roll()
@@ -115,38 +122,54 @@ func TestDiceRoll(t *testing.T) {
 	}
 }
 
-func TestHit(t *testing.T) {
-	attacker := NewToon("Attacking Toon")
-	victim := NewToon("Defending Toon")
-	initialVictimHp := victim.Hp
-
-	Hit(attacker, victim)
-
-	if victim.Hp == initialVictimHp {
-		t.Errorf("Victim's hit points (%d) were not affected.", victim.Hp)
+func TestNewToon(t *testing.T) {
+	name := "Test Toon"
+	toon := NewToon("Test Toon")
+	if toon.Name != name {
+		log.Fatalf("Toon name does not match input: (%s != %s)", name, toon.Name)
 	}
+	if toon.NameLower != strings.ToLower(name) {
+		log.Fatal("Toon NameLower does not match input")
+	}
+
+	if toon.Level != 1 {
+		log.Fatalf("Toon.Level is %d (expected 1)", toon.Level)
+	}
+	DeleteDoc(BEING_COLLECTION, toon._id)
 }
 
-func TestFight(t *testing.T) {
-	for i := 0; i < 100; i++ {
-		attacker := NewToon("Attacking Toon")
-		victim := NewToon("Defending Toon")
-		initialVictimHp := victim.Hp
-		initialAttackerHp := attacker.Hp
+// func TestHit(t *testing.T) {
+// 	attacker := NewToon("Attacking Toon")
+// 	victim := NewToon("Defending Toon")
+// 	initialVictimHp := victim.Hp
 
-		winner := Fight(attacker, victim)
+// 	Hit(attacker, victim)
 
-		if winner == nil {
-			t.Errorf("No winner of fight between %s and %s", attacker, victim)
-		}
+// 	if victim.Hp == initialVictimHp {
+// 		t.Errorf("Victim's hit points (%d) were not affected.", victim.Hp)
+// 	}
+// }
 
-		if (attacker.Hp > initialAttackerHp) {
-			t.Errorf("Attacker hp greater than initial: %d > %d", attacker.Hp, initialAttackerHp)
-		}
-		if (victim.Hp > initialVictimHp) {
-			t.Errorf("Victim hp greater than initial: %d > %d", victim.Hp, initialVictimHp)
-		}
-	}
-}
+// func TestFight(t *testing.T) {
+// 	for i := 0; i < 100; i++ {
+// 		attacker := NewToon("Attacking Toon")
+// 		victim := NewToon("Defending Toon")
+// 		initialVictimHp := victim.Hp
+// 		initialAttackerHp := attacker.Hp
+
+// 		winner := Fight(attacker, victim)
+
+// 		if winner == nil {
+// 			t.Errorf("No winner of fight between %s and %s", attacker, victim)
+// 		}
+
+// 		if (attacker.Hp > initialAttackerHp) {
+// 			t.Errorf("Attacker hp greater than initial: %d > %d", attacker.Hp, initialAttackerHp)
+// 		}
+// 		if (victim.Hp > initialVictimHp) {
+// 			t.Errorf("Victim hp greater than initial: %d > %d", victim.Hp, initialVictimHp)
+// 		}
+// 	}
+// }
 
 

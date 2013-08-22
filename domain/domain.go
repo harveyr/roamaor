@@ -37,7 +37,7 @@ var itemNamePrefixes = []string{
 	"Sadistic",
 }
 
-func FromSliceByLevel(level uint16, slice []string) string {
+func FromSliceByLevel(level int, slice []string) string {
 	span := 5
 	medIndex := math.Min(
 		float64(len(slice) - span - 1),
@@ -48,10 +48,10 @@ func FromSliceByLevel(level uint16, slice []string) string {
 	return slice[index]
 }
 
-func ItemNamePrefix(level uint16) string {
+func ItemNamePrefix(level int) string {
 	return FromSliceByLevel(level, itemNamePrefixes)
 }
 
-func PrefixedItemName(suffix string, level uint16) string {
+func PrefixedItemName(suffix string, level int) string {
 	return fmt.Sprintf("%s %s", ItemNamePrefix(level), suffix)
 }

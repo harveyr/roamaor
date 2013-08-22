@@ -6,15 +6,15 @@ import (
 )
 
 type DiceRoll struct {
-	Num uint8
-	Sides uint8
-	Modifier uint8
+	Num int
+	Sides int
+	Modifier int
 }
 
-func (d *DiceRoll) Roll() (roll uint16) {
-	roll = uint16(d.Modifier)
-	for i := 0; i < int(d.Num); i++ {
-		roll += uint16(rand.Intn(int(d.Sides)) + 1)
+func (d *DiceRoll) Roll() (roll int) {
+	roll = d.Modifier
+	for i := 0; i < d.Num; i++ {
+		roll += rand.Intn(d.Sides) + 1
 	}
 	// fmt.Printf("Roll result for %s: %d (random: %d)\n", d, roll, r)
 	return
@@ -24,7 +24,7 @@ func (d *DiceRoll) String() string {
 	return fmt.Sprintf("<DiceRoll: %dd%d + %d>", d.Num, d.Sides, d.Modifier)
 }
 
-func NewDiceRoll(num uint8, sides uint8, mod uint8) *DiceRoll {
+func NewDiceRoll(num int, sides int, mod int) *DiceRoll {
 	d := new(DiceRoll)
 	d.Num = num
 	d.Sides = sides

@@ -42,23 +42,33 @@ func GetQueryObject() *bson.M {
 }
 
 func DocExists(collection string, doc map[string]interface{}) bool {
+	// log.Printf("DocExists: [collection] %s [query] %s", collection, doc)
 	c := GetCollection(collection)
 	count, err := c.Find(doc).Count()
 	if err != nil {
-		panic("Error while checking doc existence")
+		log.Fatalf("Error while checking doc existence: %s", err)
 	}
 	return count > 0
 }
 
-func InsertDoc(collection string, doc map[string]interface{}) bson.ObjectId {
+func FetchOne(collection string, query map[string]interface{}) map[string]interface{} {
 	c := GetCollection(collection)
-	id := bson.NewObjectId()
-	doc["_id"] = id
+	returnMap := make(map[string]interface{})
+	err := c.Find(query).One(&returnMap)
+	if err != nil {
+		log.Fatalf("Error fetching object: [collection] %s [query] %s [err] %s", collection, query, err)
+	}
+	return returnMap
+}
+
+func InsertDoc(collection string, doc interface{}) {
+	c := GetCollection(collection)
+	// id := bson.NewObjectId()
+	// doc["_id"] = id
 	err := c.Insert(doc)
 	if err != nil {
-		panic(err)
+		log.Fatal("Failed to insert doc: ", err)
 	}
-	return id
 }
 
 func DeleteDoc(collection string, docId bson.ObjectId) {

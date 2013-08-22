@@ -18,10 +18,10 @@ func DistBetw(p1 *Point, p2 *Point) float64 {
 
 func MoveToward(b *Being, p *Point, time int) {
     fmt.Printf("Moving %s toward %s\n", b, p)
-    bX := float64(b.Location.X)
-    bY := float64(b.Location.Y)
-    pX := float64(p.X)
-    pY := float64(p.Y)
+    bX := b.Location.X
+    bY := b.Location.Y
+    pX := p.X
+    pY := p.Y
     fmt.Printf("... %s begins at distance %f\n", b, DistBetw(b.Location, p))
 
     potentialDistance := math.Min(1, b.Speed() * float64(time) / 5)
@@ -48,7 +48,7 @@ func MoveToward(b *Being, p *Point, time int) {
 
     yMove = math.Min(yMove, math.Abs(pY - bY))
     xMove = math.Min(xMove, math.Abs(pX - bX))
-	b.Location.X += float32(xMove)
-	b.Location.Y += float32(yMove)
+	b.Location.X += xMove
+	b.Location.Y += yMove
     fmt.Printf("... %s ends at distance %f\n", b, DistBetw(b.Location, p))
 }
