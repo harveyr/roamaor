@@ -7217,3 +7217,29 @@ a.th {
 .f-dropdown.large {
   max-width: 800px;
 }
+
+/* line 58, ../sass/app.scss */
+.god-wrapper {
+  padding: 20px;
+}
+
+/* line 62, ../sass/app.scss */
+.map {
+  background-color: #E7E7E7;
+  height: 400px;
+}
+/* line 66, ../sass/app.scss */
+.map .dest-marker {
+  width: 20px;
+  height: 30px;
+  background-color: #fff;
+  position: absolute;
+}
+/* line 73, ../sass/app.scss */
+.map .my-location {
+  width: 10px;
+  height: 10px;
+  background-color: #222;
+  position: absolute;
+  border-radius: 5px;
+}

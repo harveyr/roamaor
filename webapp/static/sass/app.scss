@@ -54,3 +54,27 @@
 // @import "foundation/components/tooltips";
 // @import "foundation/components/dropdown";
 
+
+.god-wrapper {
+    padding: 20px;
+}
+
+.map {
+    background-color: #E7E7E7;
+    height: 400px;
+
+    .dest-marker {
+        width: 20px;
+        height: 30px;
+        background-color: #fff;
+        position: absolute;
+    }
+
+    .my-location {
+        width: 10px;
+        height: 10px;
+        background-color: #222;
+        position: absolute;
+        border-radius: 5px;
+    }
+}
