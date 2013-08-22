@@ -3,9 +3,11 @@ package being
 import (
     // "log"
     "fmt"
+    "time"
     "../location"
     "../weapon"
     "../dice"
+    "../../models"
 )
 
 const (
@@ -13,6 +15,26 @@ const (
 	NPC = iota
 	MOB = iota
 )
+
+var mobPrefixes = []string{
+	"Nice",
+	"Cutesy",
+	"Benign",
+	"Limping",
+	"Paltry",
+	"Measly",
+	"Sticky",
+	"Foul",
+}
+
+var mobNames = []string{
+	"Hen",
+	"Kitten",
+	"Danish",
+	"Cuddlefuzz",
+	"Sugarplum",
+	"Wildebisht",
+}
 
 type Being struct {
     Name string
@@ -23,6 +45,14 @@ type Being struct {
     Weapon *weapon.Weapon
     baseSpeed uint8
     beingType uint8
+    LastTick time.Time
+}
+
+func RandMobName(level uint16) string {
+	return fmt.Sprintf(
+		"%s %s",
+		models.FromSliceByLevel(level, mobPrefixes),
+		models.FromSliceByLevel(level, mobNames))
 }
 
 func NewToon(name string) *Being {
@@ -32,6 +62,14 @@ func NewToon(name string) *Being {
 	b.Weapon = nil
 	b.Level = 1
 	b.Hp = 40 + 20 * uint32(b.Level)
+	return b
+}
+
+func NewMob(level uint16) *Being {
+	b := new(Being)
+	b.Name = RandMobName(level)
+	b.Level = level
+	b.Hp = 20 + 10 * uint32(level)
 	return b
 }
 
@@ -67,4 +105,16 @@ func (b *Being) SetName(name string) {
 func (b *Being) SetBaseSpeed(speed uint8) {
 	b.baseSpeed = speed
 	return
+}
+
+func (b *Being) UpdateLastTick() {
+	b.LastTick = time.Now()
+}
+
+func (b *Being) SinceLastTick() uint16 {
+	if b.LastTick.IsZero() {
+		return 0
+	}
+	duration := time.Now().Sub(b.LastTick)
+	return uint16(duration/time.Second)
 }

@@ -20,7 +20,7 @@ var names = []string{
 }
 
 func RandName(level uint16) string {
-	return models.PrefixedName(models.FromSliceByLevel(level, names), level)
+	return models.PrefixedItemName(models.FromSliceByLevel(level, names), level)
 }
 
 type Weapon struct {

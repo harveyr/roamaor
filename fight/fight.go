@@ -48,4 +48,3 @@ func Fight(attacker *being.Being, victim *being.Being) *being.Being {
 	}
 	return nil
 }
-

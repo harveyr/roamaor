@@ -16,8 +16,7 @@ func (d *DiceRoll) Roll() (roll uint16) {
 	for i := 0; i < int(d.Num); i++ {
 		roll += uint16(rand.Intn(int(d.Sides)) + 1)
 	}
-	r := rand.Intn(int(d.Sides))
-	fmt.Printf("Roll result for %s: %d (random: %d)\n", d, roll, r)
+	// fmt.Printf("Roll result for %s: %d (random: %d)\n", d, roll, r)
 	return
 }
 

@@ -3,7 +3,7 @@ package weapon
 import "testing"
 
 func TestDiceRoll(t *testing.T) {
-	w := NewWeapon("Test Weapon", 5)
+	w := NewWeapon(5)
 	damageRoll := w.Damage.Roll()
 
 	if damageRoll < 5 || damageRoll > 35 {

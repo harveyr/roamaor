@@ -10,10 +10,12 @@ type Bounded interface {
 	Bounds() map[string]float64
 }
 
-var namePrefixes = []string{
+var itemNamePrefixes = []string{
 	"Crap",
 	"Benign",
 	"Slimy",
+	"Paltry",
+	"Measly",
 	"Substandard",
 	"Beleaguered",
 	"Patchwork",
@@ -37,7 +39,7 @@ var namePrefixes = []string{
 func FromSliceByLevel(level uint16, slice []string) string {
 	span := 5
 	medIndex := math.Min(
-		float64(len(namePrefixes) - span - 1),
+		float64(len(slice) - span - 1),
 		math.Floor(float64(level) / 100 * float64(len(slice))))
 	minIndex := math.Max(0, float64(medIndex - 5))
 	maxIndex := math.Min(medIndex + 5, float64(len(slice) - 1))
@@ -45,10 +47,10 @@ func FromSliceByLevel(level uint16, slice []string) string {
 	return slice[index]
 }
 
-func NamePrefix(level uint16) string {
-	return FromSliceByLevel(level, namePrefixes)
+func ItemNamePrefix(level uint16) string {
+	return FromSliceByLevel(level, itemNamePrefixes)
 }
 
-func PrefixedName(suffix string, level uint16) string {
-	return fmt.Sprintf("%s %s", NamePrefix(level), suffix)
+func PrefixedItemName(suffix string, level uint16) string {
+	return fmt.Sprintf("%s %s", ItemNamePrefix(level), suffix)
 }
