@@ -85,42 +85,29 @@ func TestDiceRoll(t *testing.T) {
 	}
 }
 
-func TestSaveToonFields(t *testing.T) {
-	name := "TestSaveToon"
-	nameLower := strings.ToLower(name)
+func TestNewToon(t *testing.T) {
+	name := "TestNewToon Toon"
 	toon := NewToon(name)
-	if toon.NameLower != nameLower {
-		log.Fatal("[TestSaveToonFields] NameLower != nameLower")
+	if toon.Name != name {
+		log.Fatalf("Toon name does not match input: (%s != %s)", name, toon.Name)
 	}
-	changeInfo := SaveFields(BEING_COLLECTION, toon, "Name", "Level")
-	queryMap := make(map[string]interface{})
-	queryMap["_id"] = toon.ObjectId()
-	fetchMap := FetchOne(BEING_COLLECTION, queryMap)
-	fetchedName, _ := fetchMap["name"].(string)
-	if fetchedName != name {
-		log.Fatalf("[TestSaveToonFields] Name mismatch: %s != %s", fetchedName, name)
+	if toon.NameLower != strings.ToLower(name) {
+		log.Fatal("Toon NameLower does not match input")
 	}
-	if changeInfo.Updated != 1 {
-		log.Fatalf("[TestSaveToonFields] %d docs were updated. Expected 1.", changeInfo.Updated)
+
+	if toon.Level != 1 {
+		log.Fatalf("Toon.Level is %d (expected 1)", toon.Level)
 	}
+
+	fetched := FetchToonById(toon.Id)
+	if fetched.Id != toon.Id {
+		log.Fatal("[TestNewToon] Id mismatch")
+	}
+	if fetched.Name != toon.Name {
+		log.Fatal("[TestNewToon] Name mismatch")
+	}
+	// DeleteDoc(BEING_COLLECTION, toon)
 }
-
-// func TestNewToon(t *testing.T) {
-// 	name := "TestNewToon Toon"
-// 	toon := NewToon(name)
-// 	if toon.Name != name {
-// 		log.Fatalf("Toon name does not match input: (%s != %s)", name, toon.Name)
-// 	}
-// 	if toon.NameLower != strings.ToLower(name) {
-// 		log.Fatal("Toon NameLower does not match input")
-// 	}
-
-// 	if toon.Level != 1 {
-// 		log.Fatalf("Toon.Level is %d (expected 1)", toon.Level)
-// 	}
-// 	log.Print("toon.Id: ", toon.Id)
-// 	DeleteDoc(BEING_COLLECTION, toon)
-// }
 
 // func TestFetchAllToons(t *testing.T) {
 // 	NewToon("TestFetchAllToons Toon 1")

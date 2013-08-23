@@ -89,17 +89,14 @@ func SaveFields(collection string, doc MongoDocInterface, fields ...string) *mgo
 }
 
 
-// func InsertDoc(collection string, doc DocInterface) bson.ObjectId {
-// 	c := GetCollection(collection)
-// 	id := bson.NewObjectId()
-// 	log.Print("[InsertDoc] Setting doc id to new id: ", id)
-// 	doc.SetId(id)
-// 	err := c.Insert(doc)
-// 	if err != nil {
-// 		log.Fatal("Failed to insert doc: ", err)
-// 	}
-// 	return id
-// }
+func InsertDoc(collection string, doc interface{}) {
+	c := GetCollection(collection)
+	err := c.Insert(doc)
+	if err != nil {
+		log.Fatalf("[InsertDoc] Failed to insert doc: %s (%s) ", doc, err)
+	}
+	return
+}
 
 // func DeleteDoc(collection string, doc DocInterface) {
 // 	if !doc.ObjectId().Valid() {

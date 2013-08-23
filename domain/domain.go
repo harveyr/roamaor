@@ -2,6 +2,7 @@
 package domain
 
 import (
+	"log"
 	"fmt"
 	"math"
 	"math/rand"
@@ -18,12 +19,11 @@ type MongoDoc struct {
 	Id bson.ObjectId "_id"
 }
 
-func (d *MongoDoc) SetId(id bson.ObjectId) {
-	d.Id = id
-}
-
-func (d MongoDoc) ObjectId() bson.ObjectId {
-	return d.Id
+func (d *MongoDoc) InitId() {
+	if d.Id.Valid() {
+		log.Fatal("[SetNewId] Doc already has a valid id: ", d.Id)
+	}
+	d.Id = bson.NewObjectId()
 }
 
 var itemNamePrefixes = []string{

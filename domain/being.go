@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 	"time"
-	// "labix.org/v2/mgo/bson"
+	"labix.org/v2/mgo/bson"
 )
 
 const (
@@ -37,7 +37,7 @@ var mobNames = []string{
 }
 
 type Being struct {
-	MongoDoc
+	Id        bson.ObjectId "_id"
 	BeingType int
 	Name      string
 	NameLower string
@@ -51,90 +51,23 @@ type Being struct {
 	LastTick  time.Time
 }
 
-// func (b Being) Publicize() map[string]interface{} {
-// 	log.Print("Publicizing being: ", b)
-// 	m := make(map[string]interface{})
-// 	m["id"] = b.Id
-// 	m["name"] = b.Name
-// 	m["hp"] = b.Hp
-// 	m["level"] = b.Level
-// 	m["x"] = b.LocX
-// 	m["y"] = b.LocY
-// 	return m
-// }
-
-// func BeingFromMap(m map[string]interface{}) *Being {
-// 	b := Being{}
-// 	failures := make([]string, 0)
-
-// 	if val, ok := m["_id"].(bson.ObjectId); ok {
-// 		b.id = val
-// 	} else {
-// 		log.Fatalf("BeingFromMap failed to convert ObjectId: %s", m["_id"])
-// 	}
-
-// 	if val, ok := m["name"].(string); ok {
-// 		b.Name = val
-// 	} else {
-// 		failures = append(failures, "name")
-// 	}
-
-// 	if val, ok := m["namelower"].(string); ok {
-// 		b.NameLower = val
-// 	} else {
-// 		failures = append(failures, "namelower")
-// 	}
-
-// 	if val, ok := m["level"].(int); ok {
-// 		b.Level = val
-// 	} else {
-// 		log.Fatalf("BeingFromMap failed to convert level: %s", m["level"])
-// 	}
-
-// 	// locMap, ok := m["location"].(map[string]interface{})
-// 	// if !ok {
-// 	// 	log.Fatalf("BeingFromMap failed to convert location to map: %s", m["location"])
-// 	// }
-// 	// b.Location = PointFromMap(locMap)
-
-// 	// if m["destination"] == nil {
-// 	// 	b.Destination = nil
-// 	// } else {
-// 	// 	destMap, ok := m["destination"].(map[string]interface{})
-// 	// 	if !ok {
-// 	// 		log.Fatal("BeingFromMap failed to convert destination to map: ", m["destination"])
-// 	// 	}
-// 	// 	b.Destination = PointFromMap(destMap)
-// 	// }
-// 	// log.Print("destination: ", m["destination"], m["destination"] == nil)
-
-// 	if len(failures) > 0 {
-// 		log.Fatalf("Failed to convert map keys to Being values: %s", failures)
-// 	}
-
-// 	// if m["weapon"] == nil {
-// 	// 	b.Weapon = nil
-// 	// } else {
-// 	// 	log.Fatal("UNHANDLED! Weapon loading from db")
-// 	// }
-
-// 	log.Print("BeingFromMap result: ", b)
-// 	return &b
-// }
-
-func NewToon(name string) *Being {
+func CanCreateToon(name string) bool {
 	nameLower := strings.ToLower(name)
 	uniqueQuery := make(map[string]interface{})
 	uniqueQuery["namelower"] = nameLower
 	uniqueQuery["beingtype"] = BEING_TOON
-	if DocExists(BEING_COLLECTION, uniqueQuery) {
-		log.Printf("Being with name %s already exists. Returning nil.", name)
-		return nil
+	return !DocExists(BEING_COLLECTION, uniqueQuery)
+}
+
+func NewToon(name string) *Being {
+	if !CanCreateToon(name) {
+		log.Fatal("Can't create toon! Did you check?")
 	}
 
 	b := Being{
+		Id:			bson.NewObjectId(),
 		Name:      name,
-		NameLower: nameLower,
+		NameLower: strings.ToLower(name),
 		BeingType: BEING_TOON,
 		Level:     1,
 		Hp:        60,
@@ -142,8 +75,22 @@ func NewToon(name string) *Being {
 		LocX:      0,
 		LocY:      0,
 	}
+	log.Print("b.Id: ", b.Id)
+	c := GetCollection(BEING_COLLECTION)
+	err := c.Insert(b)
+	if err != nil {
+		log.Fatalf("[NewToon] Failed to insert toon: %s (%s) ", b, err)
+	}
+	return &b
+}
 
-	// InsertDoc(BEING_COLLECTION, &b)
+func FetchToonById(id bson.ObjectId) *Being {
+	c := GetCollection(BEING_COLLECTION)
+	b := Being{}
+	err := c.FindId(id).One(&b)
+	if err != nil {
+		log.Fatal("Failed to fetch toon with id ", id)
+	}
 	return &b
 }
 
