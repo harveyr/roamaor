@@ -84,14 +84,14 @@ func NewToon(name string) *Being {
 	return &b
 }
 
-func FetchToonById(id bson.ObjectId) *Being {
+func FetchToonById(id bson.ObjectId) (*Being, error) {
 	c := GetCollection(BEING_COLLECTION)
 	b := Being{}
 	err := c.FindId(id).One(&b)
 	if err != nil {
-		log.Fatal("Failed to fetch toon with id ", id)
+		log.Print("Failed to fetch toon with id ", id)
 	}
-	return &b
+	return &b, err
 }
 
 func FetchAllToons() []Being {
@@ -144,10 +144,6 @@ func (b *Being) TakeDamage(damage int) {
 	}
 }
 
-func (b *Being) SetName(name string) {
-	b.Name = name
-}
-
 func (b *Being) UpdateLastTick() {
 	b.LastTick = time.Now()
 }
@@ -160,3 +156,10 @@ func (b Being) SinceLastTick() uint16 {
 	return uint16(duration / time.Second)
 }
 
+func (b Being) Delete() {
+	c := GetCollection(BEING_COLLECTION)
+	err := c.RemoveId(b.Id)
+	if err != nil {
+		log.Fatal("Failed to delete being %s (%s)", b, err)
+	}
+}

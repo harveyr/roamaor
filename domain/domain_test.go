@@ -85,7 +85,7 @@ func TestDiceRoll(t *testing.T) {
 	}
 }
 
-func TestNewToon(t *testing.T) {
+func TestCreateAndDeleteToon(t *testing.T) {
 	name := "TestNewToon Toon"
 	toon := NewToon(name)
 	if toon.Name != name {
@@ -99,14 +99,22 @@ func TestNewToon(t *testing.T) {
 		log.Fatalf("Toon.Level is %d (expected 1)", toon.Level)
 	}
 
-	fetched := FetchToonById(toon.Id)
+	fetched, err := FetchToonById(toon.Id)
+	if err != nil {
+		log.Fatal("Failed fetch 1")
+	}
 	if fetched.Id != toon.Id {
-		log.Fatal("[TestNewToon] Id mismatch")
+		log.Fatal("Id mismatch")
 	}
 	if fetched.Name != toon.Name {
-		log.Fatal("[TestNewToon] Name mismatch")
+		log.Fatal("Name mismatch")
 	}
-	// DeleteDoc(BEING_COLLECTION, toon)
+	
+	toon.Delete()
+	fetched, err = FetchToonById(toon.Id)
+	if err == nil {
+		log.Fatal("Fetched deleted toon: ", fetched)
+	}
 }
 
 // func TestFetchAllToons(t *testing.T) {
