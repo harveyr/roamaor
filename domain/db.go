@@ -18,6 +18,7 @@ func InitDb(host string, dbName string) {
 		panic(err)
 	}
 	_session = s
+	_session.SetSafe(&mgo.Safe{})
 	_db = _session.DB(dbName)
 	return
 }
@@ -61,17 +62,24 @@ func FetchOne(collection string, query map[string]interface{}) map[string]interf
 	return returnMap
 }
 
-func InsertDoc(collection string, doc interface{}) {
+func InsertDoc(collection string, doc DocInterface) bson.ObjectId {
 	c := GetCollection(collection)
-	// id := bson.NewObjectId()
-	// doc["_id"] = id
+	id := bson.NewObjectId()
+	doc.SetId(id)
 	err := c.Insert(doc)
 	if err != nil {
 		log.Fatal("Failed to insert doc: ", err)
 	}
+	return id
 }
 
-func DeleteDoc(collection string, docId bson.ObjectId) {
+func DeleteDoc(collection string, doc DocInterface) {
 	c := GetCollection(collection)
-	c.RemoveId(docId)
+	query := map[string]bson.ObjectId{
+		"_id": doc.Id(),
+	}
+	err := c.Remove(query)
+	if err != nil {
+		log.Fatalf("Failed to delete doc: %s, %s", collection, doc)
+	}
 }

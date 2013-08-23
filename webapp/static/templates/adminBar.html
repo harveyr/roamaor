@@ -1,0 +1,26 @@
+<div class="admin-wrapper row" ng-controller="AdminCtrl" ng-cloak>
+    <div class="small-2 large-1 columns">
+        Admin
+    </div>
+    <div class="small-10 large-11 columns">
+        <div class="row">
+            <div class="small-12 columns" ng-show="!showNewPlayerInput">
+                <button class="button tiny" ng-click="showNewPlayerInput = true" ng-show="!showNewPlayerInput">
+                    New Player
+                </button>
+            </div>
+            <span ng-show="showNewPlayerInput" class="admin-new-player">
+                <div class="small-3 columns">
+                    <input type="text" placeholder="name" ng-model="admin.newPlayerName">
+                </div>
+                <div class="small-2 columns">
+                    <button class="button small" ng-click="submitNewPlayer(admin.newPlayerName)">Submit</button>
+                </div>
+                <div class="small-2 columns">
+                    <button class="button small secondary" ng-click="showNewPlayerInput = false">Cancel</button>
+                </div>
+                <div class="small-5 columns"> </div>
+            </span>
+        </div>
+    </div>
+</div>

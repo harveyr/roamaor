@@ -37,85 +37,98 @@ var mobNames = []string{
 }
 
 type Being struct {
-	_id bson.ObjectId
+	id bson.ObjectId
     BeingType int
     Name string
     NameLower string
     Level int
     Hp int
-    Location *Point
-    Destination *Point
-    Weapon *Weapon
+    LocX float64
+    LocY float64
+    DestX int
+    DestY int
     BaseSpeed int
     LastTick time.Time
 }
 
-func RandMobName(level int) string {
-	return fmt.Sprintf(
-		"%s %s",
-		FromSliceByLevel(level, mobPrefixes),
-		FromSliceByLevel(level, mobNames))
+func (b Being) Publicize() map[string]interface{} {
+	log.Print("Publicizing being: ", b)
+	m := make(map[string]interface{})
+	m["id"] = b.id
+	m["name"] = b.Name
+	m["hp"] = b.Hp
+	m["level"] = b.Level
+	m["x"] = b.LocX
+	m["y"] = b.LocY
+	return m
 }
 
-func BeingFromMap(m map[string]interface{}) *Being {
-	b := Being{}
-	failures := make([]string, 0)
+// func BeingFromMap(m map[string]interface{}) *Being {
+// 	b := Being{}
+// 	failures := make([]string, 0)
 
-	if val, ok := m["name"].(string); ok {
-		b.Name = val
-	} else {
-		failures = append(failures, "name")
-	}
+// 	if val, ok := m["_id"].(bson.ObjectId); ok {
+// 		b.id = val
+// 	} else {
+// 		log.Fatalf("BeingFromMap failed to convert ObjectId: %s", m["_id"])
+// 	}
 
-	if val, ok := m["namelower"].(string); ok {
-		b.NameLower = val
-	} else {
-		failures = append(failures, "namelower")
-	}
+// 	if val, ok := m["name"].(string); ok {
+// 		b.Name = val
+// 	} else {
+// 		failures = append(failures, "name")
+// 	}
+
+// 	if val, ok := m["namelower"].(string); ok {
+// 		b.NameLower = val
+// 	} else {
+// 		failures = append(failures, "namelower")
+// 	}
 	
-	if val, ok := m["level"].(int); ok {
-		b.Level = val
-	} else {
-		log.Fatalf("BeingFromMap failed to convert level: %s", m["level"])
-	}
+// 	if val, ok := m["level"].(int); ok {
+// 		b.Level = val
+// 	} else {
+// 		log.Fatalf("BeingFromMap failed to convert level: %s", m["level"])
+// 	}
 
-	locMap, ok := m["location"].(map[string]interface{})
-	if !ok {
-		log.Fatalf("BeingFromMap failed to convert location to map: %s", m["location"])
-	}
-	b.Location = PointFromMap(locMap)
+// 	// locMap, ok := m["location"].(map[string]interface{})
+// 	// if !ok {
+// 	// 	log.Fatalf("BeingFromMap failed to convert location to map: %s", m["location"])
+// 	// }
+// 	// b.Location = PointFromMap(locMap)
 
-	if m["destination"] == nil {
-		b.Destination = nil
-	} else {
-		destMap, ok := m["destination"].(map[string]interface{})
-		if !ok {
-			log.Fatal("BeingFromMap failed to convert destination to map: ", m["destination"])
-		}
-		b.Destination = PointFromMap(destMap)
-	}
-	log.Print("destination: ", m["destination"], m["destination"] == nil)
+// 	// if m["destination"] == nil {
+// 	// 	b.Destination = nil
+// 	// } else {
+// 	// 	destMap, ok := m["destination"].(map[string]interface{})
+// 	// 	if !ok {
+// 	// 		log.Fatal("BeingFromMap failed to convert destination to map: ", m["destination"])
+// 	// 	}
+// 	// 	b.Destination = PointFromMap(destMap)
+// 	// }
+// 	// log.Print("destination: ", m["destination"], m["destination"] == nil)
 
-	if len(failures) > 0 {
-		log.Fatalf("Failed to convert map keys to Being values: %s", failures)
-	}
+// 	if len(failures) > 0 {
+// 		log.Fatalf("Failed to convert map keys to Being values: %s", failures)
+// 	}
 
-	if m["weapon"] == nil {
-		b.Weapon = nil
-	} else {
-		log.Fatal("UNHANDLED! Weapon loading from db")
-	}
+// 	// if m["weapon"] == nil {
+// 	// 	b.Weapon = nil
+// 	// } else {
+// 	// 	log.Fatal("UNHANDLED! Weapon loading from db")
+// 	// }
 
-	return &b
-}
+// 	log.Print("BeingFromMap result: ", b)
+// 	return &b
+// }
 
 func NewToon(name string) *Being {
 	nameLower := strings.ToLower(name)
 	uniqueQuery := make(map[string]interface{})
 	uniqueQuery["namelower"] = nameLower
 	uniqueQuery["beingtype"] = BEING_TOON
-	// map[string]interface{Name: NameLower, BeingType: BEING_TOON}
 	if DocExists(BEING_COLLECTION, uniqueQuery) {
+		log.Printf("Being with name %s already exists. Returning nil.", name)
 		return nil
 	}
 
@@ -126,12 +139,32 @@ func NewToon(name string) *Being {
 		Level: 1,
 		Hp: 60,
 		BaseSpeed: 2,
-		Location: NewPoint(0, 0),
+		LocX: 0,
+		LocY: 0,
 	}
 
-	InsertDoc(BEING_COLLECTION, b)
-	insertedMap := FetchOne(BEING_COLLECTION, uniqueQuery)
-	return BeingFromMap(insertedMap)
+	InsertDoc(BEING_COLLECTION, &b)
+	return &b
+}
+
+func FetchAllToons() []Being {
+	query := map[string]int{
+		"beingtype": BEING_TOON,
+	}
+	var result []Being
+	c := GetCollection(BEING_COLLECTION)
+	err := c.Find(query).All(&result)
+	if err != nil {
+		log.Print("WARNING: Failed to fetch all toons")
+	}
+	return result
+}
+
+func RandMobName(level int) string {
+	return fmt.Sprintf(
+		"%s %s",
+		FromSliceByLevel(level, mobPrefixes),
+		FromSliceByLevel(level, mobNames))
 }
 
 func NewMob(level int) *Being {
@@ -153,9 +186,6 @@ func (b *Being) Speed() (speed float64) {
 }
 
 func (b *Being) DamageDice() *DiceRoll {
-	if b.Weapon != nil {
-		return b.Weapon.Damage
-	}
 	return NewDiceRoll(1, 6, b.Level)
 }
 
@@ -175,10 +205,18 @@ func (b *Being) UpdateLastTick() {
 	b.LastTick = time.Now()
 }
 
-func (b *Being) SinceLastTick() uint16 {
+func (b Being) SinceLastTick() uint16 {
 	if b.LastTick.IsZero() {
 		return 0
 	}
 	duration := time.Now().Sub(b.LastTick)
 	return uint16(duration/time.Second)
+}
+
+func (b Being) Id() bson.ObjectId {
+	return b.id
+}
+
+func (b *Being) SetId(id bson.ObjectId) {
+	b.id = id
 }

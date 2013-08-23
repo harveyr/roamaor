@@ -18,17 +18,13 @@ func DistBetw(p1 *Point, p2 *Point) float64 {
 
 func MoveToward(b *Being, p *Point, time int) {
     fmt.Printf("Moving %s toward %s\n", b, p)
-    bX := b.Location.X
-    bY := b.Location.Y
-    pX := p.X
-    pY := p.Y
-    fmt.Printf("... %s begins at distance %f\n", b, DistBetw(b.Location, p))
+    // fmt.Printf("... %s begins at distance %f\n", b, DistBetw(b.Location, p))
 
     potentialDistance := math.Min(1, b.Speed() * float64(time) / 5)
 
     var xMove, yMove float64 = 0, 0
-    xDiff := (pX - bX)
-    yDiff := (pY - bY)
+    xDiff := (p.X - b.LocX)
+    yDiff := (p.Y - b.LocY)
 
     if xDiff == 0 && yDiff == 0 {
     	// We're there!
@@ -46,9 +42,9 @@ func MoveToward(b *Being, p *Point, time int) {
     	xMove = potentialDistance - yMove
     }
 
-    yMove = math.Min(yMove, math.Abs(pY - bY))
-    xMove = math.Min(xMove, math.Abs(pX - bX))
-	b.Location.X += xMove
-	b.Location.Y += yMove
-    fmt.Printf("... %s ends at distance %f\n", b, DistBetw(b.Location, p))
+    yMove = math.Min(yMove, math.Abs(p.Y - b.LocY))
+    xMove = math.Min(xMove, math.Abs(p.X - b.LocX))
+	b.LocX += xMove
+	b.LocY += yMove
+    // fmt.Printf("... %s ends at distance %f\n", b, DistBetw(b.Location, p))
 }

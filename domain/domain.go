@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"labix.org/v2/mgo/bson"
+
 )
 
-type Bounded interface {
-	Bounds() map[string]float64
+type DocInterface interface {
+	SetId(id bson.ObjectId)
+	Id() bson.ObjectId
 }
 
 var itemNamePrefixes = []string{

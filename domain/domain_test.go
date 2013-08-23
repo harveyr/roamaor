@@ -2,21 +2,13 @@ package domain
 
 import (
 	"testing"
-	"fmt"
+	// "fmt"
 	"log"
 	"strings"
-	"labix.org/v2/mgo/bson"
+	// "labix.org/v2/mgo/bson"
 )
 
 const TESTDB = "roamaor_test"
-
-type FakeDoc struct {
-	Name string
-}
-
-func (f *FakeDoc) String() string {
-	return fmt.Sprintf("<FakeDoc: %s>", f.Name)
-}
 
 func InitTestDb() {
 	InitDb("localhost", TESTDB)
@@ -30,35 +22,6 @@ func TestInitDb(t *testing.T) {
 	InitTestDb()
 	CloseSession()
 	InitTestDb()
-}
-
-func TestInsertedDocExistsAndDeletes(t *testing.T) {
-	// InitTestDb()
-	collection := "fakedocs"
-	doc := FakeDoc{Name: "Bongo"}
-	docMap := make(map[string]interface{})
-	docMap["name"] = doc.Name
-	
-	if DocExists(collection, docMap) {
-		log.Fatal("Doc exists but has not been inserted")
-	}
-
-	InsertDoc(collection, doc)
-	// if reflect.TypeOf(id).Name() != "ObjectId" {
-	// 	log.Fatal("Returned id is not an ObjectId")
-	// }
-
-	if !DocExists(collection, docMap) {
-		log.Fatal("Doc does not exist in db after insert")
-	}
-
-	fetched := FetchOne(collection, docMap)
-
-	objId, ok := fetched["_id"].(bson.ObjectId)
-	if !ok {
-		log.Fatal("_id in fetched map is not an ObjectId")
-	}
-	DeleteDoc(collection, objId)
 }
 
 func TestNamePrefixes(t *testing.T) {
@@ -123,8 +86,8 @@ func TestDiceRoll(t *testing.T) {
 }
 
 func TestNewToon(t *testing.T) {
-	name := "Test Toon"
-	toon := NewToon("Test Toon")
+	name := "TestNewToon Toon"
+	toon := NewToon(name)
 	if toon.Name != name {
 		log.Fatalf("Toon name does not match input: (%s != %s)", name, toon.Name)
 	}
@@ -135,7 +98,18 @@ func TestNewToon(t *testing.T) {
 	if toon.Level != 1 {
 		log.Fatalf("Toon.Level is %d (expected 1)", toon.Level)
 	}
-	DeleteDoc(BEING_COLLECTION, toon._id)
+	log.Print("toon.Id: ", toon.Id)
+	DeleteDoc(BEING_COLLECTION, toon)
+}
+
+func TestFetchAllToons(t *testing.T) {
+	NewToon("TestFetchAllToons Toon 1")
+	NewToon("TestFetchAllToons Toon 2")
+	toons := FetchAllToons()
+	log.Print("toons: ", toons)
+	if len(toons) != 2 {
+		log.Fatal("Expected 2 toons. Fetched ", len(toons))
+	}
 }
 
 // func TestHit(t *testing.T) {

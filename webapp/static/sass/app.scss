@@ -1,0 +1,105 @@
+// Global Foundation Settings
+@import "settings";
+
+// Comment out this import if you don't want to use normalize
+@import "normalize";
+
+// Comment out this import if you are customizing you imports below
+@import "foundation";
+
+// Import specific parts of Foundation by commenting the import "foundation"
+// and uncommenting what you want below. You must uncomment the following if customizing
+
+// @import "foundation/components/global"; // *always required
+// @import "foundation/components/grid";
+
+//
+// Use this grid if you want to start using the new Foundation 5 grid early.
+// It will change breakpoints to min-width: 640px and 1024px.
+//
+// @import "foundation/components/grid-5";
+//
+
+// @import "foundation/components/visibility";
+// @import "foundation/components/block-grid";
+// @import "foundation/components/type";
+// @import "foundation/components/buttons";
+// @import "foundation/components/forms"; // *requires components/buttons
+// @import "foundation/components/custom-forms"; // *requires components/buttons, components/forms
+// @import "foundation/components/button-groups"; // *requires components/buttons
+// @import "foundation/components/dropdown-buttons"; // *requires components/buttons
+// @import "foundation/components/split-buttons"; // *requires components/buttons
+// @import "foundation/components/flex-video";
+// @import "foundation/components/section";
+// @import "foundation/components/top-bar";  // *requires components/grid
+// @import "foundation/components/orbit";
+// @import "foundation/components/reveal";
+// @import "foundation/components/joyride";
+// @import "foundation/components/clearing";
+// @import "foundation/components/alert-boxes";
+// @import "foundation/components/breadcrumbs";
+// @import "foundation/components/keystrokes";
+// @import "foundation/components/labels";
+// @import "foundation/components/inline-lists";
+// @import "foundation/components/pagination";
+// @import "foundation/components/panels";
+// @import "foundation/components/pricing-tables";
+// @import "foundation/components/progress-bars";
+// @import "foundation/components/side-nav";
+// @import "foundation/components/sub-nav";
+// @import "foundation/components/switch";
+// @import "foundation/components/magellan";
+// @import "foundation/components/tables";
+// @import "foundation/components/thumbs";
+// @import "foundation/components/tooltips";
+// @import "foundation/components/dropdown";
+
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
+.god-wrapper {
+    padding: {
+        left: 20px;
+        right: 20px;
+        bottom: 40px;
+    }
+}
+
+.admin-wrapper {
+    // width: 100%;
+    // height: 40px;
+    // border: 1px solid #333;
+    font-size: 0.8em;
+    position: relative;
+    top: -31px;
+    background-color: black;
+    color: $primary-color;
+    padding-top: 14px;
+
+    // .admin-inner > div {
+    //     display: inline-block;
+    // }
+}
+
+$map-bg: #E7E7E7;
+.map {
+    background-color: $map-bg;
+    height: 500px;
+
+    .dest-marker {
+        width: 20px;
+        height: 30px;
+        background-color: #fff;
+        position: absolute;
+    }
+
+    .my-location {
+        width: 10px;
+        height: 10px;
+        background-color: $map-bg;
+        position: absolute;
+        border-radius: 5px;
+    }
+}
