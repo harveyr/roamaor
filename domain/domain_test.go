@@ -85,32 +85,40 @@ func TestDiceRoll(t *testing.T) {
 	}
 }
 
-func TestNewToon(t *testing.T) {
-	name := "TestNewToon Toon"
+func TestSaveToonFields(t *testing.T) {
+	name := "TestSaveToon"
+	nameLower := strings.ToLower(name)
+	log.Print("nameLower: ", nameLower)
 	toon := NewToon(name)
-	if toon.Name != name {
-		log.Fatalf("Toon name does not match input: (%s != %s)", name, toon.Name)
-	}
-	if toon.NameLower != strings.ToLower(name) {
-		log.Fatal("Toon NameLower does not match input")
-	}
-
-	if toon.Level != 1 {
-		log.Fatalf("Toon.Level is %d (expected 1)", toon.Level)
-	}
-	log.Print("toon.Id: ", toon.Id)
-	DeleteDoc(BEING_COLLECTION, toon)
+	SaveFields(BEING_COLLECTION, toon, "Name", "Level")
 }
 
-func TestFetchAllToons(t *testing.T) {
-	NewToon("TestFetchAllToons Toon 1")
-	NewToon("TestFetchAllToons Toon 2")
-	toons := FetchAllToons()
-	log.Print("toons: ", toons)
-	if len(toons) != 2 {
-		log.Fatal("Expected 2 toons. Fetched ", len(toons))
-	}
-}
+// func TestNewToon(t *testing.T) {
+// 	name := "TestNewToon Toon"
+// 	toon := NewToon(name)
+// 	if toon.Name != name {
+// 		log.Fatalf("Toon name does not match input: (%s != %s)", name, toon.Name)
+// 	}
+// 	if toon.NameLower != strings.ToLower(name) {
+// 		log.Fatal("Toon NameLower does not match input")
+// 	}
+
+// 	if toon.Level != 1 {
+// 		log.Fatalf("Toon.Level is %d (expected 1)", toon.Level)
+// 	}
+// 	log.Print("toon.Id: ", toon.Id)
+// 	DeleteDoc(BEING_COLLECTION, toon)
+// }
+
+// func TestFetchAllToons(t *testing.T) {
+// 	NewToon("TestFetchAllToons Toon 1")
+// 	NewToon("TestFetchAllToons Toon 2")
+// 	toons := FetchAllToons()
+// 	log.Print("toons: ", toons)
+// 	if len(toons) != 2 {
+// 		log.Fatal("Expected 2 toons. Fetched ", len(toons))
+// 	}
+// }
 
 // func TestHit(t *testing.T) {
 // 	attacker := NewToon("Attacking Toon")

@@ -1,17 +1,17 @@
 package domain
 
 import (
-    "log"
-    "fmt"
-    "time"
-    "strings"
-	"labix.org/v2/mgo/bson"
+	"fmt"
+	"log"
+	"strings"
+	"time"
+	// "labix.org/v2/mgo/bson"
 )
 
 const (
 	BEING_TOON = iota
-	BEING_NPC = iota
-	BEING_MOB = iota
+	BEING_NPC  = iota
+	BEING_MOB  = iota
 )
 
 const BEING_COLLECTION = "beings"
@@ -37,31 +37,31 @@ var mobNames = []string{
 }
 
 type Being struct {
-	id bson.ObjectId
-    BeingType int
-    Name string
-    NameLower string
-    Level int
-    Hp int
-    LocX float64
-    LocY float64
-    DestX int
-    DestY int
-    BaseSpeed int
-    LastTick time.Time
+	MongoDoc
+	BeingType int
+	Name      string
+	NameLower string
+	Level     int
+	Hp        int
+	LocX      float64
+	LocY      float64
+	DestX     int
+	DestY     int
+	BaseSpeed int
+	LastTick  time.Time
 }
 
-func (b Being) Publicize() map[string]interface{} {
-	log.Print("Publicizing being: ", b)
-	m := make(map[string]interface{})
-	m["id"] = b.id
-	m["name"] = b.Name
-	m["hp"] = b.Hp
-	m["level"] = b.Level
-	m["x"] = b.LocX
-	m["y"] = b.LocY
-	return m
-}
+// func (b Being) Publicize() map[string]interface{} {
+// 	log.Print("Publicizing being: ", b)
+// 	m := make(map[string]interface{})
+// 	m["id"] = b.Id
+// 	m["name"] = b.Name
+// 	m["hp"] = b.Hp
+// 	m["level"] = b.Level
+// 	m["x"] = b.LocX
+// 	m["y"] = b.LocY
+// 	return m
+// }
 
 // func BeingFromMap(m map[string]interface{}) *Being {
 // 	b := Being{}
@@ -84,7 +84,7 @@ func (b Being) Publicize() map[string]interface{} {
 // 	} else {
 // 		failures = append(failures, "namelower")
 // 	}
-	
+
 // 	if val, ok := m["level"].(int); ok {
 // 		b.Level = val
 // 	} else {
@@ -133,17 +133,17 @@ func NewToon(name string) *Being {
 	}
 
 	b := Being{
-		Name: name,
+		Name:      name,
 		NameLower: nameLower,
 		BeingType: BEING_TOON,
-		Level: 1,
-		Hp: 60,
+		Level:     1,
+		Hp:        60,
 		BaseSpeed: 2,
-		LocX: 0,
-		LocY: 0,
+		LocX:      0,
+		LocY:      0,
 	}
 
-	InsertDoc(BEING_COLLECTION, &b)
+	// InsertDoc(BEING_COLLECTION, &b)
 	return &b
 }
 
@@ -171,18 +171,18 @@ func NewMob(level int) *Being {
 	b := new(Being)
 	b.Name = RandMobName(level)
 	b.Level = level
-	b.Hp = 20 + 10 * level
+	b.Hp = 20 + 10*level
 	return b
 }
 
 func (b *Being) String() (repr string) {
-    repr = fmt.Sprintf("<[Being] %s>", b.Name)
-    return
+	repr = fmt.Sprintf("<[Being] %s>", b.Name)
+	return
 }
 
 func (b *Being) Speed() (speed float64) {
-    speed = float64(b.BaseSpeed) + float64(b.Level)
-    return
+	speed = float64(b.BaseSpeed) + float64(b.Level)
+	return
 }
 
 func (b *Being) DamageDice() *DiceRoll {
@@ -210,13 +210,6 @@ func (b Being) SinceLastTick() uint16 {
 		return 0
 	}
 	duration := time.Now().Sub(b.LastTick)
-	return uint16(duration/time.Second)
+	return uint16(duration / time.Second)
 }
 
-func (b Being) Id() bson.ObjectId {
-	return b.id
-}
-
-func (b *Being) SetId(id bson.ObjectId) {
-	b.id = id
-}

@@ -9,9 +9,21 @@ import (
 
 )
 
-type DocInterface interface {
+type MongoDocInterface interface {
 	SetId(id bson.ObjectId)
-	Id() bson.ObjectId
+	ObjectId() bson.ObjectId
+}
+
+type MongoDoc struct {
+	Id bson.ObjectId "_id"
+}
+
+func (d MongoDoc) SetId(id bson.ObjectId) {
+	d.Id = id
+}
+
+func (d MongoDoc) ObjectId() bson.ObjectId {
+	return d.Id
 }
 
 var itemNamePrefixes = []string{

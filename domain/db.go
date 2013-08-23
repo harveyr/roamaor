@@ -2,6 +2,7 @@ package domain
 
 import (
 	"log"
+	"reflect"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
@@ -62,24 +63,79 @@ func FetchOne(collection string, query map[string]interface{}) map[string]interf
 	return returnMap
 }
 
-func InsertDoc(collection string, doc DocInterface) bson.ObjectId {
-	c := GetCollection(collection)
-	id := bson.NewObjectId()
-	doc.SetId(id)
-	err := c.Insert(doc)
-	if err != nil {
-		log.Fatal("Failed to insert doc: ", err)
+
+func SaveFields(collection string, doc MongoDocInterface, fields ...string) {
+	log.Print("[SaveFields] doc: ", doc)
+	log.Print("[SaveFields] fields: ", fields)
+	updateMap := make(map[string]interface{})
+	updateMap["_id"] = doc.ObjectId()
+	structVal := reflect.Indirect(reflect.ValueOf(doc))
+	for _, field := range fields {
+		updateMap[field] = structVal.FieldByName(field)
 	}
-	return id
+	log.Print("updateMap: ", updateMap)
+	// if b.Id == nil {
+	// 	b.Id := bson.NewObjectId()
+	// }
+	// c := GetCollection(collection)
+	// err := c.Insert(doc)
+	// if err != nil {
+	// 	log.Fatal("Failed to insert doc: ", err)
+	// }
+	// return id
 }
 
-func DeleteDoc(collection string, doc DocInterface) {
-	c := GetCollection(collection)
-	query := map[string]bson.ObjectId{
-		"_id": doc.Id(),
-	}
-	err := c.Remove(query)
-	if err != nil {
-		log.Fatalf("Failed to delete doc: %s, %s", collection, doc)
-	}
-}
+
+// func InsertDoc(collection string, doc DocInterface) bson.ObjectId {
+// 	c := GetCollection(collection)
+// 	id := bson.NewObjectId()
+// 	log.Print("[InsertDoc] Setting doc id to new id: ", id)
+// 	doc.SetId(id)
+// 	err := c.Insert(doc)
+// 	if err != nil {
+// 		log.Fatal("Failed to insert doc: ", err)
+// 	}
+// 	return id
+// }
+
+// func DeleteDoc(collection string, doc DocInterface) {
+// 	if !doc.ObjectId().Valid() {
+// 		log.Fatal("[DeleteDoc] Doc has invalid Id: %s", doc.ObjectId())
+// 	}
+
+// 	c := GetCollection(collection)
+	
+// 	emptyQuery := make(map[string]interface{})
+// 	var allResults []interface{}
+// 	allErr := c.Find(emptyQuery).All(&allResults)
+// 	if allErr != nil {
+// 		log.Fatal("[DeleteDoc] Coudln't find ANY docs!")
+// 	} else {
+// 		log.Printf("[DeleteDoc] Found %d docs: %s", len(allResults), allResults)
+// 	}
+
+// 	log.Print("string: ", doc.ObjectId().String())
+// 	log.Print("hex: ", doc.ObjectId().Hex())
+// 	log.Print("machine: ", doc.ObjectId().Machine())
+
+// 	// query := map[string]bson.ObjectId{
+// 	// 	"_id": doc.ObjectId(),
+// 	// }
+// 	query := map[string]bson.ObjectId{
+// 		"_id": doc.ObjectId(),
+// 	}
+
+// 	count, err := c.Find(query).Count()
+// 	if count == 0 {
+// 		log.Fatal("[DeleteDoc] Couldn't find doc with query ", query)
+// 	}
+
+// 	err = c.Remove(query)
+// 	// var findMap map[string]interface{}
+// 	// c.FindId
+// 	// err := c.RemoveId(doc.Id())
+// 	if err != nil {
+// 		log.Fatalf("Failed to delete doc: %s, %s, Query: %s. Error: %s", collection, doc, query, err)
+// 		// log.Fatalf("Failed to delete doc: %s, %s, Error: %s", collection, doc, err)
+// 	}
+// }
