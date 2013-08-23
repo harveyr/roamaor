@@ -88,9 +88,21 @@ func TestDiceRoll(t *testing.T) {
 func TestSaveToonFields(t *testing.T) {
 	name := "TestSaveToon"
 	nameLower := strings.ToLower(name)
-	log.Print("nameLower: ", nameLower)
 	toon := NewToon(name)
-	SaveFields(BEING_COLLECTION, toon, "Name", "Level")
+	if toon.NameLower != nameLower {
+		log.Fatal("[TestSaveToonFields] NameLower != nameLower")
+	}
+	changeInfo := SaveFields(BEING_COLLECTION, toon, "Name", "Level")
+	queryMap := make(map[string]interface{})
+	queryMap["_id"] = toon.ObjectId()
+	fetchMap := FetchOne(BEING_COLLECTION, queryMap)
+	fetchedName, _ := fetchMap["name"].(string)
+	if fetchedName != name {
+		log.Fatalf("[TestSaveToonFields] Name mismatch: %s != %s", fetchedName, name)
+	}
+	if changeInfo.Updated != 1 {
+		log.Fatalf("[TestSaveToonFields] %d docs were updated. Expected 1.", changeInfo.Updated)
+	}
 }
 
 // func TestNewToon(t *testing.T) {

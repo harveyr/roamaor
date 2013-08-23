@@ -18,7 +18,7 @@ type MongoDoc struct {
 	Id bson.ObjectId "_id"
 }
 
-func (d MongoDoc) SetId(id bson.ObjectId) {
+func (d *MongoDoc) SetId(id bson.ObjectId) {
 	d.Id = id
 }
 

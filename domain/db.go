@@ -63,26 +63,29 @@ func FetchOne(collection string, query map[string]interface{}) map[string]interf
 	return returnMap
 }
 
-
-func SaveFields(collection string, doc MongoDocInterface, fields ...string) {
-	log.Print("[SaveFields] doc: ", doc)
-	log.Print("[SaveFields] fields: ", fields)
+func SaveFields(collection string, doc MongoDocInterface, fields ...string) *mgo.ChangeInfo {
+	if !doc.ObjectId().Valid() {
+		doc.SetId(bson.NewObjectId())
+	}
+	if !doc.ObjectId().Valid() {
+		log.Fatal("[SaveFields] Couldn't set a valid ObjectId on ", doc)
+	}
+	selectorMap := map[string]string{
+		"_id": doc.ObjectId().Hex(),
+	}
 	updateMap := make(map[string]interface{})
-	updateMap["_id"] = doc.ObjectId()
 	structVal := reflect.Indirect(reflect.ValueOf(doc))
 	for _, field := range fields {
 		updateMap[field] = structVal.FieldByName(field)
 	}
 	log.Print("updateMap: ", updateMap)
-	// if b.Id == nil {
-	// 	b.Id := bson.NewObjectId()
-	// }
-	// c := GetCollection(collection)
-	// err := c.Insert(doc)
-	// if err != nil {
-	// 	log.Fatal("Failed to insert doc: ", err)
-	// }
-	// return id
+	log.Print("selectorMap: ", selectorMap)
+	c := GetCollection(collection)
+	info, err := c.Upsert(selectorMap, updateMap)
+	if err != nil {
+		log.Fatal("[SaveFields] Upsert failed.\n\tselectorMap: %s\n\tupdateMap: %s\n\terr: %s", selectorMap, updateMap, err)
+	}
+	return info
 }
 
 
