@@ -26,7 +26,7 @@ type AppPageContent struct {
 	AdminHtml	template.HTML
 }
 
-func Jsonify(m map[string]interface{}) (s string) {
+func Jsonify(m interface{}) (s string) {
     b, err := json.Marshal(m)
     if err != nil {
             s = ""
@@ -109,20 +109,48 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func adminNewToonHandler(w http.ResponseWriter, r *http.Request) {
+func bootstrapBundleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	data := make(map[string]interface{})
+	data["worldWidth"] = 5000
+	data["worldHeight"] = 5000
+	fmt.Fprintf(w, Jsonify(data))
+}
+
+func setDestinationHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var args map[string]float64
+	if err := decoder.Decode(&args); err != nil {
+		log.Fatalf("Failed to decode request body\n\tErr: %s\n\tBody: %s", err, r.Body)
+	}
+	log.Print("args: ", args)
+}
+
+func adminNewToonHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	args := make(map[string]string)
 	err := decoder.Decode(&args)
 	if err != nil {
-		log.Fatal("Failed to decode request body: ", r.Body)
+		log.Fatalf("Failed to decode request body\n\tErr: %s\n\tBody: %s", err, r.Body)
 	}
-	toon := domain.NewToon(args["name"])
-	if toon == nil {
+
+	w.Header().Set("Content-Type", "application/json")
+	if !domain.CanCreateToon(args["name"]) {
 		w.WriteHeader(http.StatusNotModified)
 	} else {
-		fmt.Fprintf(w, Jsonify(toon.Publicize()))
+		toon := domain.NewToon(args["name"])
+		fmt.Fprintf(w, Jsonify(toon))
 	}
+	return
+}
+
+func adminAllToonsHandler(w http.ResponseWriter, r *http.Request) {
+	c := domain.GetCollection(domain.BEING_COLLECTION)
+	query := make(map[string]interface{})
+	var result []interface{}
+	c.Find(query).All(&result)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, Jsonify(result))
 	return
 }
 
@@ -135,17 +163,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Could not resolve webapp path: ", envPath)
 	}
-
 	webappPath = p
-	indexPage = filepath.Join(webappPath, "static/index.html")
 
-	_, err = os.Stat(indexPage)
-	if err != nil {
-		log.Fatal("Could not find index.html at ", indexPage)
-	}
 	http.HandleFunc("/app", appHandler)
 	http.HandleFunc("/static/", assetsHandler)
 	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/api/destination", setDestinationHandler)
+	http.HandleFunc("/api/bootstrap", bootstrapBundleHandler)
 	http.HandleFunc("/api/admin/newtoon", adminNewToonHandler)
+	http.HandleFunc("/api/admin/alltoons", adminAllToonsHandler)
 	http.ListenAndServe(":8080", nil)
 }

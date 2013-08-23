@@ -7208,35 +7208,55 @@ a.th {
 }
 
 /* line 62, ../sass/app.scss */
+.inbl {
+  display: inline-block;
+}
+
+/* line 66, ../sass/app.scss */
 .god-wrapper {
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 40px;
 }
 
-/* line 70, ../sass/app.scss */
+/* line 74, ../sass/app.scss */
 .admin-wrapper {
+  width: 100%;
+  height: 40px;
   font-size: 0.8em;
   position: relative;
   top: -31px;
   background-color: black;
   color: #2ba6cb;
-  padding-top: 14px;
+  padding: 8px 10px 8px 10px;
+}
+/* line 89, ../sass/app.scss */
+.admin-wrapper .title {
+  display: inline-block;
+  margin-right: 15px;
+}
+/* line 93, ../sass/app.scss */
+.admin-wrapper button {
+  display: inline-block;
+}
+/* line 97, ../sass/app.scss */
+.admin-wrapper input {
+  display: inline-block;
 }
 
-/* line 87, ../sass/app.scss */
+/* line 103, ../sass/app.scss */
 .map {
   background-color: #e7e7e7;
   height: 500px;
 }
-/* line 91, ../sass/app.scss */
+/* line 107, ../sass/app.scss */
 .map .dest-marker {
   width: 20px;
   height: 30px;
   background-color: #fff;
   position: absolute;
 }
-/* line 98, ../sass/app.scss */
+/* line 114, ../sass/app.scss */
 .map .my-location {
   width: 10px;
   height: 10px;
