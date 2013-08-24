@@ -75,7 +75,6 @@ func NewToon(name string) *Being {
 		LocX:      0,
 		LocY:      0,
 	}
-	log.Print("b.Id: ", b.Id)
 	c := GetCollection(BEING_COLLECTION)
 	err := c.Insert(b)
 	if err != nil {
@@ -127,10 +126,12 @@ func (b *Being) String() (repr string) {
 	return
 }
 
-// func (b Being) Save() {
-// 	c := GetCollection(BEING_COLLECTION)
-
-// }
+func (b Being) Save() {
+	c := GetCollection(BEING_COLLECTION)
+	if err := c.UpdateId(b.Id, b); err != nil {
+		log.Printf("Failed to save being %s (%s)", b, err)
+	}
+}
 
 func (b *Being) Speed() (speed float64) {
 	speed = float64(b.BaseSpeed) + float64(b.Level)
@@ -151,14 +152,15 @@ func (b *Being) TakeDamage(damage int) {
 
 func (b *Being) UpdateLastTick() {
 	b.LastTick = time.Now()
+	b.Save()
 }
 
-func (b Being) SinceLastTick() uint16 {
+func (b Being) SinceLastTick() float64 {
 	if b.LastTick.IsZero() {
 		return 0
 	}
 	duration := time.Now().Sub(b.LastTick)
-	return uint16(duration / time.Second)
+	return float64(duration / time.Second)
 }
 
 func (b Being) Delete() {

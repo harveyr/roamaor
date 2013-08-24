@@ -75,3 +75,11 @@ func (u User) Save() {
 		log.Printf("Failed to save user %s (%s)", u, err)
 	}
 }
+
+func (u User) Toon() *Being {
+	if !u.ToonId.Valid() {
+		log.Printf("%s has no assigned toon", u)
+		return nil
+	}
+	return FetchToonById(u.ToonId)
+}

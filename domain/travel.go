@@ -2,7 +2,7 @@ package domain
 
 import (
 	"math"
-	"fmt"
+	"log"
 )
 
 func Distance(x1 float64, y1 float64, x2 float64, y2 float64) (d float64) {
@@ -16,15 +16,12 @@ func DistBetw(p1 *Point, p2 *Point) float64 {
 	return Distance(float64(p1.X), float64(p1.Y), float64(p2.X), float64(p2.Y))
 }
 
-func MoveToward(b *Being, p *Point, time int) {
-    fmt.Printf("Moving %s toward %s\n", b, p)
-    // fmt.Printf("... %s begins at distance %f\n", b, DistBetw(b.Location, p))
-
-    potentialDistance := math.Min(1, b.Speed() * float64(time) / 5)
+func Roam(b *Being, time float64) {
+    potentialDistance := math.Min(1, b.Speed() * time / 5)
 
     var xMove, yMove float64 = 0, 0
-    xDiff := (p.X - b.LocX)
-    yDiff := (p.Y - b.LocY)
+    xDiff := (b.DestX - b.LocX)
+    yDiff := (b.DestY - b.LocY)
 
     if xDiff == 0 && yDiff == 0 {
     	// We're there!
@@ -42,9 +39,10 @@ func MoveToward(b *Being, p *Point, time int) {
     	xMove = potentialDistance - yMove
     }
 
-    yMove = math.Min(yMove, math.Abs(p.Y - b.LocY))
-    xMove = math.Min(xMove, math.Abs(p.X - b.LocX))
+    yMove = math.Min(yMove, math.Abs(xDiff))
+    xMove = math.Min(xMove, math.Abs(yDiff))
 	b.LocX += xMove
 	b.LocY += yMove
-    // fmt.Printf("... %s ends at distance %f\n", b, DistBetw(b.Location, p))
+	b.Save()
+	log.Printf("\tlocation: {%f, %f}", b.LocX, b.LocY)
 }

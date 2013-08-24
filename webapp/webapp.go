@@ -154,9 +154,14 @@ func setDestinationHandler(w http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&args); err != nil {
 		log.Fatalf("Failed to decode request body\n\tErr: %s\n\tBody: %s", err, r.Body)
 	}
-	log.Print("args: ", args)
-	// currentUser.DestX = args["x"]
-	// currentUser.DestY = args["y"]
+	toon := currentUser.Toon()
+	if toon == nil {
+		log.Print("No toon for user ", currentUser)
+	} else {
+		toon.DestX = args["x"]
+		toon.DestY = args["y"]
+		toon.Save()
+	}
 }
 
 func setActiveToonHandler(w http.ResponseWriter, r *http.Request) {
