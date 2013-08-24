@@ -1,13 +1,20 @@
-<div class="admin-wrapper" ng-controller="AdminCtrl" ng-cloak>
-    <div class="title">
-        Admin
-    </div>
-    <div class="inbl">
-        <button class="button tiny" data-reveal-id="admin-new-player-modal">
-            New Player
-        </button>
-    </div>
+<div ng-controller="AdminCtrl" ng-cloak>
+    <div class="admin-wrapper">
+        <div class="title">
+            Admin
+        </div>
+        <div class="inbl">
+            <button class="button tiny" data-reveal-id="admin-new-player-modal">
+                New Player
+            </button>
+        </div>
+        <div class="inbl">
+            <select ng-model="admin.selectedToon"
+                ng-options="toon.name for toon in allToons"
+                ng-change="selectedToonChange(admin.selectedToon)"></select>
+        </div>
 
+    </div>
     <div id="admin-new-player-modal" class="reveal-modal small">
         <h2>Create a New Player</h2>
         <p>

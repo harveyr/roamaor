@@ -45,8 +45,8 @@ type Being struct {
 	Hp        int
 	LocX      float64
 	LocY      float64
-	DestX     int
-	DestY     int
+	DestX     float64
+	DestY     float64
 	BaseSpeed int
 	LastTick  time.Time
 }

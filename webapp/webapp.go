@@ -36,6 +36,15 @@ func Jsonify(m interface{}) (s string) {
     return
 }
 
+func WriteFailureResponse(w http.ResponseWriter, reason string) {
+	w.Header().Set("Content-Type", "application/json")
+	response := make(map[string]interface{})
+	response["success"] = false
+	response["reason"] = reason
+	fmt.Fprintf(w, Jsonify(response))
+	return
+}
+
 func parseTemplate(partial string, data interface{}) (out []byte, error error) {
 	// See https://bitbucket.org/jzs/sketchground/src/4defb0a2ea64?at=default
     var buf bytes.Buffer
@@ -111,9 +120,16 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 func bootstrapBundleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	user := domain.FetchUser("harveyr@gmail.com")
+	if user == nil {
+		WriteFailureResponse(w, "Failed to fetch user")
+		return
+	}
+
 	data := make(map[string]interface{})
 	data["worldWidth"] = 5000
 	data["worldHeight"] = 5000
+	data["user"] = user.Publicize()
 	fmt.Fprintf(w, Jsonify(data))
 }
 
@@ -155,6 +171,7 @@ func adminAllToonsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
 	domain.InitDb("localhost", "roamaor")
 	defer domain.CloseSession()
 	
@@ -164,6 +181,10 @@ func main() {
 		log.Fatal("Could not resolve webapp path: ", envPath)
 	}
 	webappPath = p
+
+	if domain.CanCreateUser("harveyr@gmail.com") {
+		domain.NewUser("harveyr@gmail.com")
+	}
 
 	http.HandleFunc("/app", appHandler)
 	http.HandleFunc("/static/", assetsHandler)

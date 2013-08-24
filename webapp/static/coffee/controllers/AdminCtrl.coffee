@@ -8,3 +8,7 @@ angular.module(APP_NAME).controller 'AdminCtrl', ($scope, $rootScope, $http) ->
         $http.post("/api/admin/newtoon", data).then (response) ->
             console.log 'response:', response
 
+
+    $scope.selectedToonChange = (toon) ->
+        console.log 'toon:', toon
+        

@@ -40,7 +40,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         .attr("height", 20)
 
     $scope.mapClick = ($event) ->
-        toon = $rootScope.allToons[0]
+        toon = $rootScope.myToon
         toonCoords = toonSvgCoords(toon)
         destX = $event.offsetX
         destY = $event.offsetY
@@ -109,6 +109,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     fetchData = ->
         $http.get("/api/admin/alltoons").then (response) ->
             $rootScope.allToons = response.data
+            $rootScope.myToon = $rootScope.allToons[0]
             renderToons()
         $http.get("/api/bootstrap").then (response) ->
             $rootScope.worldHeight = response.data.worldHeight

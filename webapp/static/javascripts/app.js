@@ -86,7 +86,7 @@
     svg.append("image").attr("xlink:href", "/static/img/pin.png").attr("width", 20).attr("height", 20);
     $scope.mapClick = function($event) {
       var destPointData, destX, destY, height, lineData, postData, scaledDestX, scaledDestY, svgHeightScale, svgWidthScale, toon, toonCoords, width, yOffset;
-      toon = $rootScope.allToons[0];
+      toon = $rootScope.myToon;
       toonCoords = toonSvgCoords(toon);
       destX = $event.offsetX;
       destY = $event.offsetY;
@@ -146,6 +146,7 @@
     fetchData = function() {
       $http.get("/api/admin/alltoons").then(function(response) {
         $rootScope.allToons = response.data;
+        $rootScope.myToon = $rootScope.allToons[0];
         return renderToons();
       });
       return $http.get("/api/bootstrap").then(function(response) {
@@ -173,7 +174,7 @@
 
   angular.module(APP_NAME).controller('AdminCtrl', function($scope, $rootScope, $http) {
     $scope.admin = {};
-    return $scope.submitNewPlayer = function(name) {
+    $scope.submitNewPlayer = function(name) {
       var data;
       console.log('name:', name);
       data = {
@@ -182,6 +183,9 @@
       return $http.post("/api/admin/newtoon", data).then(function(response) {
         return console.log('response:', response);
       });
+    };
+    return $scope.selectedToonChange = function(toon) {
+      return console.log('toon:', toon);
     };
   });
 
