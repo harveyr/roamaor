@@ -130,7 +130,11 @@
         y: scaledDestY
       };
       return $http.post("/api/destination", postData).then(function(response) {
-        return console.log('response:', response);
+        if (response.data.success) {
+          return $rootScope.setMyToon(response.data.toon);
+        } else {
+          return $rootScope.alertUser("Failed to set destination: " + response.data.reason);
+        }
       });
     };
     renderToon = function() {
@@ -189,6 +193,34 @@
       return $http.post("/api/activetoon", data).then(function(response) {
         return console.log('response:', response.status, response.data);
       });
+    };
+  });
+
+  angular.module(DIRECTIVE_MODULE).directive("toonSummary", function($rootScope) {
+    var directive;
+    return directive = {
+      replace: true,
+      scope: true,
+      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n    </div>\n</div>",
+      link: function(scope) {
+        var applyToon;
+        applyToon = function(toon) {
+          scope.name = toon.Name;
+          scope.locX = toon.LocX.toFixed(2);
+          scope.locY = toon.LocY.toFixed(2);
+          scope.fights = toon.Fights;
+          scope.fightsWon = toon.FightsWon;
+          scope.destX = toon.DestX.toFixed(2);
+          return scope.destY = toon.DestY.toFixed(2);
+        };
+        if ($rootScope.myToon) {
+          applyToon($rootScope.myToon);
+        }
+        console.log('[toonSummary] $rootScope.myToon:', $rootScope.myToon);
+        return $rootScope.$watch('myToon', function() {
+          return applyToon($rootScope.myToon);
+        });
+      }
     };
   });
 

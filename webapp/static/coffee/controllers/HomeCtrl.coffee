@@ -88,7 +88,10 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             y: scaledDestY
 
         $http.post("/api/destination", postData).then (response) ->
-            console.log 'response:', response
+            if response.data.success
+                $rootScope.setMyToon response.data.toon
+            else 
+                $rootScope.alertUser "Failed to set destination: #{response.data.reason}" 
 
     renderToon = ->
         if !$rootScope.myToon

@@ -49,6 +49,8 @@ type Being struct {
 	DestY     float64
 	BaseSpeed int
 	LastTick  time.Time
+	Fights    int
+	FightsWon int
 }
 
 func CanCreateToon(name string) bool {
@@ -64,23 +66,21 @@ func NewToon(name string) *Being {
 		log.Fatal("Can't create toon! Did you check?")
 	}
 
-	b := Being{
-		Id:			bson.NewObjectId(),
-		Name:      name,
-		NameLower: strings.ToLower(name),
-		BeingType: BEING_TOON,
-		Level:     1,
-		Hp:        60,
-		BaseSpeed: 2,
-		LocX:      0,
-		LocY:      0,
-	}
+	b := new(Being)
+	b.Id = bson.NewObjectId()
+	b.Level = 1
+	b.Name = name
+	b.NameLower = strings.ToLower(name)
+	b.BeingType = BEING_TOON
+	b.Hp = 60
+	b.BaseSpeed = 2
+
 	c := GetCollection(BEING_COLLECTION)
 	err := c.Insert(b)
 	if err != nil {
 		log.Fatalf("[NewToon] Failed to insert toon: %s (%s) ", b, err)
 	}
-	return &b
+	return b
 }
 
 func FetchToonById(id bson.ObjectId) (*Being) {
@@ -117,7 +117,8 @@ func NewMob(level int) *Being {
 	b := new(Being)
 	b.Name = RandMobName(level)
 	b.Level = level
-	b.Hp = 20 + 10*level
+	b.Hp = 20 + 10 * level
+	b.BeingType = BEING_MOB
 	return b
 }
 
@@ -171,3 +172,6 @@ func (b Being) Delete() {
 	}
 }
 
+func (b Being) IsToon() bool {
+	return b.BeingType == BEING_TOON
+}

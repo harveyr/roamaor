@@ -1,13 +1,13 @@
 3.2.8 (Media Mark)
-543f12e1e7d5817c33f80f2214b9fec0c66731a7
+6bdab23257aa204ad8f83b817deda0721eceecae
 o:Sass::Tree::RootNode
-:@template"öŠ//
+:@template"õŠ//
 // Foundation Variables
 //
 
 // The default font-size is set to 100% of the browser style sheet (usually 16px)
 // for compatibility with browser-based text zoom or user-set defaults.
-$base-font-size: 100% !default;
+$base-font-size: 95% !default;
 
 // $base-line-height is 24px while $base-font-size is 16px
 // $base-line-height: 150%;
@@ -1313,7 +1313,7 @@ $topbar-bg: #727272;
  * for compatibility with browser-based text zoom or user-set defaults. */;;;	[ ;i
 o:Sass::Tree::VariableNode:@guarded"!default;@:
 @name"base-font-size:
-@expro:Sass::Script::Number:@numerator_units["%:@original"	100%;@;ii:@denominator_units[ ;i;	[ ;io;
+@expro:Sass::Script::Number:@numerator_units["%:@original"95%;@;id:@denominator_units[ ;i;	[ ;io;
 
 ;@;["^/* $base-line-height is 24px while $base-font-size is 16px
  * $base-line-height: 150%; */;;;	[ ;io;

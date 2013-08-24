@@ -157,11 +157,16 @@ func setDestinationHandler(w http.ResponseWriter, r *http.Request) {
 	toon := currentUser.Toon()
 	if toon == nil {
 		log.Print("No toon for user ", currentUser)
+		WriteFailureResponse(w, "No toon for user")
 	} else {
 		toon.DestX = args["x"]
 		toon.DestY = args["y"]
 		toon.Save()
+		response := make(map[string]interface{})
+		response["toon"] = toon
+		WriteSuccessResponse(w, response)
 	}
+	return
 }
 
 func setActiveToonHandler(w http.ResponseWriter, r *http.Request) {
