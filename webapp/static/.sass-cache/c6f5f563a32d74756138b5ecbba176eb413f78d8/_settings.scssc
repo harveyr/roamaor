@@ -1,7 +1,7 @@
 3.2.8 (Media Mark)
-41e86094e211410e5ab88d73426282aafd592240
+543f12e1e7d5817c33f80f2214b9fec0c66731a7
 o:Sass::Tree::RootNode
-:@template"÷Š//
+:@template"öŠ//
 // Foundation Variables
 //
 
@@ -488,7 +488,7 @@ $default-float: left;
 
 // We use these to control text style.
 
-// $alert-font-weight: bold;
+$alert-font-weight: normal;
 // $alert-font-size: emCalc(14);
 // $alert-font-color: #fff;
 // $alert-font-color-alt: darken($secondary-color, 60%);
@@ -1302,7 +1302,7 @@ $topbar-bg: #727272;
 // Sticky Class
 
 // $topbar-sticky-class: ".sticky";
-:@options{ :@has_childrenT:@children[xo:Sass::Tree::CommentNode
+:@options{ :@has_childrenT:@children[yo:Sass::Tree::CommentNode
 ;@:@value["%/*
  * Foundation Variables
  * */:
@@ -1807,12 +1807,11 @@ space;[ ;i-;	[ ;i-o;
  * $alert-padding-opposite-direction: $alert-padding-top + emCalc(10);
  * $alert-padding-bottom: $alert-padding-top + emCalc(1); */;;;	[ ;iáo;
 
-;@;["./* We use these to control text style. */;;;	[ ;iæo;
+;@;["./* We use these to control text style. */;;;	[ ;iæo;;0;@;"alert-font-weight;o;/	;@;"normal;;0;iè;	[ ;ièo;
 
-;@;["•/* $alert-font-weight: bold;
- * $alert-font-size: emCalc(14);
+;@;["}/* $alert-font-size: emCalc(14);
  * $alert-font-color: #fff;
- * $alert-font-color-alt: darken($secondary-color, 60%); */;;;	[ ;ièo;
+ * $alert-font-color-alt: darken($secondary-color, 60%); */;;;	[ ;iéo;
 
 ;@;["./* We use this for close hover effect. */;;;	[ ;iío;
 

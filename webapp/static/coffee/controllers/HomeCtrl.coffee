@@ -30,14 +30,14 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     toonSvgCoords = (toon) ->
         {
-            x: toon.locx + toonRadius
-            y: svg.attr("height") - toon.locy - toonRadius
+            x: toon.LocX + toonRadius
+            y: svg.attr("height") - toon.LocY - toonRadius
         }
 
-    svg.append("image")
-        .attr("xlink:href", "/static/img/pin.png")
-        .attr("width", 20)
-        .attr("height", 20)
+    # svg.append("image")
+    #     .attr("xlink:href", "/static/img/pin.png")
+    #     .attr("width", 20)
+    #     .attr("height", 20)
 
     $scope.mapClick = ($event) ->
         toon = $rootScope.myToon
@@ -90,28 +90,25 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         $http.post("/api/destination", postData).then (response) ->
             console.log 'response:', response
 
-
-    renderToons = ->
-        console.log 'rendering:', $rootScope.allToons
+    renderToon = ->
+        if !$rootScope.myToon
+            throw "myToon not set"
         svgHeight = svg.attr("height")
-        _.each $rootScope.allToons, (toon, idx) ->
-            coords = toonSvgCoords(toon)
-            toonLoc = svg.append("circle")
-                .attr("id", "toon-#{toon._id}")
-                .attr("cx", coords.x)
-                .attr("cy", coords.y)
-                .attr("r", toonRadius)
-                .style("fill", "#E7E7E7")
-            toonLoc.transition()
-                .delay(500 + 20 * idx)
-                .style("fill", "#777")
+        toon = $rootScope.myToon
+        coords = toonSvgCoords(toon)
+        toonLoc = svg.append("circle")
+            .attr("id", "toon-#{toon._id}")
+            .attr("cx", coords.x)
+            .attr("cy", coords.y)
+            .attr("r", toonRadius)
+            .style("fill", "#E7E7E7")
+        toonLoc.transition()
+            .delay(500)
+            .style("fill", "#777")
 
-    fetchData = ->
-        $http.get("/api/admin/alltoons").then (response) ->
-            $rootScope.allToons = response.data
-            $rootScope.myToon = $rootScope.allToons[0]
-            renderToons()
-        $http.get("/api/bootstrap").then (response) ->
-            $rootScope.worldHeight = response.data.worldHeight
-            $rootScope.worldWidth = response.data.worldWidth
-    fetchData()
+    if $rootScope.myToon
+        renderToon()
+
+    $scope.$on "myToonUpdated", ->
+        renderToon()
+

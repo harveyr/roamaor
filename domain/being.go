@@ -84,14 +84,14 @@ func NewToon(name string) *Being {
 	return &b
 }
 
-func FetchToonById(id bson.ObjectId) (*Being, error) {
+func FetchToonById(id bson.ObjectId) (*Being) {
 	c := GetCollection(BEING_COLLECTION)
 	b := Being{}
 	err := c.FindId(id).One(&b)
 	if err != nil {
-		log.Print("Failed to fetch toon with id ", id)
+		log.Printf("Failed to fetch toon with id %s (%s)", id, err)
 	}
-	return &b, err
+	return &b
 }
 
 func FetchAllToons() []Being {
@@ -126,6 +126,11 @@ func (b *Being) String() (repr string) {
 	repr = fmt.Sprintf("<[Being] %s>", b.Name)
 	return
 }
+
+// func (b Being) Save() {
+// 	c := GetCollection(BEING_COLLECTION)
+
+// }
 
 func (b *Being) Speed() (speed float64) {
 	speed = float64(b.BaseSpeed) + float64(b.Level)
@@ -163,3 +168,4 @@ func (b Being) Delete() {
 		log.Fatal("Failed to delete being %s (%s)", b, err)
 	}
 }
+

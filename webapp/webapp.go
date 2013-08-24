@@ -11,10 +11,12 @@ import (
 	"html/template"
 	"encoding/json"
 	"bitbucket.org/harveyr/roamaor/domain"
+	"labix.org/v2/mgo/bson"
 )
 
 var webappPath string
 var indexPage string
+var currentUser *domain.User  // Use sessions for this
 
 type PageContent struct {
     MenuHtml    template.HTML
@@ -41,6 +43,13 @@ func WriteFailureResponse(w http.ResponseWriter, reason string) {
 	response := make(map[string]interface{})
 	response["success"] = false
 	response["reason"] = reason
+	fmt.Fprintf(w, Jsonify(response))
+	return
+}
+
+func WriteSuccessResponse(w http.ResponseWriter, response map[string]interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	response["success"] = true
 	fmt.Fprintf(w, Jsonify(response))
 	return
 }
@@ -125,11 +134,17 @@ func bootstrapBundleHandler(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse(w, "Failed to fetch user")
 		return
 	}
-
+	currentUser = user
 	data := make(map[string]interface{})
+	data["success"] = true
 	data["worldWidth"] = 5000
 	data["worldHeight"] = 5000
 	data["user"] = user.Publicize()
+	if len(user.ToonId) > 0 {
+		data["toon"] = domain.FetchToonById(user.ToonId)
+	} else {
+		data["toon"] = nil
+	}
 	fmt.Fprintf(w, Jsonify(data))
 }
 
@@ -140,6 +155,25 @@ func setDestinationHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Failed to decode request body\n\tErr: %s\n\tBody: %s", err, r.Body)
 	}
 	log.Print("args: ", args)
+	// currentUser.DestX = args["x"]
+	// currentUser.DestY = args["y"]
+}
+
+func setActiveToonHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var args map[string]bson.ObjectId
+	if err := decoder.Decode(&args); err != nil {
+		log.Print("[setActiveToonHandler] Failed to decode body: ", err)
+	}
+	log.Print("args: ", args)
+	if currentUser == nil {
+		log.Print("No current user!")
+		WriteFailureResponse(w, "No active user")
+		return
+	}
+	currentUser.ToonId = args["toonId"]
+	currentUser.Save()
+	WriteSuccessResponse(w, make(map[string]interface{}))
 }
 
 func adminNewToonHandler(w http.ResponseWriter, r *http.Request) {
@@ -190,6 +224,7 @@ func main() {
 	http.HandleFunc("/static/", assetsHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/api/destination", setDestinationHandler)
+	http.HandleFunc("/api/activetoon", setActiveToonHandler)
 	http.HandleFunc("/api/bootstrap", bootstrapBundleHandler)
 	http.HandleFunc("/api/admin/newtoon", adminNewToonHandler)
 	http.HandleFunc("/api/admin/alltoons", adminAllToonsHandler)

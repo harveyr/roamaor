@@ -30,40 +30,42 @@
   angular.module(DIRECTIVE_MODULE).directive('userFeedback', function() {
     var directive;
     return directive = {
-      template: "<div class=\"row-fluid\" ng-show=\"fbModel.html\">\n    <div class=\"span12 alert {{fbModel.alertClass}}\">\n        <span class=\"{{fbModel.iconClass}}\" ng-show=\"fbModel.iconClass\"></span>\n        <span ng-bind-html-unsafe=\"fbModel.html\"></span>\n    </div>\n</div>",
-      link: function(scope) {
-        var setFeedback;
-        scope.fbModel = {};
-        setFeedback = function(html, alertClass, iconClass) {
-          scope.fbModel.html = html;
-          scope.fbModel.alertClass = alertClass;
-          return scope.fbModel.iconClass = iconClass;
-        };
-        scope.$on('feedback', function(html, alertClass, iconClass) {
-          return setFeedback(html, alertClass, iconClass);
-        });
-        scope.$on('successFeedback', function(e, html) {
-          return setFeedback(html, 'alert-success', 'icon-thumbs-up');
-        });
-        scope.$on('errorFeedback', function(e, html) {
-          return setFeedback(html, 'alert-error', 'icon-exclamation-sign');
-        });
-        scope.$on('warnFeedback', function(e, html) {
-          return setFeedback(html, '', 'icon-info-sign');
-        });
-        return scope.$on('clearFeedback', function(e) {
-          return setFeedback(null, '', '');
-        });
-      }
+      replace: true,
+      template: "<div class=\"row\" ng-show=\"userAlert\">\n    <div class=\"small-12\">\n        <div data-alert class=\"alert-box\">\n            {{userAlert}}\n            <a href=\"#\" class=\"close\">&times;</a>\n        </div>\n    </div>\n</div>",
+      link: function(scope) {}
     };
   });
 
-  app = angular.module(APP_NAME, ["" + APP_NAME + ".directives"]).run(function($rootScope) {
-    return $rootScope.appName = "Roamoar";
+  app = angular.module(APP_NAME, ["" + APP_NAME + ".directives"]).run(function($rootScope, $http) {
+    $rootScope.appName = "Roamoar";
+    $rootScope.myToon = null;
+    $rootScope.alertUser = function(string) {
+      return $rootScope.userAlert = string;
+    };
+    $rootScope.setMyToon = function(toon) {
+      $rootScope.myToon = toon;
+      return $rootScope.$broadcast("myToonUpdated");
+    };
+    $http.get("/api/admin/alltoons").then(function(response) {
+      return $rootScope.allToons = response.data;
+    });
+    return $http.get("/api/bootstrap").then(function(response) {
+      if (!response.data.success) {
+        $rootScope.alertUser("Failed to fetch bootstrap bundle. (" + response.data.reason + ")");
+        return;
+      }
+      $rootScope.worldHeight = response.data.worldHeight;
+      $rootScope.worldWidth = response.data.worldWidth;
+      $rootScope.myUser = response.data.user;
+      console.log('$rootScope.myUser:', $rootScope.myUser);
+      if (response.data.toon) {
+        return $rootScope.setMyToon(response.data.toon);
+      }
+    });
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var fetchData, lineFunc, mapColor, myDest, myDestPath, renderToons, scaleX, scaleY, svg, toonRadius, toonSvgCoords, triFunc;
+    var lineFunc, mapColor, myDest, myDestPath, renderToon, scaleX, scaleY, svg, toonRadius, toonSvgCoords, triFunc;
     mapColor = "#E7E7E7";
     toonRadius = 5;
     scaleX = null;
@@ -79,11 +81,10 @@
     myDestPath = svg.append("path").attr("id", "my-dest-path");
     toonSvgCoords = function(toon) {
       return {
-        x: toon.locx + toonRadius,
-        y: svg.attr("height") - toon.locy - toonRadius
+        x: toon.LocX + toonRadius,
+        y: svg.attr("height") - toon.LocY - toonRadius
       };
     };
-    svg.append("image").attr("xlink:href", "/static/img/pin.png").attr("width", 20).attr("height", 20);
     $scope.mapClick = function($event) {
       var destPointData, destX, destY, height, lineData, postData, scaledDestX, scaledDestY, svgHeightScale, svgWidthScale, toon, toonCoords, width, yOffset;
       toon = $rootScope.myToon;
@@ -132,29 +133,23 @@
         return console.log('response:', response);
       });
     };
-    renderToons = function() {
-      var svgHeight;
-      console.log('rendering:', $rootScope.allToons);
+    renderToon = function() {
+      var coords, svgHeight, toon, toonLoc;
+      if (!$rootScope.myToon) {
+        throw "myToon not set";
+      }
       svgHeight = svg.attr("height");
-      return _.each($rootScope.allToons, function(toon, idx) {
-        var coords, toonLoc;
-        coords = toonSvgCoords(toon);
-        toonLoc = svg.append("circle").attr("id", "toon-" + toon._id).attr("cx", coords.x).attr("cy", coords.y).attr("r", toonRadius).style("fill", "#E7E7E7");
-        return toonLoc.transition().delay(500 + 20 * idx).style("fill", "#777");
-      });
+      toon = $rootScope.myToon;
+      coords = toonSvgCoords(toon);
+      toonLoc = svg.append("circle").attr("id", "toon-" + toon._id).attr("cx", coords.x).attr("cy", coords.y).attr("r", toonRadius).style("fill", "#E7E7E7");
+      return toonLoc.transition().delay(500).style("fill", "#777");
     };
-    fetchData = function() {
-      $http.get("/api/admin/alltoons").then(function(response) {
-        $rootScope.allToons = response.data;
-        $rootScope.myToon = $rootScope.allToons[0];
-        return renderToons();
-      });
-      return $http.get("/api/bootstrap").then(function(response) {
-        $rootScope.worldHeight = response.data.worldHeight;
-        return $rootScope.worldWidth = response.data.worldWidth;
-      });
-    };
-    return fetchData();
+    if ($rootScope.myToon) {
+      renderToon();
+    }
+    return $scope.$on("myToonUpdated", function() {
+      return renderToon();
+    });
   });
 
   angular.module(APP_NAME).config([
@@ -185,7 +180,15 @@
       });
     };
     return $scope.selectedToonChange = function(toon) {
-      return console.log('toon:', toon);
+      var data;
+      console.log('toon:', toon);
+      data = {
+        toonId: toon._id
+      };
+      $rootScope.setMyToon(toon);
+      return $http.post("/api/activetoon", data).then(function(response) {
+        return console.log('response:', response.status, response.data);
+      });
     };
   });
 

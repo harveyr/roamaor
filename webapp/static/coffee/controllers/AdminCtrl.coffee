@@ -11,4 +11,11 @@ angular.module(APP_NAME).controller 'AdminCtrl', ($scope, $rootScope, $http) ->
 
     $scope.selectedToonChange = (toon) ->
         console.log 'toon:', toon
+        data =
+            toonId: toon._id
+
+        $rootScope.setMyToon toon
+        $http.post("/api/activetoon", data).then (response) ->
+            console.log 'response:', response.status, response.data
+
         

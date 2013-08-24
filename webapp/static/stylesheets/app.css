@@ -5863,7 +5863,7 @@ label.error {
   border-style: solid;
   border-width: 1px;
   display: block;
-  font-weight: bold;
+  font-weight: normal;
   margin-bottom: 1.25em;
   position: relative;
   padding: 0.6875em 1.3125em 0.75em 0.6875em;

@@ -44,13 +44,13 @@ func NewUser(email string) *User {
 
 func FetchUser(email string) *User {
 	query := map[string]string{
-		"Email": email,
+		"email": strings.ToLower(email),
 	}
 	var user User
 	c := GetCollection(USER_COLLECTION)
 	err := c.Find(query).One(&user)
 	if err != nil {
-		log.Print("Failed to fetch user ", email)
+		log.Printf("Failed to fetch user %s (%s)", email, err)
 		return nil
 	}
 	return &user
@@ -67,4 +67,11 @@ func (u User) Publicize() map[string]interface{} {
 	m["_id"] = u.Id
 	m["toonid"] = u.ToonId
 	return m
+}
+
+func (u User) Save() {
+	c := GetCollection(USER_COLLECTION)
+	if err := c.UpdateId(u.Id, u); err != nil {
+		log.Printf("Failed to save user %s (%s)", u, err)
+	}
 }
