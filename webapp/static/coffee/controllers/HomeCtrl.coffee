@@ -7,8 +7,21 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     svg = d3.select("svg")
         .attr("height", 500)
-        .style("background-color", mapColor)
-        .style("box-shadow", "1px 1px 1px #999")
+        # .style("background-color", mapColor)
+        # .style("box-shadow", "1px 1px 1px #999")
+
+    svgHeight = parseInt(svg.style("height"))
+    svgWidth = parseInt(svg.style("width"))
+
+    $scope.mapStyle =
+        "background-size": "#{svgWidth}px #{svgHeight}px"
+    console.log '$scope.mapStyle:', $scope.mapStyle
+
+    # svg.append("image")
+    #     .attr("xlink:href", "/static/img/mapbg.png")
+    #     .attr("width", svgWidth)
+    #     .attr("height", svgHeight)
+
 
     lineFunc = d3.svg.line()
         .x((d) -> d.x)
@@ -33,11 +46,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             x: toon.LocX + toonRadius
             y: svg.attr("height") - toon.LocY - toonRadius
         }
-
-    # svg.append("image")
-    #     .attr("xlink:href", "/static/img/pin.png")
-    #     .attr("width", 20)
-    #     .attr("height", 20)
 
     $scope.mapClick = ($event) ->
         toon = $rootScope.myToon
@@ -69,7 +77,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         svg.append("path")
             .attr("id", "my-dest-point")
             .attr("d", lineFunc(destPointData))
-            .attr("stroke", "#555")
+            .attr("stroke", "white")
             .attr("stroke-width", 1)
             .attr("fill", "none")
             .attr("opacity", 0)
@@ -116,15 +124,15 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         coords = gameToMapCoords(toon.LocX, toon.LocY)
         coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1)
         coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2)
-        toonLoc = svg.append("circle")
-            .attr("id", "toon-#{toon._id}")
+
+        elemId = "toon-#{toon._id}"
+        d3.select(elemId).remove()
+        svg.append("circle")
+            .attr("id", elemId)
             .attr("cx", coords.x)
             .attr("cy", coords.y)
             .attr("r", toonRadius)
-            .style("fill", "#E7E7E7")
-        toonLoc.transition()
-            .delay(500)
-            .style("fill", "#777")
+            .style("fill", "#ccc")
 
     renderLocations = ->
         _.each $rootScope.displayedLocations, (loc, idx) ->
@@ -142,5 +150,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     $rootScope.$watch "displayedLocations", ->
         renderLocations()
 
-    $scope.$on "myToonUpdated", ->
-        renderToon()
+    $rootScope.$watch "myToon", ->
+        if $rootScope.myToon
+            renderToon()

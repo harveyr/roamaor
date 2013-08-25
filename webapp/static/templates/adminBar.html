@@ -16,6 +16,13 @@
         <div class="inbl">
             <button class="button tiny" ng-click="showAllLocs()">Show All Locs</button>
         </div>
+        <div class="inbl">
+            <button class="button tiny" ng-click="toggleAutoUpdate()">
+                Auto Update
+                <span ng-show="autoUpdate">On</span>
+                <span ng-show="!autoUpdate">Off</span>
+            </button>
+        </div>
 
     </div>
     <div id="admin-new-player-modal" class="reveal-modal small">

@@ -52,6 +52,7 @@ type Being struct {
 	LastTick  time.Time
 	Fights    int
 	FightsWon int
+	LocationsVisited []bson.ObjectId "omitempty"
 }
 
 func CanCreateToon(name string) bool {

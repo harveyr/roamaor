@@ -43,31 +43,41 @@
       return $rootScope.userAlert = string;
     };
     $rootScope.setMyToon = function(toon) {
-      $rootScope.myToon = toon;
-      return $rootScope.$broadcast("myToonUpdated");
+      if (!toon) {
+        throw "setMyToon received null toon";
+      }
+      return $rootScope.myToon = toon;
     };
-    return $http.get("/api/bootstrap").then(function(response) {
-      if (!response.data.success) {
-        $rootScope.alertUser("Failed to fetch bootstrap bundle. (" + response.data.reason + ")");
-        return;
-      }
-      $rootScope.worldHeight = response.data.worldHeight;
-      $rootScope.worldWidth = response.data.worldWidth;
-      $rootScope.myUser = response.data.user;
-      console.log('$rootScope.myUser:', $rootScope.myUser);
-      if (response.data.toon) {
-        return $rootScope.setMyToon(response.data.toon);
-      }
-    });
+    $rootScope.fetchBundle = function() {
+      return $http.get("/api/bootstrap").then(function(response) {
+        if (!response.data.success) {
+          $rootScope.alertUser("Failed to fetch bootstrap bundle. (" + response.data.reason + ")");
+          return;
+        }
+        $rootScope.worldHeight = response.data.worldHeight;
+        $rootScope.worldWidth = response.data.worldWidth;
+        $rootScope.myUser = response.data.user;
+        if (response.data.toon) {
+          return $rootScope.setMyToon(response.data.toon);
+        }
+      });
+    };
+    return $rootScope.fetchBundle();
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var gameToMapCoords, lineFunc, mapColor, mapToGameCoords, myDest, myDestPath, renderLocations, renderToon, scaleX, scaleY, svg, toonRadius, toonSvgCoords, triFunc;
+    var gameToMapCoords, lineFunc, mapColor, mapToGameCoords, myDest, myDestPath, renderLocations, renderToon, scaleX, scaleY, svg, svgHeight, svgWidth, toonRadius, toonSvgCoords, triFunc;
     mapColor = "#E7E7E7";
     toonRadius = 5;
     scaleX = null;
     scaleY = null;
-    svg = d3.select("svg").attr("height", 500).style("background-color", mapColor).style("box-shadow", "1px 1px 1px #999");
+    svg = d3.select("svg").attr("height", 500);
+    svgHeight = parseInt(svg.style("height"));
+    svgWidth = parseInt(svg.style("width"));
+    $scope.mapStyle = {
+      "background-size": "" + svgWidth + "px " + svgHeight + "px"
+    };
+    console.log('$scope.mapStyle:', $scope.mapStyle);
     lineFunc = d3.svg.line().x(function(d) {
       return d.x;
     }).y(function(d) {
@@ -117,7 +127,7 @@
       ];
       console.log('destPointData:', destPointData);
       d3.select("#my-dest-point").remove();
-      svg.append("path").attr("id", "my-dest-point").attr("d", lineFunc(destPointData)).attr("stroke", "#555").attr("stroke-width", 1).attr("fill", "none").attr("opacity", 0).transition().duration(600).attr("opacity", 1).attr("transform", "translate(0, " + yOffset + ")");
+      svg.append("path").attr("id", "my-dest-point").attr("d", lineFunc(destPointData)).attr("stroke", "white").attr("stroke-width", 1).attr("fill", "none").attr("opacity", 0).transition().duration(600).attr("opacity", 1).attr("transform", "translate(0, " + yOffset + ")");
       console.log('world size:', $rootScope.worldWidth, $rootScope.worldHeight);
       svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight;
       svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth;
@@ -154,7 +164,7 @@
       };
     };
     renderToon = function() {
-      var coords, svgHeight, toon, toonLoc;
+      var coords, elemId, toon;
       if (!$rootScope.myToon) {
         throw "myToon not set";
       }
@@ -163,8 +173,9 @@
       coords = gameToMapCoords(toon.LocX, toon.LocY);
       coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1);
       coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2);
-      toonLoc = svg.append("circle").attr("id", "toon-" + toon._id).attr("cx", coords.x).attr("cy", coords.y).attr("r", toonRadius).style("fill", "#E7E7E7");
-      return toonLoc.transition().delay(500).style("fill", "#777");
+      elemId = "toon-" + toon._id;
+      d3.select(elemId).remove();
+      return svg.append("circle").attr("id", elemId).attr("cx", coords.x).attr("cy", coords.y).attr("r", toonRadius).style("fill", "#ccc");
     };
     renderLocations = function() {
       return _.each($rootScope.displayedLocations, function(loc, idx) {
@@ -179,8 +190,10 @@
     $rootScope.$watch("displayedLocations", function() {
       return renderLocations();
     });
-    return $scope.$on("myToonUpdated", function() {
-      return renderToon();
+    return $rootScope.$watch("myToon", function() {
+      if ($rootScope.myToon) {
+        return renderToon();
+      }
     });
   });
 
@@ -199,8 +212,10 @@
     }
   ]);
 
-  angular.module(APP_NAME).controller('AdminCtrl', function($scope, $rootScope, $http) {
+  angular.module(APP_NAME).controller('AdminCtrl', function($scope, $rootScope, $http, $timeout) {
+    var updateData;
     $scope.admin = {};
+    $scope.autoUpdate = false;
     $scope.submitNewPlayer = function(name) {
       var data;
       console.log('name:', name);
@@ -213,7 +228,7 @@
     };
     $scope.selectedToonChange = function(toon) {
       var data;
-      console.log('toon:', toon);
+      console.log('selectedToonChange:', toon);
       data = {
         toonId: toon._id
       };
@@ -227,9 +242,24 @@
         return $rootScope.displayedLocations = response.data;
       });
     };
+    updateData = function() {
+      if (!$scope.autoUpdate) {
+        return;
+      }
+      $rootScope.fetchBundle();
+      return $timeout(function() {
+        return updateData();
+      }, 2000);
+    };
+    $scope.toggleAutoUpdate = function(auto) {
+      $scope.autoUpdate = !$scope.autoUpdate;
+      return updateData();
+    };
     return $http.get("/api/admin/alltoons").then(function(response) {
       $rootScope.allToons = response.data;
-      return $scope.admin.selectedToon = $rootScope.myToon.Id;
+      if ($rootScope.myToon) {
+        return $scope.admin.selectedToon = $rootScope.myToon.Id;
+      }
     });
   });
 
@@ -238,13 +268,15 @@
     return directive = {
       replace: true,
       scope: true,
-      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Hp: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n    </div>\n</div>",
+      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Hp: {{hp}} / {{maxHp}}\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n    </div>\n</div>",
       link: function(scope) {
         var applyToon;
         applyToon = function(toon) {
           scope.name = toon.Name;
           scope.locX = toon.LocX.toFixed(2);
           scope.locY = toon.LocY.toFixed(2);
+          scope.hp = toon.Hp;
+          scope.maxHp = toon.MaxHp;
           scope.fights = toon.Fights;
           scope.fightsWon = toon.FightsWon;
           scope.destX = toon.DestX.toFixed(2);
@@ -255,7 +287,9 @@
         }
         console.log('[toonSummary] $rootScope.myToon:', $rootScope.myToon);
         return $rootScope.$watch('myToon', function() {
-          return applyToon($rootScope.myToon);
+          if ($rootScope.myToon) {
+            return applyToon($rootScope.myToon);
+          }
         });
       }
     };

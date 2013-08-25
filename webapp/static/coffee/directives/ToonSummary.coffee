@@ -9,7 +9,7 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
                     <strong>{{name}}</strong>
                 </p>
                 <p>
-                    Hp: {{locX}}, {{locY}}
+                    Hp: {{hp}} / {{maxHp}}
                 </p>
                 <p>
                     Location: {{locX}}, {{locY}}
@@ -28,6 +28,8 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
                 scope.name = toon.Name
                 scope.locX = toon.LocX.toFixed(2)
                 scope.locY = toon.LocY.toFixed(2)
+                scope.hp = toon.Hp
+                scope.maxHp = toon.MaxHp
                 scope.fights = toon.Fights
                 scope.fightsWon = toon.FightsWon
                 scope.destX = toon.DestX.toFixed(2)
@@ -39,4 +41,5 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
             console.log '[toonSummary] $rootScope.myToon:', $rootScope.myToon
 
             $rootScope.$watch 'myToon', ->
-                applyToon $rootScope.myToon
+                if $rootScope.myToon
+                    applyToon $rootScope.myToon

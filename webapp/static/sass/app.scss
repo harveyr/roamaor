@@ -1,3 +1,5 @@
+@import "compass/css3/images";
+
 // Global Foundation Settings
 @import "settings";
 
@@ -100,22 +102,8 @@
 }
 
 $map-bg: #E7E7E7;
-.map {
-    background-color: $map-bg;
-    height: 500px;
-
-    .dest-marker {
-        width: 20px;
-        height: 30px;
-        background-color: #fff;
-        position: absolute;
-    }
-
-    .my-location {
-        width: 10px;
-        height: 10px;
-        background-color: $map-bg;
-        position: absolute;
-        border-radius: 5px;
-    }
+.game-map {
+    background-image:url("/static/img/mapbg.png");
+    background-repeat: no-repeat;
+    background-position: -3px 13px;
 }

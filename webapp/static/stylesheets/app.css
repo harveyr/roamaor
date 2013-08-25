@@ -7202,24 +7202,24 @@ a.th {
   max-width: 800px;
 }
 
-/* line 58, ../sass/app.scss */
+/* line 60, ../sass/app.scss */
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
 }
 
-/* line 62, ../sass/app.scss */
+/* line 64, ../sass/app.scss */
 .inbl {
   display: inline-block;
 }
 
-/* line 66, ../sass/app.scss */
+/* line 68, ../sass/app.scss */
 .god-wrapper {
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 40px;
 }
 
-/* line 74, ../sass/app.scss */
+/* line 76, ../sass/app.scss */
 .admin-wrapper {
   width: 100%;
   height: 40px;
@@ -7230,37 +7230,23 @@ a.th {
   color: #2ba6cb;
   padding: 8px 10px 8px 10px;
 }
-/* line 89, ../sass/app.scss */
+/* line 91, ../sass/app.scss */
 .admin-wrapper .title {
   display: inline-block;
   margin-right: 15px;
 }
-/* line 93, ../sass/app.scss */
+/* line 95, ../sass/app.scss */
 .admin-wrapper button {
   display: inline-block;
 }
-/* line 97, ../sass/app.scss */
+/* line 99, ../sass/app.scss */
 .admin-wrapper input {
   display: inline-block;
 }
 
-/* line 103, ../sass/app.scss */
-.map {
-  background-color: #e7e7e7;
-  height: 500px;
-}
-/* line 107, ../sass/app.scss */
-.map .dest-marker {
-  width: 20px;
-  height: 30px;
-  background-color: #fff;
-  position: absolute;
-}
-/* line 114, ../sass/app.scss */
-.map .my-location {
-  width: 10px;
-  height: 10px;
-  background-color: #e7e7e7;
-  position: absolute;
-  border-radius: 5px;
+/* line 105, ../sass/app.scss */
+.game-map {
+  background-image: url("/static/img/mapbg.png");
+  background-repeat: no-repeat;
+  background-position: -3px 13px;
 }
