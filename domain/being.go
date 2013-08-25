@@ -129,13 +129,6 @@ func (b *Being) String() (repr string) {
 	return
 }
 
-func (b Being) Save() {
-	c := GetCollection(BEING_COLLECTION)
-	if err := c.UpdateId(b.Id, b); err != nil {
-		log.Printf("Failed to save being %s (%s)", b, err)
-	}
-}
-
 func (b *Being) Speed() (speed float64) {
 	speed = float64(b.BaseSpeed) + float64(b.Level)
 	return
@@ -155,7 +148,6 @@ func (b *Being) TakeDamage(damage int) {
 
 func (b *Being) UpdateLastTick() {
 	b.LastTick = time.Now()
-	log.Print("updating LastTick: ", b.LastTick)
 	b.Save()
 }
 
@@ -163,9 +155,8 @@ func (b *Being) SinceLastTick() float64 {
 	if b.LastTick.IsZero() {
 		return 0
 	}
-	log.Print("sincelasttick b.LastTick: ", b.LastTick)
 	duration := time.Now().Sub(b.LastTick)
-	return float64(duration / time.Second)
+	return float64(duration) / float64(time.Second)
 }
 
 func (b Being) Delete() {
@@ -174,6 +165,18 @@ func (b Being) Delete() {
 	if err != nil {
 		log.Fatal("Failed to delete being %s (%s)", b, err)
 	}
+}
+
+func (b Being) Save() {
+	c := GetCollection(BEING_COLLECTION)
+	if err := c.UpdateId(b.Id, b); err != nil {
+		log.Printf("Failed to save being %s (%s)", b, err)
+	}
+}
+
+func (b *Being) Reload() {
+	c := GetCollection(BEING_COLLECTION)
+	c.FindId(b.Id).One(b)
 }
 
 func (b Being) IsToon() bool {

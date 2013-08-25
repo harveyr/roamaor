@@ -25,20 +25,9 @@ func main() {
 	for i := 0; i < ticks; i++ {
 		log.Printf("Starting tick %d / %d", i, ticks)
 		for _, toon := range toons {
+			toon.Reload()
 			domain.TickBeing(&toon)
 		}
 		time.Sleep(1 * time.Second)
 	}
-
-    // toon.SetBaseSpeed(1)
-    // l := NewLocation("Blarney", 50, 130, 5, 5)
-    // TickBeing(toon, 60)
-    // toon.Destination = l.Start
-    // TickBeing(toon, 60)
-
-    // w := NewWeapon(5)
-    // fmt.Printf("%s", w)
-
-    // mob := NewMob(1)
-    // Fight(mob, toon)
 }
