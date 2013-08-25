@@ -13,6 +13,9 @@
                 ng-options="toon.name for toon in allToons"
                 ng-change="selectedToonChange(admin.selectedToon)"></select>
         </div>
+        <div class="inbl">
+            <button class="button tiny" ng-click="showAllLocs()">Show All Locs</button>
+        </div>
 
     </div>
     <div id="admin-new-player-modal" class="reveal-modal small">

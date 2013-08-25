@@ -16,4 +16,5 @@ func TickBeing(b *Being) {
 
     Roam(b, tickTime)
 	b.UpdateLastTick()
+	log.Print("after b.UpdateLastTick(), last tick: ", b.LastTick)
 }

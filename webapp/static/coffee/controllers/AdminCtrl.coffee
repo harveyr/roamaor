@@ -18,4 +18,8 @@ angular.module(APP_NAME).controller 'AdminCtrl', ($scope, $rootScope, $http) ->
         $http.post("/api/activetoon", data).then (response) ->
             console.log 'response:', response.status, response.data
 
+
+    $scope.showAllLocs = ->
+        $http.get("/api/admin/alllocations").then (response) ->
+            $rootScope.displayedLocations = response.data
         

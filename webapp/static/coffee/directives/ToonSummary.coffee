@@ -9,6 +9,9 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
                     <strong>{{name}}</strong>
                 </p>
                 <p>
+                    Hp: {{locX}}, {{locY}}
+                </p>
+                <p>
                     Location: {{locX}}, {{locY}}
                 </p>
                 <p>

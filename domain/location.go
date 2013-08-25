@@ -3,52 +3,42 @@ package domain
 import (
     "fmt"
     "log"
-    "reflect"
+	"labix.org/v2/mgo/bson"
 )
 
-type Point struct {
-	X, Y float64
-}
+const (
+	WORLD_WIDTH = 600
+	WORLD_HEIGHT  = 600
+	LOCATION_COLLECTION = "locations"
+)
 
 type Location struct {
+	Id        bson.ObjectId "_id"
 	Name string
-	Start *Point
-    W, H uint16
+    CX, CY, W, H int
 }
 
-func PointFromMap(m map[string]interface{}) *Point {
-	p := Point{}
-	if val, ok := m["x"].(float64); ok {
-		p.X = val
-	} else {
-		t := reflect.TypeOf(m["x"])
-		log.Fatal("Failed to convert map[x]: ", m["x"], t)
+func NewLocation(name string, x int, y int, w int, h int) *Location {
+	c := GetCollection(LOCATION_COLLECTION)
+	l := &Location{Name: name, CX: x, CY: y, W: w, H: h}
+	l.Id = bson.NewObjectId()
+
+	if err := c.Insert(l); err != nil {
+		log.Printf("Failed to insert location %s (%s)", l, err)
 	}
-	if val, ok := m["y"].(float64); ok {
-		p.Y = val
-	} else {
-		log.Fatal("Failed to convert map[y]: ", m["y"])
-	}
-	return &p
-}
 
-func NewPoint(x float64, y float64) *Point {
-	return &Point{X: x, Y: y}
-}
-
-func NewLocation(name string, x uint16, y uint16, w uint16, h uint16) *Location {
-	l := &Location{Name: name, W: w, H: h}
-	l.Start = NewPoint(float64(x), float64(y))
 	return l
 }
 
 func (l *Location) String() (repr string) {
-    repr = fmt.Sprintf("<[Location] %s>", l.Name)
+    repr = fmt.Sprintf("<[Location] [%s] {%d, %d}>", l.Name, l.CX, l.CY)
     return
 }
 
-func (l *Location) Center() *Point {
-	x := l.Start.X + float64(l.W) / 2
-	y := l.Start.Y + float64(l.H) / 2
-	return NewPoint(x, y)
+func (l Location) Save() {
+	c := GetCollection(LOCATION_COLLECTION)
+	if err := c.UpdateId(l.Id, l); err != nil {
+		log.Printf("Failed to save location %s (%s)", l, err)
+	}
 }
+

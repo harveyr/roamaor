@@ -1,23 +1,34 @@
 package main
 
 import (
-    // "log"
-    // "fmt"
+    "log"
+    "flag"
     "time"
     "math/rand"
     "./domain"
 )
 
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
+	log.Print("Roamaor starting up ...")
 
+	var ticks int
+	flag.IntVar(&ticks, "t", 1, "number of ticks")
+	flag.Parse()
+
+	rand.Seed(time.Now().UTC().UnixNano())
+	log.Print("Initializing database...")
 	domain.InitDb("localhost", "roamaor")
+	log.Print("Initializing world...")
+	domain.InitWorldLocations()
 
 	toons := domain.FetchAllToons()
-	for _, toon := range toons {
-		domain.TickBeing(&toon)
+	for i := 0; i < ticks; i++ {
+		log.Printf("Starting tick %d / %d", i, ticks)
+		for _, toon := range toons {
+			domain.TickBeing(&toon)
+		}
+		time.Sleep(1 * time.Second)
 	}
-	// time.Sleep(1 * time.Second)
 
     // toon.SetBaseSpeed(1)
     // l := NewLocation("Blarney", 50, 130, 5, 5)

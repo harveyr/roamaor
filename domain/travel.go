@@ -12,10 +12,6 @@ func Distance(x1 float64, y1 float64, x2 float64, y2 float64) (d float64) {
 	return
 }
 
-func DistBetw(p1 *Point, p2 *Point) float64 {
-	return Distance(float64(p1.X), float64(p1.Y), float64(p2.X), float64(p2.Y))
-}
-
 func Roam(b *Being, time float64) {
     potentialDistance := math.Min(1, b.Speed() * time / 5)
 

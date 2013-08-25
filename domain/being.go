@@ -42,6 +42,7 @@ type Being struct {
 	Name      string
 	NameLower string
 	Level     int
+	MaxHp     int
 	Hp        int
 	LocX      float64
 	LocY      float64
@@ -72,6 +73,7 @@ func NewToon(name string) *Being {
 	b.Name = name
 	b.NameLower = strings.ToLower(name)
 	b.BeingType = BEING_TOON
+	b.MaxHp = 60
 	b.Hp = 60
 	b.BaseSpeed = 2
 
@@ -153,13 +155,15 @@ func (b *Being) TakeDamage(damage int) {
 
 func (b *Being) UpdateLastTick() {
 	b.LastTick = time.Now()
+	log.Print("updating LastTick: ", b.LastTick)
 	b.Save()
 }
 
-func (b Being) SinceLastTick() float64 {
+func (b *Being) SinceLastTick() float64 {
 	if b.LastTick.IsZero() {
 		return 0
 	}
+	log.Print("sincelasttick b.LastTick: ", b.LastTick)
 	duration := time.Now().Sub(b.LastTick)
 	return float64(duration / time.Second)
 }

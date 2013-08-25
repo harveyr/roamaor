@@ -137,8 +137,8 @@ func bootstrapBundleHandler(w http.ResponseWriter, r *http.Request) {
 	currentUser = user
 	data := make(map[string]interface{})
 	data["success"] = true
-	data["worldWidth"] = 5000
-	data["worldHeight"] = 5000
+	data["worldWidth"] = domain.WORLD_WIDTH
+	data["worldHeight"] = domain.WORLD_HEIGHT
 	data["user"] = user.Publicize()
 	if len(user.ToonId) > 0 {
 		data["toon"] = domain.FetchToonById(user.ToonId)
@@ -214,8 +214,16 @@ func adminAllToonsHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func main() {
+func adminAllLocsHandler(w http.ResponseWriter, r *http.Request) {
+	c := domain.GetCollection(domain.LOCATION_COLLECTION)
+	var result []domain.Location
+	c.Find(make(map[string]interface{})).All(&result)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, Jsonify(result))
+	return
+}
 
+func main() {
 	domain.InitDb("localhost", "roamaor")
 	defer domain.CloseSession()
 	
@@ -238,5 +246,6 @@ func main() {
 	http.HandleFunc("/api/bootstrap", bootstrapBundleHandler)
 	http.HandleFunc("/api/admin/newtoon", adminNewToonHandler)
 	http.HandleFunc("/api/admin/alltoons", adminAllToonsHandler)
+	http.HandleFunc("/api/admin/alllocations", adminAllLocsHandler)
 	http.ListenAndServe(":8080", nil)
 }

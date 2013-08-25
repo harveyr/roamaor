@@ -65,7 +65,7 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var lineFunc, mapColor, myDest, myDestPath, renderToon, scaleX, scaleY, svg, toonRadius, toonSvgCoords, triFunc;
+    var gameToMapCoords, lineFunc, mapColor, mapToGameCoords, myDest, myDestPath, renderLocations, renderToon, scaleX, scaleY, svg, toonRadius, toonSvgCoords, triFunc;
     mapColor = "#E7E7E7";
     toonRadius = 5;
     scaleX = null;
@@ -121,6 +121,7 @@
       console.log('destPointData:', destPointData);
       d3.select("#my-dest-point").remove();
       svg.append("path").attr("id", "my-dest-point").attr("d", lineFunc(destPointData)).attr("stroke", "#555").attr("stroke-width", 1).attr("fill", "none").attr("opacity", 0).transition().duration(600).attr("opacity", 1).attr("transform", "translate(0, " + yOffset + ")");
+      console.log('world size:', $rootScope.worldWidth, $rootScope.worldHeight);
       svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight;
       svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth;
       scaledDestX = destX / svgWidthScale;
@@ -137,6 +138,24 @@
         }
       });
     };
+    mapToGameCoords = function(inputX, inputY) {
+      var scaled, svgHeightScale, svgWidthScale;
+      svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth;
+      svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight;
+      return scaled = {
+        x: inputX / svgWidthScale,
+        y: inputY / svgHeightScale
+      };
+    };
+    gameToMapCoords = function(inputX, inputY) {
+      var scaled, svgHeightScale, svgWidthScale;
+      svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth;
+      svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight;
+      return scaled = {
+        x: inputX * svgWidthScale,
+        y: inputY * svgHeightScale
+      };
+    };
     renderToon = function() {
       var coords, svgHeight, toon, toonLoc;
       if (!$rootScope.myToon) {
@@ -144,13 +163,25 @@
       }
       svgHeight = svg.attr("height");
       toon = $rootScope.myToon;
-      coords = toonSvgCoords(toon);
+      coords = gameToMapCoords(toon.LocX, toon.LocY);
+      coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1);
+      coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2);
       toonLoc = svg.append("circle").attr("id", "toon-" + toon._id).attr("cx", coords.x).attr("cy", coords.y).attr("r", toonRadius).style("fill", "#E7E7E7");
       return toonLoc.transition().delay(500).style("fill", "#777");
+    };
+    renderLocations = function() {
+      return _.each($rootScope.displayedLocations, function(loc, idx) {
+        var coords;
+        coords = gameToMapCoords(loc.CX, loc.CY);
+        return svg.append("circle").attr("class", "world-location").attr("cx", coords.x).attr("cy", coords.y).attr("r", 5).style("fill", "blue");
+      });
     };
     if ($rootScope.myToon) {
       renderToon();
     }
+    $rootScope.$watch("displayedLocations", function() {
+      return renderLocations();
+    });
     return $scope.$on("myToonUpdated", function() {
       return renderToon();
     });
@@ -183,7 +214,7 @@
         return console.log('response:', response);
       });
     };
-    return $scope.selectedToonChange = function(toon) {
+    $scope.selectedToonChange = function(toon) {
       var data;
       console.log('toon:', toon);
       data = {
@@ -194,6 +225,11 @@
         return console.log('response:', response.status, response.data);
       });
     };
+    return $scope.showAllLocs = function() {
+      return $http.get("/api/admin/alllocations").then(function(response) {
+        return $rootScope.displayedLocations = response.data;
+      });
+    };
   });
 
   angular.module(DIRECTIVE_MODULE).directive("toonSummary", function($rootScope) {
@@ -201,7 +237,7 @@
     return directive = {
       replace: true,
       scope: true,
-      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n    </div>\n</div>",
+      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Hp: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n    </div>\n</div>",
       link: function(scope) {
         var applyToon;
         applyToon = function(toon) {
