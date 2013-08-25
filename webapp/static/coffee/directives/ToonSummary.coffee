@@ -20,6 +20,9 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
                 <p>
                     Fights Won: {{fightsWon}} / {{fights}}
                 </p>
+                <p>
+                    Locations Visited: {{myToon.LocationsVisited}}
+                </p>
             </div>
         </div>
         """

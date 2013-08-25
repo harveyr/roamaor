@@ -7249,4 +7249,8 @@ a.th {
   background-image: url("/static/img/mapbg.png");
   background-repeat: no-repeat;
   background-position: -3px 13px;
+  padding-left: 42px;
+  padding-top: 21px;
+  padding-right: 37px;
+  padding-bottom: 10px;
 }

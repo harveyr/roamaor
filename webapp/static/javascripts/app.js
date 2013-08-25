@@ -54,11 +54,13 @@
           $rootScope.alertUser("Failed to fetch bootstrap bundle. (" + response.data.reason + ")");
           return;
         }
+        console.log('bundle:', response.data);
         $rootScope.worldHeight = response.data.worldHeight;
         $rootScope.worldWidth = response.data.worldWidth;
         $rootScope.myUser = response.data.user;
         if (response.data.toon) {
-          return $rootScope.setMyToon(response.data.toon);
+          $rootScope.setMyToon(response.data.toon);
+          return $rootScope.locationsVisited = response.data.visited;
         }
       });
     };
@@ -66,16 +68,18 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var gameToMapCoords, lineFunc, mapColor, mapToGameCoords, myDest, myDestPath, renderLocations, renderToon, scaleX, scaleY, svg, svgHeight, svgWidth, toonRadius, toonSvgCoords, triFunc;
+    var gameToMapCoords, lineFunc, map, mapColor, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, scaleX, scaleY, svg, toonRadius, toonSvgCoords;
     mapColor = "#E7E7E7";
     toonRadius = 5;
     scaleX = null;
     scaleY = null;
     svg = d3.select("svg").attr("height", 500);
-    svgHeight = parseInt(svg.style("height"));
-    svgWidth = parseInt(svg.style("width"));
+    console.log('$(.game-map).height():', console.log('$(.game-map).width():', $(".game-map").width()));
+    map = $(".game-map");
+    mapWidth = map.width();
+    mapHeight = map.height();
     $scope.mapStyle = {
-      "background-size": "" + svgWidth + "px " + svgHeight + "px"
+      "background-size": "" + mapWidth + "px " + mapHeight + "px"
     };
     console.log('$scope.mapStyle:', $scope.mapStyle);
     lineFunc = d3.svg.line().x(function(d) {
@@ -83,67 +87,12 @@
     }).y(function(d) {
       return d.y;
     }).interpolate('linear');
-    triFunc = d3.svg.symbol().type("triangle-up");
-    myDest = svg.append("circle").attr("id", "my-dest").attr("cx", 0).attr("cy", 0).attr("r", 5).style("fill", mapColor);
     myDestPath = svg.append("path").attr("id", "my-dest-path");
     toonSvgCoords = function(toon) {
       return {
         x: toon.LocX + toonRadius,
         y: svg.attr("height") - toon.LocY - toonRadius
       };
-    };
-    $scope.mapClick = function($event) {
-      var destPointData, destX, destY, height, lineData, postData, scaledDestX, scaledDestY, svgHeightScale, svgWidthScale, toon, toonCoords, width, yOffset;
-      toon = $rootScope.myToon;
-      toonCoords = toonSvgCoords(toon);
-      destX = $event.offsetX;
-      destY = $event.offsetY;
-      lineData = [
-        {
-          x: toonCoords.x,
-          y: toonCoords.y
-        }, {
-          x: destX,
-          y: destY
-        }
-      ];
-      yOffset = 10;
-      width = 10;
-      height = 10;
-      destPointData = [
-        {
-          x: destX,
-          y: destY - yOffset
-        }, {
-          x: destX - width / 2,
-          y: destY - yOffset - height
-        }, {
-          x: destX + width / 2,
-          y: destY - yOffset - height
-        }, {
-          x: destX,
-          y: destY - yOffset
-        }
-      ];
-      console.log('destPointData:', destPointData);
-      d3.select("#my-dest-point").remove();
-      svg.append("path").attr("id", "my-dest-point").attr("d", lineFunc(destPointData)).attr("stroke", "white").attr("stroke-width", 1).attr("fill", "none").attr("opacity", 0).transition().duration(600).attr("opacity", 1).attr("transform", "translate(0, " + yOffset + ")");
-      console.log('world size:', $rootScope.worldWidth, $rootScope.worldHeight);
-      svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight;
-      svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth;
-      scaledDestX = destX / svgWidthScale;
-      scaledDestY = destY / svgHeightScale;
-      postData = {
-        x: scaledDestX,
-        y: scaledDestY
-      };
-      return $http.post("/api/destination", postData).then(function(response) {
-        if (response.data.success) {
-          return $rootScope.setMyToon(response.data.toon);
-        } else {
-          return $rootScope.alertUser("Failed to set destination: " + response.data.reason);
-        }
-      });
     };
     mapToGameCoords = function(inputX, inputY) {
       var scaled, svgHeightScale, svgWidthScale;
@@ -164,7 +113,7 @@
       };
     };
     renderToon = function() {
-      var coords, elemId, toon;
+      var coords, elemId, svgHeight, toon;
       if (!$rootScope.myToon) {
         throw "myToon not set";
       }
@@ -173,15 +122,55 @@
       coords = gameToMapCoords(toon.LocX, toon.LocY);
       coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1);
       coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2);
-      elemId = "toon-" + toon._id;
+      elemId = "toon-" + toon.Id;
       d3.select(elemId).remove();
       return svg.append("circle").attr("id", elemId).attr("cx", coords.x).attr("cy", coords.y).attr("r", toonRadius).style("fill", "#ccc");
     };
     renderLocations = function() {
       return _.each($rootScope.displayedLocations, function(loc, idx) {
         var coords;
-        coords = gameToMapCoords(loc.CX, loc.CY);
-        return svg.append("circle").attr("class", "world-location").attr("cx", coords.x).attr("cy", coords.y).attr("r", 5).style("fill", "blue");
+        console.log('loc:', loc);
+        coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2);
+        console.log('coords:', coords);
+        return svg.append("circle").attr("class", "world-location").attr("cx", coords.x).attr("cy", coords.y).attr("r", 5).attr("stroke-width", 1).attr("stroke", "blue");
+      });
+    };
+    renderDestination = function(destX, destY) {
+      var destPointData, height, width, yOffset;
+      yOffset = 10;
+      width = 10;
+      height = 10;
+      destPointData = [
+        {
+          x: destX,
+          y: destY - yOffset
+        }, {
+          x: destX - width / 2,
+          y: destY - yOffset - height
+        }, {
+          x: destX + width / 2,
+          y: destY - yOffset - height
+        }, {
+          x: destX,
+          y: destY - yOffset
+        }
+      ];
+      d3.select("#my-dest-point").remove();
+      return svg.append("path").attr("id", "my-dest-point").attr("d", lineFunc(destPointData)).attr("stroke", "white").attr("stroke-width", 1).attr("fill", "none").attr("opacity", 0).transition().duration(600).attr("opacity", 1).attr("transform", "translate(0, " + yOffset + ")");
+    };
+    $scope.mapClick = function($event) {
+      var destX, destY, postData;
+      destX = $event.offsetX;
+      destY = $event.offsetY;
+      renderDestination(destX, destY);
+      postData = mapToGameCoords(destX, destY);
+      console.log('postData:', postData);
+      return $http.post("/api/destination", postData).then(function(response) {
+        if (response.data.success) {
+          return $rootScope.setMyToon(response.data.toon);
+        } else {
+          return $rootScope.alertUser("Failed to set destination: " + response.data.reason);
+        }
       });
     };
     if ($rootScope.myToon) {
@@ -268,7 +257,7 @@
     return directive = {
       replace: true,
       scope: true,
-      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Hp: {{hp}} / {{maxHp}}\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n    </div>\n</div>",
+      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Hp: {{hp}} / {{maxHp}}\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n        <p>\n            Locations Visited: {{myToon.LocationsVisited}}\n        </p>\n    </div>\n</div>",
       link: function(scope) {
         var applyToon;
         applyToon = function(toon) {

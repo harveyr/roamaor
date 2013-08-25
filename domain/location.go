@@ -53,3 +53,15 @@ func FetchLocationsAt(x float64, y float64) []Location {
 	c.Find(query).All(&locs)
 	return locs
 }
+
+func FetchLocationsVisited(b *Being) []Location {
+	query := make(map[string]interface{})
+	query["_id"] = map[string][]bson.ObjectId{"$in": b.LocationsVisited}
+	var result []Location
+	c := GetCollection(LOCATION_COLLECTION)
+	if err := c.Find(query).All(&result); err != nil {
+		log.Print("Failed to fetch locations visited: ", err)
+		return make([]Location, 0)
+	}
+	return result
+}

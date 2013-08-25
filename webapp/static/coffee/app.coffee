@@ -18,10 +18,12 @@ app = angular.module(APP_NAME, [
                 $rootScope.alertUser "Failed to fetch bootstrap bundle. (#{response.data.reason})"
                 return
 
+            console.log 'bundle:', response.data
             $rootScope.worldHeight = response.data.worldHeight
             $rootScope.worldWidth = response.data.worldWidth
             $rootScope.myUser = response.data.user
             if response.data.toon 
                 $rootScope.setMyToon(response.data.toon)
+                $rootScope.locationsVisited = response.data.visited
 
     $rootScope.fetchBundle()

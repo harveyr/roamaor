@@ -13,7 +13,7 @@ func Distance(x1 float64, y1 float64, x2 float64, y2 float64) (d float64) {
 }
 
 func Roam(b *Being, time float64) {
-    potentialDistance := math.Min(1, b.Speed() * time / 5)
+    potentialDistance := b.Speed() * time / 60
 
     var xMove, yMove float64 = 0, 0
     xDiff := (b.DestX - b.LocX)
@@ -30,17 +30,29 @@ func Roam(b *Being, time float64) {
     } else if yDiff == 0 {
     	xMove = potentialDistance
     } else {
-    	totalDiff := xDiff + yDiff
-    	yMove = potentialDistance * yDiff / totalDiff
+    	totalDiff := math.Abs(xDiff) + math.Abs(yDiff)
+    	yMove = potentialDistance * math.Abs(yDiff) / totalDiff
     	xMove = potentialDistance - yMove
     }
 
-    yMove = math.Min(yMove, math.Abs(xDiff))
-    xMove = math.Min(xMove, math.Abs(yDiff))
+    if xDiff < 0 {
+    	xMove *= -1
+    }
+    if yDiff < 0 {
+    	yMove *= -1
+    }
+
+	log.Print("potentialDistance: ", potentialDistance)
+	log.Print("xMove: ", xMove)
+	log.Print("yMove: ", yMove)
+
 	b.LocX += xMove
 	b.LocY += yMove
-	b.Save()
+
 	log.Printf("\tlocation: {%f, %f}", b.LocX, b.LocY)
+	b.Save()
+	
+	UpdateLocationsVisited(b)
 }
 
 func UpdateLocationsVisited(b *Being) {

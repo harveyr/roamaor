@@ -156,7 +156,6 @@ func TestUpdateLocationsVisited(t *testing.T) {
 	toon.LocY = 10
 
 	UpdateLocationsVisited(toon)
-
 	if len(toon.LocationsVisited) > 0 {
 		log.Fatal("Toon should not have visited locations yet")
 	}

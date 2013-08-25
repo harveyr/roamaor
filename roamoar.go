@@ -12,7 +12,9 @@ func main() {
 	log.Print("Roamaor starting up ...")
 
 	var ticks int
+	var mult float64
 	flag.IntVar(&ticks, "t", 1, "number of ticks")
+	flag.Float64Var(&mult, "x", 1.0, "time multiplier")
 	flag.Parse()
 
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -26,8 +28,8 @@ func main() {
 		log.Printf("Starting tick %d / %d", i, ticks)
 		for _, toon := range toons {
 			toon.Reload()
-			domain.TickBeing(&toon)
+			domain.TickBeing(&toon, mult)
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Second / 2)
 	}
 }
