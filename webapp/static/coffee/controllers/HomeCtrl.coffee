@@ -10,12 +10,9 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         # .style("background-color", mapColor)
         # .style("box-shadow", "1px 1px 1px #999")
 
-    console.log '$(.game-map).height():', 
-    console.log '$(.game-map).width():', $(".game-map").width()
-
     map = $(".game-map")
     mapWidth = map.width()
-    mapHeight = map.height()
+    mapHeight = map.height() - 9
 
     $scope.mapStyle =
         "background-size": "#{mapWidth}px #{mapHeight}px"
@@ -25,7 +22,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     #     .attr("xlink:href", "/static/img/mapbg.png")
     #     .attr("width", svgWidth)
     #     .attr("height", svgHeight)
-
 
     lineFunc = d3.svg.line()
         .x((d) -> d.x)
@@ -65,27 +61,36 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1)
         coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2)
 
-        elemId = "toon-#{toon.Id}"
-        d3.select(elemId).remove()
-        svg.append("circle")
-            .attr("id", elemId)
-            .attr("cx", coords.x)
-            .attr("cy", coords.y)
-            .attr("r", toonRadius)
-            .style("fill", "#ccc")
+        console.log 'coords:', coords
+        svg.selectAll(".my-location")
+            .data([coords])
+            .enter()
+            .append("circle")
+            .attr("id", "my-location")
+            .attr("cx", (d) -> d.x)
+            .attr("cy", (d) -> d.y)
+            .attr("r", (d) -> 5)
+            .attr("r", (d) -> 5)
+            .attr("stroke", "white")
+            .attr("stroke-width", 1)
+            .style("fill", "none")
 
     renderLocations = ->
+        console.log 'renderLocations'
+        allCoords = []
         _.each $rootScope.displayedLocations, (loc, idx) ->
-            console.log 'loc:', loc
             coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2)
-            console.log 'coords:', coords
-            svg.append("circle")
-                .attr("class", "world-location")
-                .attr("cx", coords.x)
-                .attr("cy", coords.y)
-                .attr("r", 5)
-                .attr("stroke-width", 1)
-                .attr("stroke", "blue")
+            coords.id = loc.Id
+            allCoords.push coords
+
+        console.log 'allCoords:', allCoords
+        locations = svg.selectAll(".world-location").data(allCoords)
+        enter = locations.enter().append("circle")
+        console.log 'enter:', enter
+        enter.attr("id", (d) -> d.id)
+        enter.attr("cx", (d) -> d.x)
+        enter.attr("cy", (d) -> d.y)
+        enter.attr("r", 5)
 
     renderDestination = (destX, destY) ->
         yOffset = 10
@@ -134,4 +139,5 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     $rootScope.$watch "myToon", ->
         if $rootScope.myToon
+            renderLocations()
             renderToon()

@@ -60,7 +60,7 @@
         $rootScope.myUser = response.data.user;
         if (response.data.toon) {
           $rootScope.setMyToon(response.data.toon);
-          return $rootScope.locationsVisited = response.data.visited;
+          return $rootScope.displayedLocations = response.data.visited;
         }
       });
     };
@@ -74,10 +74,9 @@
     scaleX = null;
     scaleY = null;
     svg = d3.select("svg").attr("height", 500);
-    console.log('$(.game-map).height():', console.log('$(.game-map).width():', $(".game-map").width()));
     map = $(".game-map");
     mapWidth = map.width();
-    mapHeight = map.height();
+    mapHeight = map.height() - 9;
     $scope.mapStyle = {
       "background-size": "" + mapWidth + "px " + mapHeight + "px"
     };
@@ -113,7 +112,7 @@
       };
     };
     renderToon = function() {
-      var coords, elemId, svgHeight, toon;
+      var coords, svgHeight, toon;
       if (!$rootScope.myToon) {
         throw "myToon not set";
       }
@@ -122,18 +121,41 @@
       coords = gameToMapCoords(toon.LocX, toon.LocY);
       coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1);
       coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2);
-      elemId = "toon-" + toon.Id;
-      d3.select(elemId).remove();
-      return svg.append("circle").attr("id", elemId).attr("cx", coords.x).attr("cy", coords.y).attr("r", toonRadius).style("fill", "#ccc");
+      console.log('coords:', coords);
+      return svg.selectAll(".my-location").data([coords]).enter().append("circle").attr("id", "my-location").attr("cx", function(d) {
+        return d.x;
+      }).attr("cy", function(d) {
+        return d.y;
+      }).attr("r", function(d) {
+        return 5;
+      }).attr("r", function(d) {
+        return 5;
+      }).attr("stroke", "white").attr("stroke-width", 1).style("fill", "none");
     };
     renderLocations = function() {
-      return _.each($rootScope.displayedLocations, function(loc, idx) {
+      var allCoords, enter, locations;
+      console.log('renderLocations');
+      allCoords = [];
+      _.each($rootScope.displayedLocations, function(loc, idx) {
         var coords;
-        console.log('loc:', loc);
         coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2);
-        console.log('coords:', coords);
-        return svg.append("circle").attr("class", "world-location").attr("cx", coords.x).attr("cy", coords.y).attr("r", 5).attr("stroke-width", 1).attr("stroke", "blue");
+        coords.id = loc.Id;
+        return allCoords.push(coords);
       });
+      console.log('allCoords:', allCoords);
+      locations = svg.selectAll(".world-location").data(allCoords);
+      enter = locations.enter().append("circle");
+      console.log('enter:', enter);
+      enter.attr("id", function(d) {
+        return d.id;
+      });
+      enter.attr("cx", function(d) {
+        return d.x;
+      });
+      enter.attr("cy", function(d) {
+        return d.y;
+      });
+      return enter.attr("r", 5);
     };
     renderDestination = function(destX, destY) {
       var destPointData, height, width, yOffset;
@@ -181,6 +203,7 @@
     });
     return $rootScope.$watch("myToon", function() {
       if ($rootScope.myToon) {
+        renderLocations();
         return renderToon();
       }
     });

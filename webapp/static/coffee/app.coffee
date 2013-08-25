@@ -24,6 +24,6 @@ app = angular.module(APP_NAME, [
             $rootScope.myUser = response.data.user
             if response.data.toon 
                 $rootScope.setMyToon(response.data.toon)
-                $rootScope.locationsVisited = response.data.visited
+                $rootScope.displayedLocations = response.data.visited
 
     $rootScope.fetchBundle()
