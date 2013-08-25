@@ -5,10 +5,17 @@ import (
 	// "fmt"
 	"log"
 	"strings"
-	// "labix.org/v2/mgo/bson"
+	"labix.org/v2/mgo/bson"
 )
 
 const TESTDB = "roamaor_test"
+
+func DeleteDocument(collection string, id bson.ObjectId) {
+	c:= GetCollection(collection)
+	if err := c.RemoveId(id); err != nil {
+		log.Fatalf("Failed to delete %s %s", collection, id)
+	}
+}
 
 func InitTestDb() {
 	InitDb("localhost", TESTDB)
@@ -99,8 +106,8 @@ func TestCreateAndDeleteToon(t *testing.T) {
 		log.Fatalf("Toon.Level is %d (expected 1)", toon.Level)
 	}
 
-	fetched, err := FetchToonById(toon.Id)
-	if err != nil {
+	fetched := FetchToonById(toon.Id)
+	if fetched == nil {
 		log.Fatal("Failed fetch 1")
 	}
 	if fetched.Id != toon.Id {
@@ -111,10 +118,35 @@ func TestCreateAndDeleteToon(t *testing.T) {
 	}
 	
 	toon.Delete()
-	fetched, err = FetchToonById(toon.Id)
-	if err == nil {
+	fetched = FetchToonById(toon.Id)
+	if fetched != nil {
 		log.Fatal("Fetched deleted toon: ", fetched)
 	}
+}
+
+func TestFetchLocationsAt(t *testing.T) {
+	loc := NewLocation("TestLocation", 50, 100, 5, 5)
+	locs := FetchLocationsAt(20, 20)
+	if len(locs) > 0 {
+		log.Fatal("There should be no locations at {20, 20}")
+	}
+
+	locs = FetchLocationsAt(55, 105)
+	if len(locs) != 1 {
+		log.Fatal("There should be exactly one location at {55, 105}")
+	}
+
+	locs = FetchLocationsAt(55, 120)
+	if len(locs) != 0 {
+		log.Fatal("There should zero locations at {55, 120}")
+	}
+
+	locs = FetchLocationsAt(55, 105)
+	if len(locs) != 1 {
+		log.Fatal("There one location at {55, 105}")
+	}
+
+	DeleteDocument(LOCATION_COLLECTION, loc.Id)
 }
 
 // func TestFetchAllToons(t *testing.T) {

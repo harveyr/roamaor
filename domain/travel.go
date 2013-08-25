@@ -42,3 +42,8 @@ func Roam(b *Being, time float64) {
 	b.Save()
 	log.Printf("\tlocation: {%f, %f}", b.LocX, b.LocY)
 }
+
+
+func UpdateLocationsVisited(b *Being) {
+	
+}

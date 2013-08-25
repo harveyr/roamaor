@@ -92,6 +92,7 @@ func FetchToonById(id bson.ObjectId) (*Being) {
 	err := c.FindId(id).One(&b)
 	if err != nil {
 		log.Printf("Failed to fetch toon with id %s (%s)", id, err)
+		return nil
 	}
 	return &b
 }

@@ -15,12 +15,12 @@ const (
 type Location struct {
 	Id        bson.ObjectId "_id"
 	Name string
-    CX, CY, W, H int
+    X1, Y1, X2, Y2 int
 }
 
 func NewLocation(name string, x int, y int, w int, h int) *Location {
 	c := GetCollection(LOCATION_COLLECTION)
-	l := &Location{Name: name, CX: x, CY: y, W: w, H: h}
+	l := &Location{Name: name, X1: x, Y1: y, X2: x + w, Y2: y + h}
 	l.Id = bson.NewObjectId()
 
 	if err := c.Insert(l); err != nil {
@@ -31,7 +31,7 @@ func NewLocation(name string, x int, y int, w int, h int) *Location {
 }
 
 func (l *Location) String() (repr string) {
-    repr = fmt.Sprintf("<[Location] [%s] {%d, %d}>", l.Name, l.CX, l.CY)
+    repr = fmt.Sprintf("<[Location] [%s] {%d, %d}>", l.Name, l.X1, l.Y1)
     return
 }
 
@@ -42,3 +42,14 @@ func (l Location) Save() {
 	}
 }
 
+func FetchLocationsAt(x int, y int) []Location {
+	var locs []Location
+	query := make(map[string]interface{})
+	query["x1"] = map[string]int{"$lte": x}
+	query["x2"] = map[string]int{"$gte": x}
+	query["y1"] = map[string]int{"$lte": y}
+	query["y2"] = map[string]int{"$gte": y}
+	c := GetCollection(LOCATION_COLLECTION)
+	c.Find(query).All(&locs)
+	return locs
+}
