@@ -145,7 +145,36 @@ func TestFetchLocationsAt(t *testing.T) {
 	if len(locs) != 1 {
 		log.Fatal("There one location at {55, 105}")
 	}
+	DeleteDocument(LOCATION_COLLECTION, loc.Id)
+}
 
+func TestUpdateLocationsVisited(t *testing.T) {
+	toon := NewToon("Test Toon")
+	loc := NewLocation("Test Location", 100, 200, 10, 10)
+
+	toon.LocX = 10
+	toon.LocY = 10
+
+	UpdateLocationsVisited(toon)
+
+	if len(toon.LocationsVisited) > 0 {
+		log.Fatal("Toon should not have visited locations yet")
+	}
+
+	toon.LocX = 101
+	toon.LocY = 201
+
+	UpdateLocationsVisited(toon)
+	if len(toon.LocationsVisited) != 1 {
+		log.Fatal("Toon should have visited the test location")
+	}
+
+	UpdateLocationsVisited(toon)
+	if len(toon.LocationsVisited) != 1 {
+		log.Fatal("Toon has multiples in visited history")
+	}
+
+	DeleteDocument(BEING_COLLECTION, toon.Id)
 	DeleteDocument(LOCATION_COLLECTION, loc.Id)
 }
 

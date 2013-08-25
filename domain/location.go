@@ -42,13 +42,13 @@ func (l Location) Save() {
 	}
 }
 
-func FetchLocationsAt(x int, y int) []Location {
+func FetchLocationsAt(x float64, y float64) []Location {
 	var locs []Location
 	query := make(map[string]interface{})
-	query["x1"] = map[string]int{"$lte": x}
-	query["x2"] = map[string]int{"$gte": x}
-	query["y1"] = map[string]int{"$lte": y}
-	query["y2"] = map[string]int{"$gte": y}
+	query["x1"] = map[string]float64{"$lte": x}
+	query["x2"] = map[string]float64{"$gte": x}
+	query["y1"] = map[string]float64{"$lte": y}
+	query["y2"] = map[string]float64{"$gte": y}
 	c := GetCollection(LOCATION_COLLECTION)
 	c.Find(query).All(&locs)
 	return locs

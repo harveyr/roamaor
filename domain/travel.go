@@ -43,7 +43,22 @@ func Roam(b *Being, time float64) {
 	log.Printf("\tlocation: {%f, %f}", b.LocX, b.LocY)
 }
 
-
 func UpdateLocationsVisited(b *Being) {
-	
+	locs := FetchLocationsAt(b.LocX, b.LocY)
+	if len(locs) == 0 {
+		return
+	}
+	for _, loc := range locs {
+		inVisited := false
+		for _, visitedLoc := range b.LocationsVisited {
+			if visitedLoc == loc.Id {
+				inVisited = true
+				break
+			}
+		}
+		if !inVisited {
+			b.LocationsVisited = append(b.LocationsVisited, loc.Id)
+		}
+	}
+	b.Save()
 }
