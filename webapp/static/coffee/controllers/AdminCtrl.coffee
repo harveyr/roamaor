@@ -22,4 +22,8 @@ angular.module(APP_NAME).controller 'AdminCtrl', ($scope, $rootScope, $http) ->
     $scope.showAllLocs = ->
         $http.get("/api/admin/alllocations").then (response) ->
             $rootScope.displayedLocations = response.data
-        
+    
+    $http.get("/api/admin/alltoons").then (response) ->
+        $rootScope.allToons = response.data
+        $scope.admin.selectedToon = $rootScope.myToon.Id
+

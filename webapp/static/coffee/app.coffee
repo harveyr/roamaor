@@ -11,10 +11,6 @@ app = angular.module(APP_NAME, [
         $rootScope.myToon = toon
         $rootScope.$broadcast("myToonUpdated")
 
-    $http.get("/api/admin/alltoons").then (response) ->
-        $rootScope.allToons = response.data
-        # renderToons()
-
     $http.get("/api/bootstrap").then (response) ->
         if !response.data.success
             $rootScope.alertUser "Failed to fetch bootstrap bundle. (#{response.data.reason})"

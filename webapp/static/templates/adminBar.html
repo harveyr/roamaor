@@ -10,7 +10,7 @@
         </div>
         <div class="inbl">
             <select ng-model="admin.selectedToon"
-                ng-options="toon.name for toon in allToons"
+                ng-options="toon._id as toon.name for toon in allToons"
                 ng-change="selectedToonChange(admin.selectedToon)"></select>
         </div>
         <div class="inbl">

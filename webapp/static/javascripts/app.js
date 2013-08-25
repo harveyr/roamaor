@@ -46,9 +46,6 @@
       $rootScope.myToon = toon;
       return $rootScope.$broadcast("myToonUpdated");
     };
-    $http.get("/api/admin/alltoons").then(function(response) {
-      return $rootScope.allToons = response.data;
-    });
     return $http.get("/api/bootstrap").then(function(response) {
       if (!response.data.success) {
         $rootScope.alertUser("Failed to fetch bootstrap bundle. (" + response.data.reason + ")");
@@ -225,11 +222,15 @@
         return console.log('response:', response.status, response.data);
       });
     };
-    return $scope.showAllLocs = function() {
+    $scope.showAllLocs = function() {
       return $http.get("/api/admin/alllocations").then(function(response) {
         return $rootScope.displayedLocations = response.data;
       });
     };
+    return $http.get("/api/admin/alltoons").then(function(response) {
+      $rootScope.allToons = response.data;
+      return $scope.admin.selectedToon = $rootScope.myToon.Id;
+    });
   });
 
   angular.module(DIRECTIVE_MODULE).directive("toonSummary", function($rootScope) {
