@@ -10,6 +10,7 @@ import (
 const (
 	LOG_COLLECTION = "toonlogs"
 	LOG_FIGHT = iota
+	LOG_LOCATION_DISCOVERY = iota
 )
 
 type LogItem struct {
@@ -26,7 +27,7 @@ func (l *LogItem) String() (s string) {
 }
 
 func NewLogItem(b *Being, logType int) *LogItem {
-	if logType < LOG_FIGHT || logType > LOG_FIGHT {
+	if logType < LOG_FIGHT || logType > LOG_LOCATION_DISCOVERY {
 		panic(fmt.Sprintf("Invalid log type: %d", logType))
 	}
 

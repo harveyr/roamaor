@@ -70,6 +70,9 @@ func UpdateLocationsVisited(b *Being) {
 		}
 		if !inVisited {
 			b.LocationsVisited = append(b.LocationsVisited, loc.Id)
+			item := NewLogItem(b, LOG_LOCATION_DISCOVERY)
+			item.SetAttr("locationName", loc.Name)
+			item.Save()
 		}
 	}
 	b.Save()

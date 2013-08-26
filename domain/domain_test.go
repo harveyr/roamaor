@@ -150,7 +150,8 @@ func TestFetchLocationsAt(t *testing.T) {
 
 func TestUpdateLocationsVisited(t *testing.T) {
 	toon := NewToon("Test Toon")
-	loc := NewLocation("Test Location", 100, 200, 10, 10)
+	locationName := "Test Location"
+	loc := NewLocation(locationName, 100, 200, 10, 10)
 
 	toon.LocX = 10
 	toon.LocY = 10
@@ -166,6 +167,19 @@ func TestUpdateLocationsVisited(t *testing.T) {
 	UpdateLocationsVisited(toon)
 	if len(toon.LocationsVisited) != 1 {
 		t.Error("Toon should have visited the test location")
+	}
+
+	logItems := FetchToonLogs(toon)
+	if len(logItems) != 1 {
+		t.Errorf("Expected one location discovery log item. Found %d", len(logItems))
+	}
+	item := logItems[0]
+	logLocName, ok := item.Data["locationName"].(string)
+	if !ok {
+		t.Errorf("Failed to convert locationName in log item data: %s", item.Data)
+	}
+	if logLocName != locationName {
+		t.Errorf("logLocName (%s) != locationName %s", logLocName, locationName)
 	}
 
 	UpdateLocationsVisited(toon)
@@ -234,48 +248,18 @@ func TestFightLogUponVictory(t *testing.T) {
 	DeleteDocument(LOG_COLLECTION, item.Id)
 }
 
-// func TestFetchAllToons(t *testing.T) {
-// 	NewToon("TestFetchAllToons Toon 1")
-// 	NewToon("TestFetchAllToons Toon 2")
-// 	toons := FetchAllToons()
-// 	log.Print("toons: ", toons)
-// 	if len(toons) != 2 {
-// 		t.Error("Expected 2 toons. Fetched ", len(toons))
-// 	}
-// }
+func TestHit(t *testing.T) {
+	attacker := NewToon("Attacking Toon")
+	victim := NewToon("Defending Toon")
+	initialVictimHp := victim.Hp
 
-// func TestHit(t *testing.T) {
-// 	attacker := NewToon("Attacking Toon")
-// 	victim := NewToon("Defending Toon")
-// 	initialVictimHp := victim.Hp
+	Hit(attacker, victim)
 
-// 	Hit(attacker, victim)
-
-// 	if victim.Hp == initialVictimHp {
-// 		t.Errorf("Victim's hit points (%d) were not affected.", victim.Hp)
-// 	}
-// }
-
-// func TestFight(t *testing.T) {
-// 	for i := 0; i < 100; i++ {
-// 		attacker := NewToon("Attacking Toon")
-// 		victim := NewToon("Defending Toon")
-// 		initialVictimHp := victim.Hp
-// 		initialAttackerHp := attacker.Hp
-
-// 		winner := Fight(attacker, victim)
-
-// 		if winner == nil {
-// 			t.Errorf("No winner of fight between %s and %s", attacker, victim)
-// 		}
-
-// 		if (attacker.Hp > initialAttackerHp) {
-// 			t.Errorf("Attacker hp greater than initial: %d > %d", attacker.Hp, initialAttackerHp)
-// 		}
-// 		if (victim.Hp > initialVictimHp) {
-// 			t.Errorf("Victim hp greater than initial: %d > %d", victim.Hp, initialVictimHp)
-// 		}
-// 	}
-// }
+	if victim.Hp == initialVictimHp {
+		t.Errorf("Victim's hit points (%d) were not affected.", victim.Hp)
+	}
+	DeleteDocument(BEING_COLLECTION, attacker.Id)
+	DeleteDocument(BEING_COLLECTION, victim.Id)
+}
 
 
