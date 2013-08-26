@@ -80,7 +80,6 @@
     $scope.mapStyle = {
       "background-size": "" + mapWidth + "px " + mapHeight + "px"
     };
-    console.log('$scope.mapStyle:', $scope.mapStyle);
     lineFunc = d3.svg.line().x(function(d) {
       return d.x;
     }).y(function(d) {
@@ -112,29 +111,27 @@
       };
     };
     renderToon = function() {
-      var coords, svgHeight, toon;
+      var coords, myLoc, toon;
       if (!$rootScope.myToon) {
         throw "myToon not set";
       }
-      svgHeight = svg.attr("height");
       toon = $rootScope.myToon;
       coords = gameToMapCoords(toon.LocX, toon.LocY);
       coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1);
       coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2);
-      console.log('coords:', coords);
-      return svg.selectAll(".my-location").data([coords]).enter().append("circle").attr("id", "my-location").attr("cx", function(d) {
+      myLoc = svg.selectAll("#my-location").data([coords]);
+      myLoc.enter().append("circle");
+      myLoc.attr("id", "my-location").attr("cx", function(d) {
         return d.x;
       }).attr("cy", function(d) {
         return d.y;
       }).attr("r", function(d) {
         return 5;
-      }).attr("r", function(d) {
-        return 5;
       }).attr("stroke", "white").attr("stroke-width", 1).style("fill", "none");
+      return myLoc.exit().remove();
     };
     renderLocations = function() {
-      var allCoords, enter, locations;
-      console.log('renderLocations');
+      var allCoords, locations;
       allCoords = [];
       _.each($rootScope.displayedLocations, function(loc, idx) {
         var coords;
@@ -142,20 +139,13 @@
         coords.id = loc.Id;
         return allCoords.push(coords);
       });
-      console.log('allCoords:', allCoords);
-      locations = svg.selectAll(".world-location").data(allCoords);
-      enter = locations.enter().append("circle");
-      console.log('enter:', enter);
-      enter.attr("id", function(d) {
-        return d.id;
-      });
-      enter.attr("cx", function(d) {
-        return d.x;
-      });
-      enter.attr("cy", function(d) {
-        return d.y;
-      });
-      return enter.attr("r", 5);
+      locations = svg.selectAll(".world-location").data($rootScope.displayedLocations);
+      locations.enter().append("circle").attr("class", "world-location").attr("cx", function(d) {
+        return d.X1 + d.X2 / 2;
+      }).attr("cy", function(d) {
+        return d.Y1 + d.Y2 / 2;
+      }).attr("r", 5).attr("stroke", "blue").attr("stroke-width", 1).style("fill", "none");
+      return locations.exit().remove();
     };
     renderDestination = function(destX, destY) {
       var destPointData, height, width, yOffset;

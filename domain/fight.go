@@ -24,6 +24,10 @@ func AttackerSwings(round int, attacker *Being, victim *Being) bool {
 	return false;
 }
 
+func Heal(b *Being, seconds float64) {
+	newHp := b.Hp + seconds / 60
+}
+
 func Fight(attacker *Being, victim *Being) {
 	log.Printf("Fight! %s vs %s", attacker, victim)
 	rand.Seed(time.Now().UTC().UnixNano())

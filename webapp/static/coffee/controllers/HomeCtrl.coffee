@@ -16,7 +16,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     $scope.mapStyle =
         "background-size": "#{mapWidth}px #{mapHeight}px"
-    console.log '$scope.mapStyle:', $scope.mapStyle
 
     # svg.append("image")
     #     .attr("xlink:href", "/static/img/mapbg.png")
@@ -55,42 +54,50 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     renderToon = ->
         if !$rootScope.myToon
             throw "myToon not set"
-        svgHeight = svg.attr("height")
         toon = $rootScope.myToon
         coords = gameToMapCoords(toon.LocX, toon.LocY)
         coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1)
         coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2)
 
-        console.log 'coords:', coords
-        svg.selectAll(".my-location")
+        myLoc = svg.selectAll("#my-location")
             .data([coords])
-            .enter()
+        
+        myLoc.enter()
             .append("circle")
-            .attr("id", "my-location")
+        
+        myLoc.attr("id", "my-location")
             .attr("cx", (d) -> d.x)
             .attr("cy", (d) -> d.y)
-            .attr("r", (d) -> 5)
             .attr("r", (d) -> 5)
             .attr("stroke", "white")
             .attr("stroke-width", 1)
             .style("fill", "none")
+        
+        myLoc.exit().remove()
 
     renderLocations = ->
-        console.log 'renderLocations'
         allCoords = []
         _.each $rootScope.displayedLocations, (loc, idx) ->
             coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2)
             coords.id = loc.Id
             allCoords.push coords
 
-        console.log 'allCoords:', allCoords
-        locations = svg.selectAll(".world-location").data(allCoords)
-        enter = locations.enter().append("circle")
-        console.log 'enter:', enter
-        enter.attr("id", (d) -> d.id)
-        enter.attr("cx", (d) -> d.x)
-        enter.attr("cy", (d) -> d.y)
-        enter.attr("r", 5)
+        locations = svg.selectAll(".world-location")
+            .data($rootScope.displayedLocations)
+        
+        locations.enter()
+            .append("circle")
+            .attr("class", "world-location")
+            .attr("cx", (d) -> d.X1 + d.X2 / 2)
+            .attr("cy", (d) -> d.Y1 + d.Y2 / 2)
+            .attr("r", 5)
+            .attr("stroke", "blue")
+            .attr("stroke-width", 1)
+            .style("fill", "none")
+        
+        locations.exit()
+            .remove()
+
 
     renderDestination = (destX, destY) ->
         yOffset = 10
