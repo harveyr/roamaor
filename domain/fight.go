@@ -32,11 +32,28 @@ func Heal(b *Being, seconds float64) {
 	b.Save()
 }
 
+func LogFight(fighter *Being, opponent *Being, victor bool) {
+	if !fighter.IsToon() {
+		// Don't bother logging fights for no-toons
+		return
+	}
+
+	fighter.Fights += 1
+	if victor {
+		fighter.FightsWon += 1
+	}
+	fighter.Save()
+	
+	item := NewLogItem(fighter, LOG_FIGHT)
+	item.SetAttr("victor", victor)
+	item.SetAttr("opponentName", opponent.Name)
+	item.SetAttr("opponentLevel", opponent.Level)
+	item.Save()
+}
+
 func Fight(attacker *Being, victim *Being) {
 	log.Printf("Fight! %s vs %s", attacker, victim)
 	rand.Seed(time.Now().UTC().UnixNano())
-	attacker.Fights += 1
-	victim.Fights += 1
 	round := 0
 	for {
 		if AttackerSwings(round, attacker, victim) {
@@ -53,18 +70,19 @@ func Fight(attacker *Being, victim *Being) {
 		}
 	}
 
+	var victor *Being
 	if attacker.Hp <= 0 {
-		victim.FightsWon += 1
+		victor = victim
 	} else if victim.Hp <= 0 {
-		attacker.FightsWon += 1
+		victor = attacker
 	} else {
 		log.Fatal("[Fight] Couldn't determine winner")
 	}
 	if attacker.IsToon() {
-		attacker.Save()
+		LogFight(attacker, victim, victor == attacker)
 	}
 	if victim.IsToon() {
-		victim.Save()
+		LogFight(victim, attacker, victor == victim)
 	}
 	return
 }

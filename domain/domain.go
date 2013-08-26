@@ -7,7 +7,6 @@ import (
 	"math"
 	"math/rand"
 	"labix.org/v2/mgo/bson"
-
 )
 
 type MongoDocInterface interface {

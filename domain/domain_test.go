@@ -21,7 +21,7 @@ func InitTestDb() {
 	InitDb("localhost", TESTDB)
 	err := _db.DropDatabase()
 	if err != nil {
-		log.Fatal("Failed to wipe db")
+		log.Fatalf("Failed to wipe db")
 	}
 }
 
@@ -69,7 +69,7 @@ func TestDiceRoll(t *testing.T) {
 	uniqueCount := 0
 	rolls := make([]int, attempts)
 	for i := 0; i < attempts; i++ {
-		d := NewDiceRoll(2, 6, 2)
+	d := NewDiceRoll(2, 6, 2)
 		roll := d.Roll()
 		if roll < 4 || roll > 14 {
 			t.Errorf("Invalid roll result for %s: %d", d, roll)
@@ -96,31 +96,31 @@ func TestCreateAndDeleteToon(t *testing.T) {
 	name := "TestNewToon Toon"
 	toon := NewToon(name)
 	if toon.Name != name {
-		log.Fatalf("Toon name does not match input: (%s != %s)", name, toon.Name)
+		t.Errorf("Toon name does not match input: (%s != %s)", name, toon.Name)
 	}
 	if toon.NameLower != strings.ToLower(name) {
-		log.Fatal("Toon NameLower does not match input")
+		t.Error("Toon NameLower does not match input")
 	}
 
 	if toon.Level != 1 {
-		log.Fatalf("Toon.Level is %d (expected 1)", toon.Level)
+		t.Errorf("Toon.Level is %d (expected 1)", toon.Level)
 	}
 
 	fetched := FetchToonById(toon.Id)
 	if fetched == nil {
-		log.Fatal("Failed fetch 1")
+		t.Error("Failed fetch 1")
 	}
 	if fetched.Id != toon.Id {
-		log.Fatal("Id mismatch")
+		t.Error("Id mismatch")
 	}
 	if fetched.Name != toon.Name {
-		log.Fatal("Name mismatch")
+		t.Error("Name mismatch")
 	}
 	
 	toon.Delete()
 	fetched = FetchToonById(toon.Id)
 	if fetched != nil {
-		log.Fatal("Fetched deleted toon: ", fetched)
+		t.Error("Fetched deleted toon: ", fetched)
 	}
 }
 
@@ -128,22 +128,22 @@ func TestFetchLocationsAt(t *testing.T) {
 	loc := NewLocation("TestLocation", 50, 100, 5, 5)
 	locs := FetchLocationsAt(20, 20)
 	if len(locs) > 0 {
-		log.Fatal("There should be no locations at {20, 20}")
+		t.Error("There should be no locations at {20, 20}")
 	}
 
 	locs = FetchLocationsAt(55, 105)
 	if len(locs) != 1 {
-		log.Fatal("There should be exactly one location at {55, 105}")
+		t.Error("There should be exactly one location at {55, 105}")
 	}
 
 	locs = FetchLocationsAt(55, 120)
 	if len(locs) != 0 {
-		log.Fatal("There should zero locations at {55, 120}")
+		t.Error("There should zero locations at {55, 120}")
 	}
 
 	locs = FetchLocationsAt(55, 105)
 	if len(locs) != 1 {
-		log.Fatal("There one location at {55, 105}")
+		t.Error("There one location at {55, 105}")
 	}
 	DeleteDocument(LOCATION_COLLECTION, loc.Id)
 }
@@ -157,7 +157,7 @@ func TestUpdateLocationsVisited(t *testing.T) {
 
 	UpdateLocationsVisited(toon)
 	if len(toon.LocationsVisited) > 0 {
-		log.Fatal("Toon should not have visited locations yet")
+		t.Error("Toon should not have visited locations yet")
 	}
 
 	toon.LocX = 101
@@ -165,12 +165,12 @@ func TestUpdateLocationsVisited(t *testing.T) {
 
 	UpdateLocationsVisited(toon)
 	if len(toon.LocationsVisited) != 1 {
-		log.Fatal("Toon should have visited the test location")
+		t.Error("Toon should have visited the test location")
 	}
 
 	UpdateLocationsVisited(toon)
 	if len(toon.LocationsVisited) != 1 {
-		log.Fatal("Toon has multiples in visited history")
+		t.Error("Toon has multiples in visited history")
 	}
 
 	DeleteDocument(BEING_COLLECTION, toon.Id)
@@ -188,10 +188,49 @@ func TestEarnedLevel(t *testing.T) {
 func TestCreateAndFetchLogItem(t *testing.T) {
 	toon := NewToon("Test Toon")
 	item := NewLogItem(toon, LOG_FIGHT)
+	victim := "Barney"
+
+	item.SetAttr("victim", victim)
+	item.Save()
+
 	fetched := FetchToonLogs(toon)
 	if len(fetched) != 1 {
-		log.Fatalf("Failed to fetch the log created item: %s", fetched)
+		t.Errorf("Failed to fetch the log created item: %s", fetched)
 	}
+	if fetched[0].LogType != LOG_FIGHT {
+		t.Errorf("Fetched log item had type %d. Expected %d.", fetched[0].LogType, LOG_FIGHT)
+	}
+	if fetched[0].Data["victim"] != victim {
+		t.Errorf("Fetched log item had victim %s. Expected %s.", fetched[0].Data["victim"], victim)
+	}
+	DeleteDocument(BEING_COLLECTION, toon.Id)
+	DeleteDocument(LOG_COLLECTION, item.Id)
+}
+
+func TestFightLogUponVictory(t *testing.T) {
+	toon := NewToon("Test Toon")
+	mob := NewMob(toon.Level)
+	toon.Hp = 9999999
+	Fight(toon, mob)
+
+	logItems := FetchToonLogs(toon)
+	if len(logItems) != 1 {
+		t.Errorf("Expected one fight log item. Found %d items", len(logItems))
+		return
+	}
+	item := logItems[0]
+	if item.LogType != LOG_FIGHT {
+		t.Errorf("Expected fight log item (type %d). Found type %d", LOG_FIGHT, item.LogType)
+	}
+	logMobName, ok := item.Data["opponentName"].(string)
+	if !ok {
+		t.Errorf("Unable to retrieve opponentName from log item data: %s", item.Data)
+	}
+	if logMobName != mob.Name {
+		t.Errorf("opponentName (%s) != mob.Name (%s)", logMobName, mob.Name)
+	}
+
+	DeleteDocument(BEING_COLLECTION, toon.Id)
 	DeleteDocument(LOG_COLLECTION, item.Id)
 }
 
@@ -201,7 +240,7 @@ func TestCreateAndFetchLogItem(t *testing.T) {
 // 	toons := FetchAllToons()
 // 	log.Print("toons: ", toons)
 // 	if len(toons) != 2 {
-// 		log.Fatal("Expected 2 toons. Fetched ", len(toons))
+// 		t.Error("Expected 2 toons. Fetched ", len(toons))
 // 	}
 // }
 

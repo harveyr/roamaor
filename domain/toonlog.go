@@ -16,12 +16,12 @@ type LogItem struct {
 	Id bson.ObjectId "_id"
 	ToonId bson.ObjectId `bson:"toonid,omitempty"` 
 	LogType int
-	data map[string]interface{}
+	Data map[string]interface{}
 	Created time.Time
 }
 
 func (l *LogItem) String() (s string) {
-	s = fmt.Sprintf("<LogItem [Toon %s] [Type %d]>", l.ToonId, l.LogType)
+	s = fmt.Sprintf("<LogItem %s [Toon %s] [Type %d]>", l.Id, l.ToonId, l.LogType)
 	return
 }
 
@@ -35,13 +35,20 @@ func NewLogItem(b *Being, logType int) *LogItem {
 	l.ToonId = b.Id
 	l.LogType = logType
 	l.Created = time.Now().UTC()
+	l.Data = nil
 
 	c := GetCollection(LOG_COLLECTION)
-	err := c.Insert(l)
-	if err != nil {
+	if err := c.Insert(l); err != nil {
 		log.Fatalf("[NewLogItem] Failed to insert log item: %s (%s) ", l, err)
 	}
 	return l
+}
+
+func (l *LogItem) SetAttr(key string, val interface{}) {
+	if l.Data == nil {
+		l.Data = make(map[string]interface{})
+	}
+	l.Data[key] = val
 }
 
 func FetchToonLogs(toon *Being) (result []LogItem) {
@@ -53,9 +60,9 @@ func FetchToonLogs(toon *Being) (result []LogItem) {
 	return result
 }
 
-func (o LogItem) Save() {
-	c := GetCollection(BEING_COLLECTION)
-	if err := c.UpdateId(o.Id, o); err != nil {
+func (o *LogItem) Save() {
+	c := GetCollection(LOG_COLLECTION)
+	if err := c.UpdateId(o.Id, &o); err != nil {
 		log.Printf("Failed to save log item %s (%s)", o, err)
 	}
 }
