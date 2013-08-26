@@ -4,6 +4,7 @@ import (
 	"log"
 	// "fmt"
 	"time"
+	"math"
 	"math/rand"
 )
 
@@ -25,7 +26,10 @@ func AttackerSwings(round int, attacker *Being, victim *Being) bool {
 }
 
 func Heal(b *Being, seconds float64) {
-	newHp := b.Hp + seconds / 60
+	newHp := b.Hp + int(math.Ceil(seconds / 60))
+	log.Printf("Hp: %d -> %d", b.Hp, newHp)
+	b.Hp = newHp
+	b.Save()
 }
 
 func Fight(attacker *Being, victim *Being) {

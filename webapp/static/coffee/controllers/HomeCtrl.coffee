@@ -77,6 +77,10 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     renderLocations = ->
         allCoords = []
+
+        if !$rootScope.displayedLocations or $rootScope.displayedLocations.length == 0 
+            return
+
         _.each $rootScope.displayedLocations, (loc, idx) ->
             coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2)
             coords.id = loc.Id

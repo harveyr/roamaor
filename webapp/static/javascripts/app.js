@@ -133,6 +133,9 @@
     renderLocations = function() {
       var allCoords, locations;
       allCoords = [];
+      if (!$rootScope.displayedLocations || $rootScope.displayedLocations.length === 0) {
+        return;
+      }
       _.each($rootScope.displayedLocations, function(loc, idx) {
         var coords;
         coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2);
@@ -228,13 +231,15 @@
         return console.log('response:', response);
       });
     };
-    $scope.selectedToonChange = function(toon) {
+    $scope.selectedToonChange = function(toonId) {
       var data;
-      console.log('selectedToonChange:', toon);
       data = {
-        toonId: toon._id
+        toonId: toonId
       };
-      $rootScope.setMyToon(toon);
+      $rootScope.myToon = _.findWhere($rootScope.allToons, {
+        "_id": toonId
+      });
+      console.log('$rootScope.myToon:', $rootScope.myToon);
       return $http.post("/api/activetoon", data).then(function(response) {
         return console.log('response:', response.status, response.data);
       });
@@ -259,6 +264,7 @@
     };
     return $http.get("/api/admin/alltoons").then(function(response) {
       $rootScope.allToons = response.data;
+      console.log('$rootScope.allToons:', $rootScope.allToons);
       if ($rootScope.myToon) {
         return $scope.admin.selectedToon = $rootScope.myToon.Id;
       }
@@ -270,15 +276,17 @@
     return directive = {
       replace: true,
       scope: true,
-      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Hp: {{hp}} / {{maxHp}}\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n        <p>\n            Locations Visited: {{myToon.LocationsVisited}}\n        </p>\n    </div>\n</div>",
+      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Level {{level}}\n        </p>\n        <p>\n            Hp: {{hp}} / {{maxHp}}\n            <div class=\"progress\"><span class=\"meter\" style=\"width: {{hpPercentage}}%\"></span></div>\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n        <p>\n            Locations Visited: {{myToon.LocationsVisited}}\n        </p>\n    </div>\n</div>",
       link: function(scope) {
         var applyToon;
         applyToon = function(toon) {
           scope.name = toon.Name;
+          scope.level = toon.Level;
           scope.locX = toon.LocX.toFixed(2);
           scope.locY = toon.LocY.toFixed(2);
           scope.hp = toon.Hp;
           scope.maxHp = toon.MaxHp;
+          scope.hpPercentage = toon.Hp / toon.MaxHp * 100;
           scope.fights = toon.Fights;
           scope.fightsWon = toon.FightsWon;
           scope.destX = toon.DestX.toFixed(2);

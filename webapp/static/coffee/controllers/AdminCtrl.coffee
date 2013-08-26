@@ -10,12 +10,12 @@ angular.module(APP_NAME).controller 'AdminCtrl', ($scope, $rootScope, $http, $ti
             console.log 'response:', response
 
 
-    $scope.selectedToonChange = (toon) ->
-        console.log 'selectedToonChange:', toon
+    $scope.selectedToonChange = (toonId) ->
         data =
-            toonId: toon._id
+            toonId: toonId
 
-        $rootScope.setMyToon toon
+        $rootScope.myToon = _.findWhere $rootScope.allToons, {"_id": toonId}
+        console.log '$rootScope.myToon:', $rootScope.myToon
         $http.post("/api/activetoon", data).then (response) ->
             console.log 'response:', response.status, response.data
 
@@ -37,6 +37,7 @@ angular.module(APP_NAME).controller 'AdminCtrl', ($scope, $rootScope, $http, $ti
 
     $http.get("/api/admin/alltoons").then (response) ->
         $rootScope.allToons = response.data
+        console.log '$rootScope.allToons:', $rootScope.allToons
         if $rootScope.myToon
             $scope.admin.selectedToon = $rootScope.myToon.Id
 

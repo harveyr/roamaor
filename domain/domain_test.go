@@ -2,7 +2,7 @@ package domain
 
 import (
 	"testing"
-	// "fmt"
+	"time"
 	"log"
 	"strings"
 	"labix.org/v2/mgo/bson"
@@ -175,6 +175,14 @@ func TestUpdateLocationsVisited(t *testing.T) {
 
 	DeleteDocument(BEING_COLLECTION, toon.Id)
 	DeleteDocument(LOCATION_COLLECTION, loc.Id)
+}
+
+func TestEarnedLevel(t *testing.T) {
+	createdDate := time.Now().UTC().AddDate(0, -1, 0)
+	toon := NewToon("Test Toon")
+	toon.Created = createdDate
+	EarnedLevel(toon)
+	DeleteDocument(BEING_COLLECTION, toon.Id)
 }
 
 // func TestFetchAllToons(t *testing.T) {

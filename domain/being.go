@@ -39,6 +39,8 @@ var mobNames = []string{
 type Being struct {
 	Id        bson.ObjectId "_id"
 	BeingType int
+	LastTick  time.Time
+	Created   time.Time
 	Name      string
 	NameLower string
 	Level     int
@@ -49,7 +51,6 @@ type Being struct {
 	DestX     float64
 	DestY     float64
 	BaseSpeed int
-	LastTick  time.Time
 	Fights    int
 	FightsWon int
 	LocationsVisited []bson.ObjectId "omitempty"
@@ -77,6 +78,7 @@ func NewToon(name string) *Being {
 	b.MaxHp = 60
 	b.Hp = 60
 	b.BaseSpeed = 2
+	b.Created = time.Now().UTC()
 
 	c := GetCollection(BEING_COLLECTION)
 	err := c.Insert(b)
@@ -123,6 +125,7 @@ func NewMob(level int) *Being {
 	b.Level = level
 	b.Hp = 20 + 10 * level
 	b.BeingType = BEING_MOB
+	b.Created = time.Now().UTC()
 	return b
 }
 

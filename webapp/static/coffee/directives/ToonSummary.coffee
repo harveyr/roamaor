@@ -9,7 +9,11 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
                     <strong>{{name}}</strong>
                 </p>
                 <p>
+                    Level {{level}}
+                </p>
+                <p>
                     Hp: {{hp}} / {{maxHp}}
+                    <div class="progress"><span class="meter" style="width: {{hpPercentage}}%"></span></div>
                 </p>
                 <p>
                     Location: {{locX}}, {{locY}}
@@ -29,10 +33,12 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
         link: (scope) ->
             applyToon = (toon) ->
                 scope.name = toon.Name
+                scope.level = toon.Level
                 scope.locX = toon.LocX.toFixed(2)
                 scope.locY = toon.LocY.toFixed(2)
                 scope.hp = toon.Hp
                 scope.maxHp = toon.MaxHp
+                scope.hpPercentage = toon.Hp / toon.MaxHp * 100
                 scope.fights = toon.Fights
                 scope.fightsWon = toon.FightsWon
                 scope.destX = toon.DestX.toFixed(2)

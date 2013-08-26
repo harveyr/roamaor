@@ -177,7 +177,7 @@ func setActiveToonHandler(w http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&args); err != nil {
 		log.Print("[setActiveToonHandler] Failed to decode body: ", err)
 	}
-	log.Print("args: ", args)
+	log.Print("setActiveToonHandler args: ", args)
 	if currentUser == nil {
 		log.Print("No current user!")
 		WriteFailureResponse(w, "No active user")
