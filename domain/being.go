@@ -26,6 +26,7 @@ var mobNames = []string{
 	"Rhododendron",
 	"Danish",
 	"Spore",
+	"Ringworm",
 	"Cranapple",
 	"Self-Reflection",
 	"Cuddlefuzz",
@@ -55,6 +56,7 @@ type Being struct {
 	Fights    int
 	FightsWon int
 	LocationsVisited []bson.ObjectId "omitempty"
+	Weapon	  Weapon
 }
 
 func CanCreateToon(name string) bool {

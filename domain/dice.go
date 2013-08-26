@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 )
 
@@ -30,4 +31,11 @@ func NewDiceRoll(num int, sides int, mod int) *DiceRoll {
 	d.Sides = sides
 	d.Modifier = mod
 	return d
+}
+
+func LevelDiceRoll(level int) *DiceRoll {
+	num := int(math.Ceil(float64(level) / 5))
+	sides := 6
+	mod := rand.Intn(int(math.Ceil(float64(level) / 10)))
+	return &DiceRoll{Num: num, Sides: sides, Modifier: mod}
 }

@@ -55,7 +55,7 @@ func (l *LogItem) SetAttr(key string, val interface{}) {
 func FetchToonLogs(toon *Being) (result []LogItem) {
 	query := map[string]bson.ObjectId{"toonid": toon.Id}
 	c := GetCollection(LOG_COLLECTION)
-	if err := c.Find(query).All(&result); err != nil {
+	if err := c.Find(query).Sort("-created").Limit(15).All(&result); err != nil {
 		log.Printf("Failed to fetch logs for toon %s (%s)", toon, err)
 	}
 	return result

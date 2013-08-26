@@ -82,6 +82,6 @@ func NamePrefix(level int) string {
 	return FromSliceByLevel(level, namePrefixes)
 }
 
-func PrefixedItemName(suffix string, level int) string {
+func PrefixedName(suffix string, level int) string {
 	return fmt.Sprintf("%s %s", NamePrefix(level), suffix)
 }

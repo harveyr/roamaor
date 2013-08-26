@@ -41,26 +41,10 @@ func TestNamePrefixes(t *testing.T) {
 func TestPrefixedName(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		suffix := "Stabber"
-		name := PrefixedItemName(suffix, i)
+		name := PrefixedName(suffix, i)
 		if len(name) <= (len(suffix) + 1) {
 			t.Errorf("Prefixed name '%s' is no longer than suffix '%s'", name, suffix)
 		}
-	}
-}
-
-func TestWeaponDiceRoll(t *testing.T) {
-	w := NewWeapon(5)
-	damageRoll := w.Damage.Roll()
-
-	if damageRoll < 5 || damageRoll > 35 {
-		t.Errorf("Invalid damage roll for %s: %d", w, damageRoll)
-	}
-}
-
-func TestRandName(t *testing.T) {
-	name := RandName(1)
-	if len(name) < 3 {
-		t.Errorf("Invalid random name: %s", name)
 	}
 }
 
@@ -262,4 +246,28 @@ func TestHit(t *testing.T) {
 	DeleteDocument(BEING_COLLECTION, victim.Id)
 }
 
+func TestEquipAndSaveToon(t *testing.T) {
+	toon := NewToon("Test Toon")
+	EquipBeing(toon)
+
+	if len(toon.Weapon.Name) == 0 {
+		t.Error("Weapon has empty name field: ", toon.Weapon)
+	}
+
+	if damageRoll := toon.Weapon.Damage.Roll(); damageRoll < 1 {
+		t.Errorf("Damage roll was %d. Expected at least 1.", damageRoll)
+	}
+
+	toon.Save()
+
+	fetchedToon := FetchToonById(toon.Id)
+	if fetchedToon.Weapon.Name != toon.Weapon.Name {
+		t.Errorf("Fetched toon's weapon name (%s) != original (%s)", fetchedToon.Weapon.Name, toon.Weapon.Name)
+	}
+	if fetchedRoll := fetchedToon.Weapon.Damage.Roll(); fetchedRoll < 1 {
+		t.Errorf("Fetched toon's weapon damage roll (%s) < 1 ", fetchedRoll)
+	}
+
+	DeleteDocument(BEING_COLLECTION, toon.Id)	
+}
 
