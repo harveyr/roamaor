@@ -17,23 +17,24 @@ const (
 const BEING_COLLECTION = "beings"
 
 var mobPrefixes = []string{
-	"Nice",
-	"Cutesy",
-	"Benign",
 	"Limping",
-	"Paltry",
-	"Measly",
-	"Sticky",
-	"Foul",
 }
 
 var mobNames = []string{
 	"Hen",
 	"Kitten",
+	"Rhododendron",
 	"Danish",
+	"Spore",
+	"Cranapple",
+	"Self-Reflection",
 	"Cuddlefuzz",
 	"Sugarplum",
+	"Neckbeard",
+	"Tilapia",
 	"Wildebisht",
+	"Sea Cap'n",
+	"Bunyip",
 }
 
 type Being struct {
@@ -115,7 +116,7 @@ func FetchAllToons() []Being {
 func RandMobName(level int) string {
 	return fmt.Sprintf(
 		"%s %s",
-		FromSliceByLevel(level, mobPrefixes),
+		NamePrefix(level),
 		FromSliceByLevel(level, mobNames))
 }
 

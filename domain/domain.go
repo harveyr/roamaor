@@ -25,19 +25,28 @@ func (d *MongoDoc) InitId() {
 	d.Id = bson.NewObjectId()
 }
 
-var itemNamePrefixes = []string{
+var namePrefixes = []string{
 	"Crap",
+	"Pitiful",
 	"Benign",
+	"Broken",
 	"Slimy",
 	"Paltry",
+	"Inconsequential",
+	"Unremarkable",
 	"Measly",
+	"Cutesy",
 	"Substandard",
 	"Beleaguered",
 	"Patchwork",
 	"Stinky",
+	"Sticky",
 	"Tolerable",
 	"Middlin'",
 	"Moderate",
+	"Introverted",
+	"Silent",
+	"Foul",
 	"Acceptable",
 	"Intriguing",
 	"Notable",
@@ -45,10 +54,17 @@ var itemNamePrefixes = []string{
 	"Distasteful",
 	"Corrupted",
 	"Sorrowful",
+	"Courageous",
 	"Vengeful",
 	"Punishing",
+	"Sordid",
+	"Sardonic",
+	"Coruscating",
 	"Widowing",
+	"Splendid",
+	"Sumptuous",
 	"Sadistic",
+	"Resplendent",
 }
 
 func FromSliceByLevel(level int, slice []string) string {
@@ -62,10 +78,10 @@ func FromSliceByLevel(level int, slice []string) string {
 	return slice[index]
 }
 
-func ItemNamePrefix(level int) string {
-	return FromSliceByLevel(level, itemNamePrefixes)
+func NamePrefix(level int) string {
+	return FromSliceByLevel(level, namePrefixes)
 }
 
 func PrefixedItemName(suffix string, level int) string {
-	return fmt.Sprintf("%s %s", ItemNamePrefix(level), suffix)
+	return fmt.Sprintf("%s %s", NamePrefix(level), suffix)
 }

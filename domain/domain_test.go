@@ -32,7 +32,7 @@ func TestInitDb(t *testing.T) {
 }
 
 func TestNamePrefixes(t *testing.T) {
-	prefix := ItemNamePrefix(1)
+	prefix := NamePrefix(1)
 	if len(prefix) < 1 {
 		t.Errorf("Prefix of 0 length: %s", prefix)
 	}
