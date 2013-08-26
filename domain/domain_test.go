@@ -185,6 +185,16 @@ func TestEarnedLevel(t *testing.T) {
 	DeleteDocument(BEING_COLLECTION, toon.Id)
 }
 
+func TestCreateAndFetchLogItem(t *testing.T) {
+	toon := NewToon("Test Toon")
+	item := NewLogItem(toon, LOG_FIGHT)
+	fetched := FetchToonLogs(toon)
+	if len(fetched) != 1 {
+		log.Fatalf("Failed to fetch the log created item: %s", fetched)
+	}
+	DeleteDocument(LOG_COLLECTION, item.Id)
+}
+
 // func TestFetchAllToons(t *testing.T) {
 // 	NewToon("TestFetchAllToons Toon 1")
 // 	NewToon("TestFetchAllToons Toon 2")
