@@ -122,7 +122,7 @@
       return scaled;
     };
     renderToon = function() {
-      var coords, myLoc, toon, translate;
+      var coords, healthBarColor, healthBarHeight, hpPercent, maxHealthBarHeight, myLoc, toon, translate;
       if (!$rootScope.myToon) {
         throw "myToon not set";
       }
@@ -131,10 +131,21 @@
       myLoc = svg.selectAll("#my-toon").data([coords]);
       console.log('toon coords:', coords);
       translate = "translate(" + coords.x + ", " + coords.y + ")";
+      maxHealthBarHeight = 15;
+      hpPercent = toon.Hp / toon.MaxHp;
+      healthBarHeight = hpPercent * maxHealthBarHeight;
+      healthBarColor = "#15ff00";
+      if (hpPercent < .4) {
+        healthBarColor = "red";
+      } else if (hpPercent < 0.6) {
+        healthBarColor = "#ffea00";
+      }
       if (myLoc.attr("opacity") < 1) {
+        myLoc.selectAll("#my-health-bar").attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
         return myLoc.attr("transform", translate).transition().delay(500).duration(500).attr("opacity", 1);
       } else {
-        return myLoc.transition().delay(500).duration(500).attr("transform", translate);
+        myLoc.transition().delay(500).duration(500).attr("transform", translate);
+        return myLoc.selectAll("#my-health-bar").transition().attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
       }
     };
     renderDestination = function(destX, destY) {

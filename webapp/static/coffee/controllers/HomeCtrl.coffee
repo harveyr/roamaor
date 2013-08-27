@@ -62,7 +62,21 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         
         translate = "translate(#{coords.x}, #{coords.y})"
 
+        maxHealthBarHeight = 15
+        hpPercent = (toon.Hp / toon.MaxHp)
+        healthBarHeight = hpPercent * maxHealthBarHeight
+        healthBarColor = "#15ff00"
+        if hpPercent < .4
+            healthBarColor = "red"
+        else if hpPercent < 0.6
+            healthBarColor = "#ffea00"
+
         if myLoc.attr("opacity") < 1
+            myLoc.selectAll("#my-health-bar")
+                .attr("height", healthBarHeight)
+                .attr("y", maxHealthBarHeight - healthBarHeight + 1)
+                .style("fill", healthBarColor)
+
             myLoc.attr("transform", translate)
                 .transition()
                 .delay(500)
@@ -73,6 +87,12 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
                 .delay(500)
                 .duration(500)
                 .attr("transform", translate)
+
+            myLoc.selectAll("#my-health-bar")
+                .transition()
+                .attr("height", healthBarHeight)
+                .attr("y", maxHealthBarHeight - healthBarHeight + 1)
+                .style("fill", healthBarColor)
 
 
     renderDestination = (destX, destY) ->

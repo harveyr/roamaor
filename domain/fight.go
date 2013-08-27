@@ -26,9 +26,10 @@ func AttackerSwings(round int, attacker *Being, victim *Being) bool {
 }
 
 func Heal(b *Being, seconds float64) {
-	newHp := b.Hp + int(math.Ceil(seconds / 60))
+	newHp := float64(b.Hp) + math.Ceil(seconds / 60)
+	newHpInt := int(math.Min(float64(b.MaxHp), newHp))
 	log.Printf("Hp: %d -> %d", b.Hp, newHp)
-	b.Hp = newHp
+	b.Hp = newHpInt
 	b.Save()
 }
 

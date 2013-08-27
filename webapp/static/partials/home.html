@@ -12,7 +12,7 @@
         <div class="game-map" ng-style="mapStyle">
             <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
                 ng-click="mapClick($event)">
-                <g id="my-toon">
+                <g id="my-toon" opacity="0">
                     <polygon fill="none" stroke="#000000" stroke-miterlimit="10" points="4.194,6.418 11.381,0.962 16.677,6.992 9.975,5.447   "/>
                     <polyline fill="none" stroke="#000000" stroke-miterlimit="10" points="6.23,6.076 3.796,10.904 8.679,10.629   "/>
                     <polyline fill="none" stroke="#000000" stroke-miterlimit="10" points="5.017,10.904 3.323,18.004 16.078,13.545 15.451,6.709   
@@ -20,6 +20,7 @@
                     <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="7.868" y1="8.34" x2="9.824" y2="7.374"/>
                     <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="4.282" y1="13.984" x2="7.868" y2="12.582"/>
                     <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="11.544" y1="3.977" x2="15.811" y2="1.741"/>
+                    <rect id="my-health-bar" fill="#ffffff" stroke="#000000" width="3" height="5" x="18" y="13"/>
                 </g>
 
                 <g class="svg-town" ng-repeat="loc in displayedLocations" opacity="0">
