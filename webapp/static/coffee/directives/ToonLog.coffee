@@ -21,7 +21,7 @@ angular.module(DIRECTIVE_MODULE).directive "toonLog", ($rootScope) ->
         link: (scope) ->
             scope.name = $rootScope.myToon.Name
 
-            console.log 'scope.item.Data:', scope.item.Data
+            # console.log 'scope.item.Data:', scope.item.Data
             switch scope.item.LogType
 
                 when $rootScope.logTypes.fight

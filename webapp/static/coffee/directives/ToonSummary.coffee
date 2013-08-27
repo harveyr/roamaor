@@ -54,7 +54,7 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
             if $rootScope.myToon
                 applyToon $rootScope.myToon
 
-            console.log '[toonSummary] $rootScope.myToon:', $rootScope.myToon
+            # console.log '[toonSummary] $rootScope.myToon:', $rootScope.myToon
 
             $rootScope.$watch 'myToon', ->
                 if $rootScope.myToon

@@ -120,16 +120,10 @@
       }
       toon = $rootScope.myToon;
       coords = gameToMapCoords(toon.LocX, toon.LocY);
-      myLoc = svg.selectAll("#my-location").data([coords]);
+      myLoc = svg.selectAll("#my-toon").data([coords]);
       console.log('toon coords:', coords);
       toonWidth = 15;
-      myLoc.enter().append("div");
-      myLoc.attr("id", "my-location").attr("class", "icon-meh").attr("x", function(d) {
-        return d.x - toonWidth / 2;
-      }).attr("y", function(d) {
-        return d.y;
-      }).style("font-size", "12px");
-      return myLoc.exit().remove();
+      return myLoc.attr("opacity", 0).attr("transform", "translate(" + coords.x + ", " + coords.y + ")").transition().delay(500).duration(500).attr("opacity", 1);
     };
     renderDestination = function(destX, destY) {
       var destPointData, height, myDest, width, yOffset;
@@ -156,7 +150,8 @@
       return svg.append("path").attr("id", "my-dest-point").attr("d", lineFunc(destPointData)).attr("stroke", "white").attr("stroke-width", 1).attr("fill", "none").attr("opacity", 0).transition().duration(600).attr("opacity", 1).attr("transform", "translate(0, " + yOffset + ")");
     };
     renderLocations = function() {
-      var allCoords, locations;
+      var allCoords, transformFunc;
+      console.log('renderLocations');
       allCoords = [];
       if (!$rootScope.displayedLocations || $rootScope.displayedLocations.length === 0) {
         return;
@@ -167,14 +162,16 @@
         coords.id = loc.Id;
         return allCoords.push(coords);
       });
-      locations = svg.selectAll(".world-location").data($rootScope.displayedLocations);
-      locations.enter().append("image");
-      locations.attr("xlink:href", "/static/img/town.png").attr("class", "world-location").attr("width", 15).attr("height", 15).attr("x", function(d) {
-        return d.X1 + d.X2 / 2;
-      }).attr("y", function(d) {
-        return d.Y1 + d.Y2 / 2;
-      });
-      return locations.exit().remove();
+      transformFunc = function(d) {
+        var x, y;
+        x = d.X1 + d.X2 / 2;
+        y = d.Y1 + d.Y2 / 2;
+        return "translate (" + x + ", " + y + ")";
+      };
+      return $timeout(function() {
+        var locs;
+        return locs = svg.selectAll(".svg-town").data($rootScope.displayedLocations).transition().duration(500).attr("transform", transformFunc).attr("opacity", 1);
+      }, 0);
     };
     $scope.mapClick = function($event) {
       var destX, destY, postData;
@@ -201,7 +198,6 @@
     });
     return $rootScope.$watch("myToon", function() {
       if ($rootScope.myToon) {
-        renderLocations();
         return renderToon();
       }
     });
@@ -300,7 +296,6 @@
         if ($rootScope.myToon) {
           applyToon($rootScope.myToon);
         }
-        console.log('[toonSummary] $rootScope.myToon:', $rootScope.myToon);
         return $rootScope.$watch('myToon', function() {
           if ($rootScope.myToon) {
             return applyToon($rootScope.myToon);
@@ -320,7 +315,6 @@
       template: "<div class=\"row log-item\">\n    <div class=\"small-3 large-2 columns\">\n        <div class=\"label log-label {{labelClass}}\">\n            <small>\n                {{labelText | uppercase}}\n            </small>\n        </div>\n    </div>\n    <div class=\"small-9 large-10 columns\">\n        {{name}}\n        <span ng-bind-html-unsafe=\"action\"></span>\n    </div>\n</div>",
       link: function(scope) {
         scope.name = $rootScope.myToon.Name;
-        console.log('scope.item.Data:', scope.item.Data);
         switch (scope.item.LogType) {
           case $rootScope.logTypes.fight:
             scope.action = "man-danced with a Level " + scope.item.Data.opponentLevel + " " + scope.item.Data.opponentName + ".";

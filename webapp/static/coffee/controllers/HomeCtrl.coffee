@@ -55,20 +55,20 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         toon = $rootScope.myToon
         coords = gameToMapCoords(toon.LocX, toon.LocY)
 
-        myLoc = svg.selectAll("#my-location")
+        myLoc = svg.selectAll("#my-toon")
             .data([coords])
         console.log 'toon coords:', coords
         
         toonWidth = 15
-        myLoc.enter()
-            .append("div")
 
-        myLoc.attr("id", "my-location")
-            .attr("class", "icon-meh")
-            .attr("x", (d) -> d.x - toonWidth / 2)
-            .attr("y", (d) -> d.y)
-            .style("font-size", "12px")
-
+        myLoc.attr("opacity", 0)
+            .attr("transform", "translate(#{coords.x}, #{coords.y})")
+            .transition()
+            .delay(500)
+            .duration(500)
+            .attr("opacity", 1)
+        # myLoc.enter()
+        #     .append("image")
         
         # myLoc.attr("id", "my-location")
         #     .attr("xlink:href", "/static/img/guy.png")
@@ -77,8 +77,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         #     .attr("x", (d) -> d.x - toonWidth / 2)
         #     .attr("y", (d) -> d.y)
         
-        myLoc.exit().remove()
-
     renderDestination = (destX, destY) ->
         yOffset = 10
         width = 10
@@ -107,6 +105,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             .attr("transform", "translate(0, #{yOffset})")
 
     renderLocations = ->
+        console.log 'renderLocations'
         allCoords = []
 
         if !$rootScope.displayedLocations or $rootScope.displayedLocations.length == 0 
@@ -117,21 +116,35 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             coords.id = loc.Id
             allCoords.push coords
 
-        locations = svg.selectAll(".world-location")
-            .data($rootScope.displayedLocations)
+        transformFunc = (d) ->
+            x = d.X1 + d.X2 / 2
+            y = d.Y1 + d.Y2 / 2
+            "translate (#{x}, #{y})"
+
+        $timeout ->
+            locs = svg.selectAll(".svg-town")
+                .data($rootScope.displayedLocations)
+                .transition()
+                .duration(500)
+                .attr("transform", transformFunc)
+                .attr("opacity", 1)
+        , 0
+
+        # locations = svg.selectAll(".world-location")
+        #     .data($rootScope.displayedLocations)
         
-        locations.enter()
-            .append("image")
+        # locations.enter()
+        #     .append("image")
         
-        locations.attr("xlink:href", "/static/img/town.png")
-            .attr("class", "world-location")
-            .attr("width", 15)
-            .attr("height", 15)
-            .attr("x", (d) -> d.X1 + d.X2 / 2)
-            .attr("y", (d) -> d.Y1 + d.Y2 / 2)
+        # locations.attr("xlink:href", "/static/img/town.png")
+        #     .attr("class", "world-location")
+        #     .attr("width", 15)
+        #     .attr("height", 15)
+        #     .attr("x", (d) -> d.X1 + d.X2 / 2)
+        #     .attr("y", (d) -> d.Y1 + d.Y2 / 2)
         
-        locations.exit()
-            .remove()
+        # locations.exit()
+        #     .remove()
 
     $scope.mapClick = ($event) ->
         destX = $event.offsetX
@@ -157,5 +170,5 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     $rootScope.$watch "myToon", ->
         if $rootScope.myToon
-            renderLocations()
             renderToon()
+
