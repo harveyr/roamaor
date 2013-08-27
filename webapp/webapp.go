@@ -143,6 +143,8 @@ func bootstrapBundleHandler(w http.ResponseWriter, r *http.Request) {
 	if len(user.ToonId) > 0 {
 		toon := domain.FetchToonById(user.ToonId)
 		data["toon"] = toon
+		data["toonLogs"] = domain.FetchToonLogs(toon)
+		data["logTypes"] = domain.LogTypes()
 		data["visited"] = domain.FetchLocationsVisited(toon)
 	} else {
 		data["toon"] = nil

@@ -205,33 +205,6 @@ func TestCreateAndFetchLogItem(t *testing.T) {
 	DeleteDocument(LOG_COLLECTION, item.Id)
 }
 
-func TestFightLogUponVictory(t *testing.T) {
-	toon := NewToon("Test Toon")
-	mob := NewMob(toon.Level)
-	toon.Hp = 9999999
-	Fight(toon, mob)
-
-	logItems := FetchToonLogs(toon)
-	if len(logItems) != 1 {
-		t.Errorf("Expected one fight log item. Found %d items", len(logItems))
-		return
-	}
-	item := logItems[0]
-	if item.LogType != LOG_FIGHT {
-		t.Errorf("Expected fight log item (type %d). Found type %d", LOG_FIGHT, item.LogType)
-	}
-	logMobName, ok := item.Data["opponentName"].(string)
-	if !ok {
-		t.Errorf("Unable to retrieve opponentName from log item data: %s", item.Data)
-	}
-	if logMobName != mob.Name {
-		t.Errorf("opponentName (%s) != mob.Name (%s)", logMobName, mob.Name)
-	}
-
-	DeleteDocument(BEING_COLLECTION, toon.Id)
-	DeleteDocument(LOG_COLLECTION, item.Id)
-}
-
 func TestHit(t *testing.T) {
 	attacker := NewToon("Attacking Toon")
 	victim := NewToon("Defending Toon")
@@ -271,6 +244,34 @@ func TestEquipAndSaveToon(t *testing.T) {
 	DeleteDocument(BEING_COLLECTION, toon.Id)	
 }
 
+
+func TestFightLogUponVictory(t *testing.T) {
+	toon := NewToon("Test Toon")
+	mob := NewMob(toon.Level)
+	toon.Hp = 9999999
+	Fight(toon, mob)
+
+	logItems := FetchToonLogs(toon)
+	if len(logItems) != 1 {
+		t.Errorf("Expected one fight log item. Found %d items", len(logItems))
+		return
+	}
+	item := logItems[0]
+	if item.LogType != LOG_FIGHT {
+		t.Errorf("Expected fight log item (type %d). Found type %d", LOG_FIGHT, item.LogType)
+	}
+	logMobName, ok := item.Data["opponentName"].(string)
+	if !ok {
+		t.Errorf("Unable to retrieve opponentName from log item data: %s", item.Data)
+	}
+	if logMobName != mob.Name {
+		t.Errorf("opponentName (%s) != mob.Name (%s)", logMobName, mob.Name)
+	}
+
+	DeleteDocument(BEING_COLLECTION, toon.Id)
+	DeleteDocument(LOG_COLLECTION, item.Id)
+}
+
 func TestWinnerGetsBetterWeapon(t *testing.T) {
 	toon := NewToon("Test Toon")
 	toon.Hp = 99999
@@ -285,6 +286,11 @@ func TestWinnerGetsBetterWeapon(t *testing.T) {
 	}
 	if len(toon.Weapon.Name) < 3 {
 		t.Error("Toon does not appear to have a valid weapon: ", toon.Weapon)
+	}
+
+	item := FetchToonLogs(toon)[0]
+	if weaponWonName, ok := item.Data["weaponWonName"].(string); !ok || weaponWonName != mobWeapon.Name {
+		t.Errorf("Log data does not reflect weapon won (%s): %s", mobWeapon, item)		
 	}
 
 	DeleteDocument(BEING_COLLECTION, toon.Id)

@@ -32,10 +32,10 @@ func Heal(b *Being, seconds float64) {
 	b.Save()
 }
 
-func LogFight(fighter *Being, opponent *Being, victor bool) {
+func LogFight(fighter *Being, opponent *Being, victor bool) *LogItem {
 	if !fighter.IsToon() {
 		// Don't bother logging fights for no-toons
-		return
+		return nil
 	}
 
 	fighter.Fights += 1
@@ -49,18 +49,21 @@ func LogFight(fighter *Being, opponent *Being, victor bool) {
 	item.SetAttr("opponentName", opponent.Name)
 	item.SetAttr("opponentLevel", opponent.Level)
 	item.Save()
+	return item
 }
 
 func WinFight(winner *Being, loser *Being) {
 	if winner.IsToon() {
-		LogFight(winner, loser, true)
+		logItem := LogFight(winner, loser, true)
+		if !loser.IsToon() && loser.Weapon.Level > winner.Weapon.Level {
+			winner.Weapon = loser.Weapon
+			logItem.SetAttr("weaponWonName", winner.Weapon.Name)
+			logItem.SetAttr("weaponWonLevel", winner.Weapon.Level)
+			logItem.Save()
+		}
 	}
 	if loser.IsToon() {
 		LogFight(loser, winner, false)
-	} else {
-		if loser.Weapon.Level > winner.Weapon.Level {
-			winner.Weapon = loser.Weapon
-		}
 	}
 }
 

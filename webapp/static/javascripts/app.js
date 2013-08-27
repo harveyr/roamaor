@@ -58,6 +58,8 @@
         $rootScope.worldHeight = response.data.worldHeight;
         $rootScope.worldWidth = response.data.worldWidth;
         $rootScope.myUser = response.data.user;
+        $rootScope.toonLogs = response.data.toonLogs;
+        $rootScope.logTypes = response.data.logTypes;
         if (response.data.toon) {
           $rootScope.setMyToon(response.data.toon);
           return $rootScope.displayedLocations = response.data.visited;
@@ -303,6 +305,28 @@
         return $scope.admin.selectedToon = $rootScope.myToon.Id;
       }
     });
+  });
+
+  angular.module(APP_NAME).controller('ToonLogCtrl', function($scope, $rootScope, $http, $timeout) {});
+
+  angular.module(DIRECTIVE_MODULE).directive("toonLog", function($rootScope) {
+    var directive;
+    return directive = {
+      replace: true,
+      scope: {
+        item: '='
+      },
+      template: "<div class=\"row log-item\">\n    <div class=\"small-12 columns\">\n        {{name}}\n        {{action}}\n    </div>\n</div>",
+      link: function(scope) {
+        scope.name = $rootScope.myToon.Name;
+        switch (scope.item.LogType) {
+          case $rootScope.logTypes.fight:
+            return scope.action = "man-danced with a Level " + scope.item.Data.opponentLevel + " " + scope.item.Data.opponentName;
+          case $rootScope.logTypes.locationDiscovery:
+            return scope.action = "discovered the location of " + scope.item.Data.locationName + "!";
+        }
+      }
+    };
   });
 
 }).call(this);

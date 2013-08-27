@@ -22,6 +22,8 @@ app = angular.module(APP_NAME, [
             $rootScope.worldHeight = response.data.worldHeight
             $rootScope.worldWidth = response.data.worldWidth
             $rootScope.myUser = response.data.user
+            $rootScope.toonLogs = response.data.toonLogs
+            $rootScope.logTypes = response.data.logTypes
             if response.data.toon 
                 $rootScope.setMyToon(response.data.toon)
                 $rootScope.displayedLocations = response.data.visited

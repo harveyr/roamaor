@@ -8,7 +8,7 @@ import (
 
 func ShouldFight(b *Being) (shouldFight bool) {
 	shouldFight = false
-	if rand.Float32() > 0.5 {
+	if rand.Float32() > 0.9 {
 		if float64(b.Hp) / float64(b.MaxHp) >= 0.5 {
 			shouldFight = true
 		}
