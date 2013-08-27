@@ -67,16 +67,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             .delay(500)
             .duration(500)
             .attr("opacity", 1)
-        # myLoc.enter()
-        #     .append("image")
-        
-        # myLoc.attr("id", "my-location")
-        #     .attr("xlink:href", "/static/img/guy.png")
-        #     .attr("width", toonWidth)
-        #     .attr("height", toonWidth)
-        #     .attr("x", (d) -> d.x - toonWidth / 2)
-        #     .attr("y", (d) -> d.y)
-        
+
     renderDestination = (destX, destY) ->
         yOffset = 10
         width = 10
@@ -124,27 +115,29 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         $timeout ->
             locs = svg.selectAll(".svg-town")
                 .data($rootScope.displayedLocations)
-                .transition()
+
+            color = "#555"
+            locs.selectAll("polyline")
+                .attr("stroke", color)
+            locs.selectAll("rect")
+                .attr("stroke", color)
+            locs.selectAll("path")
+                .attr("stroke", color)
+
+            locs.transition()
                 .duration(500)
                 .attr("transform", transformFunc)
                 .attr("opacity", 1)
+
+            locs.insert("rect", "rect")
+                .attr("width", (d) -> 20)
+                .attr("height", (d) -> 20)
+                # .attr("width", (d) -> d.X2 - d.X1)
+                # .attr("height", (d) -> d.Y2 - d.Y1)
+                .attr("fill", "rgba(6, 212, 0, 0.3)")
+                # .attr("stroke", "#555")
         , 0
 
-        # locations = svg.selectAll(".world-location")
-        #     .data($rootScope.displayedLocations)
-        
-        # locations.enter()
-        #     .append("image")
-        
-        # locations.attr("xlink:href", "/static/img/town.png")
-        #     .attr("class", "world-location")
-        #     .attr("width", 15)
-        #     .attr("height", 15)
-        #     .attr("x", (d) -> d.X1 + d.X2 / 2)
-        #     .attr("y", (d) -> d.Y1 + d.Y2 / 2)
-        
-        # locations.exit()
-        #     .remove()
 
     $scope.mapClick = ($event) ->
         destX = $event.offsetX
@@ -162,6 +155,13 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             else 
                 $rootScope.alertUser "Failed to set destination: #{response.data.reason}" 
 
+
+    zoom = d3.behavior.zoom()
+        .on "zoom", ->
+            svg.selectAll("g")
+                .attr("transform")
+
+
     if $rootScope.myToon
         renderToon()
 
@@ -171,4 +171,3 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     $rootScope.$watch "myToon", ->
         if $rootScope.myToon
             renderToon()
-

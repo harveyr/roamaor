@@ -70,7 +70,7 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var gameToMapCoords, lineFunc, map, mapColor, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, scaleX, scaleY, svg, toonRadius, toonSvgCoords;
+    var gameToMapCoords, lineFunc, map, mapColor, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, scaleX, scaleY, svg, toonRadius, toonSvgCoords, zoom;
     mapColor = "#E7E7E7";
     toonRadius = 5;
     scaleX = null;
@@ -169,8 +169,18 @@
         return "translate (" + x + ", " + y + ")";
       };
       return $timeout(function() {
-        var locs;
-        return locs = svg.selectAll(".svg-town").data($rootScope.displayedLocations).transition().duration(500).attr("transform", transformFunc).attr("opacity", 1);
+        var color, locs;
+        locs = svg.selectAll(".svg-town").data($rootScope.displayedLocations);
+        color = "#555";
+        locs.selectAll("polyline").attr("stroke", color);
+        locs.selectAll("rect").attr("stroke", color);
+        locs.selectAll("path").attr("stroke", color);
+        locs.transition().duration(500).attr("transform", transformFunc).attr("opacity", 1);
+        return locs.insert("rect", "rect").attr("width", function(d) {
+          return 20;
+        }).attr("height", function(d) {
+          return 20;
+        }).attr("fill", "rgba(6, 212, 0, 0.3)");
       }, 0);
     };
     $scope.mapClick = function($event) {
@@ -190,6 +200,9 @@
         }
       });
     };
+    zoom = d3.behavior.zoom().on("zoom", function() {
+      return svg.selectAll("g").attr("transform");
+    });
     if ($rootScope.myToon) {
       renderToon();
     }
