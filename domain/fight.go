@@ -51,6 +51,19 @@ func LogFight(fighter *Being, opponent *Being, victor bool) {
 	item.Save()
 }
 
+func WinFight(winner *Being, loser *Being) {
+	if winner.IsToon() {
+		LogFight(winner, loser, true)
+	}
+	if loser.IsToon() {
+		LogFight(loser, winner, false)
+	} else {
+		if loser.Weapon.Level > winner.Weapon.Level {
+			winner.Weapon = loser.Weapon
+		}
+	}
+}
+
 func Fight(attacker *Being, victim *Being) {
 	log.Printf("Fight! %s vs %s", attacker, victim)
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -70,19 +83,12 @@ func Fight(attacker *Being, victim *Being) {
 		}
 	}
 
-	var victor *Being
 	if attacker.Hp <= 0 {
-		victor = victim
+		WinFight(victim, attacker)
 	} else if victim.Hp <= 0 {
-		victor = attacker
+		WinFight(attacker, victim)
 	} else {
 		log.Fatal("[Fight] Couldn't determine winner")
-	}
-	if attacker.IsToon() {
-		LogFight(attacker, victim, victor == attacker)
-	}
-	if victim.IsToon() {
-		LogFight(victim, attacker, victor == victim)
 	}
 	return
 }

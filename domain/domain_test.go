@@ -271,3 +271,21 @@ func TestEquipAndSaveToon(t *testing.T) {
 	DeleteDocument(BEING_COLLECTION, toon.Id)	
 }
 
+func TestWinnerGetsBetterWeapon(t *testing.T) {
+	toon := NewToon("Test Toon")
+	toon.Hp = 99999
+	mob := NewMob(1)
+	EquipBeing(mob)
+	mobWeapon := mob.Weapon
+
+	Fight(toon, mob)
+
+	if toon.Weapon != mobWeapon {
+		t.Errorf("Toon did not pick up mob's weapon")
+	}
+	if len(toon.Weapon.Name) < 3 {
+		t.Error("Toon does not appear to have a valid weapon: ", toon.Weapon)
+	}
+
+	DeleteDocument(BEING_COLLECTION, toon.Id)
+}

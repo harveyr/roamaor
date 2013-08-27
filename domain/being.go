@@ -154,6 +154,10 @@ func (b *Being) TakeDamage(damage int) {
 	}
 }
 
+func (b *Being) Disarm() {
+	b.Weapon = Weapon{}
+}
+
 func (b *Being) UpdateLastTick() {
 	b.LastTick = time.Now()
 	b.Save()

@@ -25,7 +25,9 @@ func TickBeing(b *Being, multiplier float64) {
 	Heal(b, tickTime)
 
 	if ShouldFight(b) {
-		Fight(b, NewMob(b.Level))
+		mob := NewMob(b.Level)
+		EquipBeingChance(b, 0.3)
+		Fight(b, mob)
 	}
 
     Roam(b, tickTime)

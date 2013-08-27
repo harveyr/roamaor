@@ -2,6 +2,7 @@ package domain
 
 import (
 	// "log"
+	"math/rand"
 	"fmt"
 )
 
@@ -63,8 +64,14 @@ func LevelWeapon(level int) (w Weapon) {
 	}
 }
 
-
 func EquipBeing(b *Being) {
 	weapon := LevelWeapon(b.Level)
 	b.Weapon = weapon
+}
+
+func EquipBeingChance(b *Being, chance float32) {
+	if rand.Float32() < chance {
+		weapon := LevelWeapon(b.Level)
+		b.Weapon = weapon
+	}
 }
