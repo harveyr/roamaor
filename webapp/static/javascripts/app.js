@@ -123,12 +123,12 @@
       myLoc = svg.selectAll("#my-location").data([coords]);
       console.log('toon coords:', coords);
       toonWidth = 15;
-      myLoc.enter().append("image");
-      myLoc.attr("id", "my-location").attr("xlink:href", "/static/img/guy.png").attr("width", toonWidth).attr("height", toonWidth).attr("x", function(d) {
+      myLoc.enter().append("div");
+      myLoc.attr("id", "my-location").attr("class", "icon-meh").attr("x", function(d) {
         return d.x - toonWidth / 2;
       }).attr("y", function(d) {
         return d.y;
-      });
+      }).style("font-size", "12px");
       return myLoc.exit().remove();
     };
     renderDestination = function(destX, destY) {

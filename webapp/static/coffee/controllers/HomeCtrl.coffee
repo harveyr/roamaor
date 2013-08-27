@@ -61,14 +61,21 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         
         toonWidth = 15
         myLoc.enter()
-            .append("image")
-        
+            .append("div")
+
         myLoc.attr("id", "my-location")
-            .attr("xlink:href", "/static/img/guy.png")
-            .attr("width", toonWidth)
-            .attr("height", toonWidth)
+            .attr("class", "icon-meh")
             .attr("x", (d) -> d.x - toonWidth / 2)
             .attr("y", (d) -> d.y)
+            .style("font-size", "12px")
+
+        
+        # myLoc.attr("id", "my-location")
+        #     .attr("xlink:href", "/static/img/guy.png")
+        #     .attr("width", toonWidth)
+        #     .attr("height", toonWidth)
+        #     .attr("x", (d) -> d.x - toonWidth / 2)
+        #     .attr("y", (d) -> d.y)
         
         myLoc.exit().remove()
 
