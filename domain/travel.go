@@ -2,7 +2,7 @@ package domain
 
 import (
 	"math"
-	"log"
+	// "log"
 )
 
 func Distance(x1 float64, y1 float64, x2 float64, y2 float64) (d float64) {

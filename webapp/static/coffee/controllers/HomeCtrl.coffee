@@ -17,11 +17,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     $scope.mapStyle =
         "background-size": "#{mapWidth}px #{mapHeight}px"
 
-    # svg.append("image")
-    #     .attr("xlink:href", "/static/img/mapbg.png")
-    #     .attr("width", svgWidth)
-    #     .attr("height", svgHeight)
-
     lineFunc = d3.svg.line()
         .x((d) -> d.x)
         .y((d) -> d.y)
@@ -50,6 +45,9 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         scaled =
             x: inputX * svgWidthScale
             y: inputY * svgHeightScale
+        console.log 'gameToMapCoords scaled:', inputX, inputY, scaled
+        scaled
+        
 
     renderToon = ->
         if !$rootScope.myToon
@@ -63,45 +61,15 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             .data([coords])
         
         myLoc.enter()
-            .append("circle")
-        
-        myLoc.attr("id", "my-location")
-            .attr("cx", (d) -> d.x)
-            .attr("cy", (d) -> d.y)
-            .attr("r", (d) -> 5)
-            .attr("stroke", "white")
-            .attr("stroke-width", 1)
-            .style("fill", "none")
+            .append("image")
+            .attr("id", "my-location")
+            .attr("xlink:href", "/static/img/guy.png")
+            .attr("width", 15)
+            .attr("height", 15)
+            .attr("x", (d) -> d.x)
+            .attr("y", (d) -> d.y)
         
         myLoc.exit().remove()
-
-    renderLocations = ->
-        allCoords = []
-
-        if !$rootScope.displayedLocations or $rootScope.displayedLocations.length == 0 
-            return
-
-        _.each $rootScope.displayedLocations, (loc, idx) ->
-            coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2)
-            coords.id = loc.Id
-            allCoords.push coords
-
-        locations = svg.selectAll(".world-location")
-            .data($rootScope.displayedLocations)
-        
-        locations.enter()
-            .append("circle")
-            .attr("class", "world-location")
-            .attr("cx", (d) -> d.X1 + d.X2 / 2)
-            .attr("cy", (d) -> d.Y1 + d.Y2 / 2)
-            .attr("r", 5)
-            .attr("stroke", "blue")
-            .attr("stroke-width", 1)
-            .style("fill", "none")
-        
-        locations.exit()
-            .remove()
-
 
     renderDestination = (destX, destY) ->
         yOffset = 10
@@ -127,6 +95,32 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             .attr("opacity", 1)
             .attr("transform", "translate(0, #{yOffset})")
 
+    renderLocations = ->
+        allCoords = []
+
+        if !$rootScope.displayedLocations or $rootScope.displayedLocations.length == 0 
+            return
+
+        _.each $rootScope.displayedLocations, (loc, idx) ->
+            coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2)
+            coords.id = loc.Id
+            allCoords.push coords
+
+        locations = svg.selectAll(".world-location")
+            .data($rootScope.displayedLocations)
+        console.log '$rootScope.displayedLocations:', $rootScope.displayedLocations
+        
+        locations.enter()
+            .append("image")
+            .attr("xlink:href", "/static/img/town.png")
+            .attr("class", "world-location")
+            .attr("width", 15)
+            .attr("height", 15)
+            .attr("x", (d) -> d.X1 + d.X2 / 2)
+            .attr("y", (d) -> d.Y1 + d.Y2 / 2)
+        
+        locations.exit()
+            .remove()
 
     $scope.mapClick = ($event) ->
         destX = $event.offsetX

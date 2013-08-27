@@ -17,10 +17,12 @@
             <button class="button tiny" ng-click="showAllLocs()">Show All Locs</button>
         </div>
         <div class="inbl">
-            <button class="button tiny" ng-click="toggleAutoUpdate()">
-                Auto Update
-                <span ng-show="autoUpdate">On</span>
-                <span ng-show="!autoUpdate">Off</span>
+            <button class="button tiny"
+                ng-click="toggleAutoUpdate()"
+                ng-class="{warn: autoUpdate}">
+                    Auto Update
+                    <span ng-show="autoUpdate">On</span>
+                    <span ng-show="!autoUpdate">Off</span>
             </button>
         </div>
 
