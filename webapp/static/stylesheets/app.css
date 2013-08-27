@@ -7246,7 +7246,7 @@ a.th {
 
 /* line 105, ../sass/app.scss */
 .game-map {
-  background-image: url("/static/img/mapbg.png");
+  background-image: url("/static/img/mapbg.jpg");
   background-repeat: no-repeat;
   position: relative;
   top: -15px;
@@ -7258,11 +7258,28 @@ a.th {
 }
 
 /* line 117, ../sass/app.scss */
-.row.log-item {
-  margin-top: 10px;
+.button.warn {
+  background-color: #ed9c28;
 }
 
 /* line 122, ../sass/app.scss */
-.button.warn {
+.label.victory {
   background-color: #ed9c28;
+}
+/* line 125, ../sass/app.scss */
+.label.defeat {
+  background-color: #c60f13;
+}
+/* line 128, ../sass/app.scss */
+.label.log-label {
+  width: 65px;
+}
+
+/* line 133, ../sass/app.scss */
+.row.log-item {
+  padding: 10px;
+}
+/* line 136, ../sass/app.scss */
+.row.log-item:hover {
+  background-color: #222;
 }

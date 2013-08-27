@@ -3,6 +3,7 @@ package domain
 import (
 	"fmt"
 	"math"
+	"math.rand"
 	"time"
 )
 
@@ -21,7 +22,9 @@ func EarnedLevel(b *Being) (level int) {
 func ApplyProgress(b *Being) {
 	earnedLevel := EarnedLevel(b)
 	if earnedLevel > b.Level {
+		diff := earnedLevel - b.Level
 		b.Level = earnedLevel
+		b.MaxHp += 20 + earnedLevel + rand.Intn(earnedLevel)
 		b.Save()
 	}
 }

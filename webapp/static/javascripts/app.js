@@ -281,7 +281,7 @@
     return directive = {
       replace: true,
       scope: true,
-      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Level {{level}}\n        </p>\n        <p>\n            Hp: {{hp}} / {{maxHp}}\n            <div class=\"progress\"><span class=\"meter\" style=\"width: {{hpPercentage}}%\"></span></div>\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n        <p>\n            Locations Visited: {{myToon.LocationsVisited}}\n        </p>\n    </div>\n</div>",
+      template: "<div class=\"row\">\n    <div class=\"small-12\">\n        <p>\n            <strong>{{name}}</strong>\n        </p>\n        <p>\n            Level {{level}}\n        </p>\n        <p>\n            Hp: {{hp}} / {{maxHp}}\n            <div class=\"progress\"><span class=\"meter\" style=\"width: {{hpPercentage}}%\"></span></div>\n        </p>\n        <p>\n            Location: {{locX}}, {{locY}}\n        </p>\n        <p>\n            Destination: {{destX}}, {{destY}}\n        </p>\n        <p>\n            Fights Won: {{fightsWon}} / {{fights}}\n        </p>\n        <p>\n            Locations Visited: {{myToon.LocationsVisited}}\n        </p>\n        <p>\n            <div class=\"label\">Weapon</div>\n            <div ng-show=\"myToon.Weapon.Level\">\n                Level {{myToon.Weapon.Level}}\n                {{myToon.Weapon.Name}}\n            </div>\n        </p>\n    </div>\n</div>",
       link: function(scope) {
         var applyToon;
         applyToon = function(toon) {
@@ -317,12 +317,21 @@
       scope: {
         item: '='
       },
-      template: "<div class=\"row log-item\">\n    <div class=\"small-12 columns\">\n        {{name}}\n        {{action}}\n    </div>\n</div>",
+      template: "<div class=\"row log-item\">\n    <div class=\"small-3 large-2 columns\">\n        <div class=\"label log-label {{labelClass}}\">\n            <small>\n                {{labelText | uppercase}}\n            </small>\n        </div>\n    </div>\n    <div class=\"small-9 large-10 columns\">\n        {{name}}\n        <span ng-bind-html-unsafe=\"action\"></span>\n    </div>\n</div>",
       link: function(scope) {
         scope.name = $rootScope.myToon.Name;
+        console.log('scope.item.Data:', scope.item.Data);
         switch (scope.item.LogType) {
           case $rootScope.logTypes.fight:
-            return scope.action = "man-danced with a Level " + scope.item.Data.opponentLevel + " " + scope.item.Data.opponentName;
+            scope.action = "man-danced with a Level " + scope.item.Data.opponentLevel + " " + scope.item.Data.opponentName + ".";
+            if (scope.item.Data.victor) {
+              scope.labelText = "victory";
+              return scope.labelClass = "victory";
+            } else {
+              scope.labelText = "defeat";
+              return scope.labelClass = "defeat";
+            }
+            break;
           case $rootScope.logTypes.locationDiscovery:
             return scope.action = "discovered the location of " + scope.item.Data.locationName + "!";
         }

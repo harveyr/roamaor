@@ -27,6 +27,13 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
                 <p>
                     Locations Visited: {{myToon.LocationsVisited}}
                 </p>
+                <p>
+                    <div class="label">Weapon</div>
+                    <div ng-show="myToon.Weapon.Level">
+                        Level {{myToon.Weapon.Level}}
+                        {{myToon.Weapon.Name}}
+                    </div>
+                </p>
             </div>
         </div>
         """
