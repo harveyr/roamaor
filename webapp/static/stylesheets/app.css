@@ -430,11 +430,11 @@ body {
 
 /* line 272, ../../../../../../../../../.rvm/gems/ruby-2.0.0-p247/gems/zurb-foundation-4.3.1/scss/foundation/components/_global.scss */
 body {
-  background: white;
-  color: #222222;
+  background: #1a1717;
+  color: #d6d6d6;
   padding: 0;
   margin: 0;
-  font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+  font-family: "Quattrocento", serif;
   font-weight: normal;
   font-style: normal;
   line-height: 1;
@@ -2193,7 +2193,7 @@ abbr,
 acronym {
   text-transform: uppercase;
   font-size: 90%;
-  color: #222222;
+  color: #d6d6d6;
   border-bottom: 1px dotted #dddddd;
   cursor: help;
 }
@@ -7264,6 +7264,8 @@ a.th {
 .game-map {
   background-image: url("/static/img/mapbg.png");
   background-repeat: no-repeat;
+  position: relative;
+  top: -15px;
   background-position: -3px 13px;
   padding-left: 42px;
   padding-top: 21px;
@@ -7271,7 +7273,7 @@ a.th {
   padding-bottom: 16px;
 }
 
-/* line 115, ../sass/app.scss */
+/* line 117, ../sass/app.scss */
 .row.log-item {
   margin-top: 10px;
 }

@@ -105,6 +105,8 @@ $map-bg: #E7E7E7;
 .game-map {
     background-image:url("/static/img/mapbg.png");
     background-repeat: no-repeat;
+    position: relative;
+    top: -15px;
     background-position: -3px 13px;
     padding-left: 42px;
     padding-top: 21px;

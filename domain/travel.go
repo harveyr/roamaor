@@ -35,6 +35,9 @@ func Roam(b *Being, time float64) {
     	xMove = potentialDistance - yMove
     }
 
+    xMove = math.Min(xMove, math.Abs(xDiff))
+    yMove = math.Min(yMove, math.Abs(yDiff))
+
     if xDiff < 0 {
     	xMove *= -1
     }
@@ -42,14 +45,9 @@ func Roam(b *Being, time float64) {
     	yMove *= -1
     }
 
-	log.Print("potentialDistance: ", potentialDistance)
-	log.Print("xMove: ", xMove)
-	log.Print("yMove: ", yMove)
-
 	b.LocX += xMove
 	b.LocY += yMove
 
-	log.Printf("\tlocation: {%f, %f}", b.LocX, b.LocY)
 	b.Save()
 	
 	UpdateLocationsVisited(b)

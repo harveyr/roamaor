@@ -51,15 +51,16 @@ $em-base: 16 !default;
 
 $default-float: left;
 
-// $body-bg: #fff;
-// $body-font-color: #222;
+$body-bg: rgb(26, 23, 23);
+$body-font-color: #D6D6D6;
 // $body-font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+$body-font-family: 'Quattrocento', serif;
 // $body-font-weight: normal;
 // $body-font-style: normal;
 
 // Font-smoothing
 
-// $font-smoothing: antialiased;
+$font-smoothing: antialiased;
 
 // Text direction settings
 
