@@ -2,7 +2,7 @@ package domain
 
 import (
 	"math"
-	// "log"
+	"log"
 )
 
 func Distance(x1 float64, y1 float64, x2 float64, y2 float64) (d float64) {
@@ -18,6 +18,8 @@ func Roam(b *Being, time float64) {
     var xMove, yMove float64 = 0, 0
     xDiff := (b.DestX - b.LocX)
     yDiff := (b.DestY - b.LocY)
+    log.Print("xDiff: ", xDiff)
+    log.Print("yDiff: ", yDiff)
 
     if xDiff == 0 && yDiff == 0 {
     	// We're there!

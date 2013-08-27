@@ -111,28 +111,28 @@
         x: inputX * svgWidthScale,
         y: inputY * svgHeightScale
       };
-      console.log('gameToMapCoords scaled:', inputX, inputY, scaled);
       return scaled;
     };
     renderToon = function() {
-      var coords, myLoc, toon;
+      var coords, myLoc, toon, toonWidth;
       if (!$rootScope.myToon) {
         throw "myToon not set";
       }
       toon = $rootScope.myToon;
       coords = gameToMapCoords(toon.LocX, toon.LocY);
-      coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1);
-      coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2);
       myLoc = svg.selectAll("#my-location").data([coords]);
-      myLoc.enter().append("image").attr("id", "my-location").attr("xlink:href", "/static/img/guy.png").attr("width", 15).attr("height", 15).attr("x", function(d) {
-        return d.x;
+      console.log('toon coords:', coords);
+      toonWidth = 15;
+      myLoc.enter().append("image");
+      myLoc.attr("id", "my-location").attr("xlink:href", "/static/img/guy.png").attr("width", toonWidth).attr("height", toonWidth).attr("x", function(d) {
+        return d.x - toonWidth / 2;
       }).attr("y", function(d) {
         return d.y;
       });
       return myLoc.exit().remove();
     };
     renderDestination = function(destX, destY) {
-      var destPointData, height, width, yOffset;
+      var destPointData, height, myDest, width, yOffset;
       yOffset = 10;
       width = 10;
       height = 10;
@@ -151,6 +151,7 @@
           y: destY - yOffset
         }
       ];
+      myDest = svg.selectAll("#my-destination").data(destPointData);
       d3.select("#my-dest-point").remove();
       return svg.append("path").attr("id", "my-dest-point").attr("d", lineFunc(destPointData)).attr("stroke", "white").attr("stroke-width", 1).attr("fill", "none").attr("opacity", 0).transition().duration(600).attr("opacity", 1).attr("transform", "translate(0, " + yOffset + ")");
     };
@@ -167,8 +168,8 @@
         return allCoords.push(coords);
       });
       locations = svg.selectAll(".world-location").data($rootScope.displayedLocations);
-      console.log('$rootScope.displayedLocations:', $rootScope.displayedLocations);
-      locations.enter().append("image").attr("xlink:href", "/static/img/town.png").attr("class", "world-location").attr("width", 15).attr("height", 15).attr("x", function(d) {
+      locations.enter().append("image");
+      locations.attr("xlink:href", "/static/img/town.png").attr("class", "world-location").attr("width", 15).attr("height", 15).attr("x", function(d) {
         return d.X1 + d.X2 / 2;
       }).attr("y", function(d) {
         return d.Y1 + d.Y2 / 2;
@@ -180,6 +181,8 @@
       destX = $event.offsetX;
       destY = $event.offsetY;
       renderDestination(destX, destY);
+      console.log('destX:', destX);
+      console.log('destY:', destY);
       postData = mapToGameCoords(destX, destY);
       console.log('postData:', postData);
       return $http.post("/api/destination", postData).then(function(response) {

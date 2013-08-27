@@ -45,7 +45,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         scaled =
             x: inputX * svgWidthScale
             y: inputY * svgHeightScale
-        console.log 'gameToMapCoords scaled:', inputX, inputY, scaled
+        # console.log 'gameToMapCoords scaled:', inputX, inputY, scaled
         scaled
         
 
@@ -54,19 +54,20 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             throw "myToon not set"
         toon = $rootScope.myToon
         coords = gameToMapCoords(toon.LocX, toon.LocY)
-        coords.x = Math.max(coords.x, toon.LocX + toonRadius / 2 + 1)
-        coords.y = Math.max(coords.y, toon.LocY + toonRadius / 2)
 
         myLoc = svg.selectAll("#my-location")
             .data([coords])
+        console.log 'toon coords:', coords
         
+        toonWidth = 15
         myLoc.enter()
             .append("image")
-            .attr("id", "my-location")
+        
+        myLoc.attr("id", "my-location")
             .attr("xlink:href", "/static/img/guy.png")
-            .attr("width", 15)
-            .attr("height", 15)
-            .attr("x", (d) -> d.x)
+            .attr("width", toonWidth)
+            .attr("height", toonWidth)
+            .attr("x", (d) -> d.x - toonWidth / 2)
             .attr("y", (d) -> d.y)
         
         myLoc.exit().remove()
@@ -81,6 +82,9 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             {x: destX + width / 2, y: destY - yOffset - height},
             {x: destX, y: destY - yOffset},
         ]
+
+        myDest = svg.selectAll("#my-destination")
+            .data(destPointData)
 
         d3.select("#my-dest-point").remove()
         svg.append("path")
@@ -108,11 +112,11 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
         locations = svg.selectAll(".world-location")
             .data($rootScope.displayedLocations)
-        console.log '$rootScope.displayedLocations:', $rootScope.displayedLocations
         
         locations.enter()
             .append("image")
-            .attr("xlink:href", "/static/img/town.png")
+        
+        locations.attr("xlink:href", "/static/img/town.png")
             .attr("class", "world-location")
             .attr("width", 15)
             .attr("height", 15)
@@ -127,6 +131,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         destY = $event.offsetY
 
         renderDestination(destX, destY)
+        console.log 'destX:', destX
+        console.log 'destY:', destY
 
         postData = mapToGameCoords(destX, destY)
         console.log 'postData:', postData
