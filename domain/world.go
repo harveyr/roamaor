@@ -2,6 +2,11 @@ package domain
 
 import "log"
 
+const (
+	WORLD_WIDTH = 500
+	WORLD_HEIGHT  = 500
+)
+
 func CreateOrUpdateLocation(name string, x int, y int, w int, h int) {
 	c := GetCollection(LOCATION_COLLECTION)
 	var loc Location
@@ -23,8 +28,8 @@ func InitWorldLocations() {
 	print("\n")
 	log.Print("--- Initializing World Locations ---")
 
-	CreateOrUpdateLocation("Newbville", 20, 20, 5, 5)
-	CreateOrUpdateLocation("Tonky", 30, 30, 5, 5)
+	CreateOrUpdateLocation("Newbville", 20, 20, 20, 20)
+	CreateOrUpdateLocation("Tonky", 60, 80, 20, 20)
 
 	log.Print("------------------------------------")
 	print("\n")

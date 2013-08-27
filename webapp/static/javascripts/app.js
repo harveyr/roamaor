@@ -37,8 +37,10 @@
   });
 
   app = angular.module(APP_NAME, ["" + APP_NAME + ".directives"]).run(function($rootScope, $http) {
+    var updateDisplayedLocations;
     $rootScope.appName = "Roamoar";
     $rootScope.myToon = null;
+    $rootScope.displayedLocations = [];
     $rootScope.alertUser = function(string) {
       return $rootScope.userAlert = string;
     };
@@ -47,6 +49,11 @@
         throw "setMyToon received null toon";
       }
       return $rootScope.myToon = toon;
+    };
+    updateDisplayedLocations = function(locations) {
+      var notDisplayed;
+      notDisplayed = _.difference(locations, $rootScope.displayedLocations);
+      return $rootScope.displayedLocations = $rootScope.displayedLocations.concat(notDisplayed);
     };
     $rootScope.fetchBundle = function() {
       return $http.get("/api/bootstrap").then(function(response) {
@@ -62,7 +69,7 @@
         $rootScope.logTypes = response.data.logTypes;
         if (response.data.toon) {
           $rootScope.setMyToon(response.data.toon);
-          return $rootScope.displayedLocations = response.data.visited;
+          return updateDisplayedLocations(response.data.visited);
         }
       });
     };
@@ -75,6 +82,7 @@
     toonRadius = 5;
     scaleX = null;
     scaleY = null;
+    $scope.renderedLocationIds = [];
     svg = d3.select("svg").attr("height", 500);
     map = $(".game-map");
     mapWidth = map.width();
@@ -114,7 +122,7 @@
       return scaled;
     };
     renderToon = function() {
-      var coords, myLoc, toon, toonWidth;
+      var coords, myLoc, toon, translate;
       if (!$rootScope.myToon) {
         throw "myToon not set";
       }
@@ -122,8 +130,12 @@
       coords = gameToMapCoords(toon.LocX, toon.LocY);
       myLoc = svg.selectAll("#my-toon").data([coords]);
       console.log('toon coords:', coords);
-      toonWidth = 15;
-      return myLoc.attr("opacity", 0).attr("transform", "translate(" + coords.x + ", " + coords.y + ")").transition().delay(500).duration(500).attr("opacity", 1);
+      translate = "translate(" + coords.x + ", " + coords.y + ")";
+      if (myLoc.attr("opacity") < 1) {
+        return myLoc.attr("transform", translate).transition().delay(500).duration(500).attr("opacity", 1);
+      } else {
+        return myLoc.transition().delay(500).duration(500).attr("transform", translate);
+      }
     };
     renderDestination = function(destX, destY) {
       var destPointData, height, myDest, width, yOffset;
@@ -169,18 +181,18 @@
         return "translate (" + x + ", " + y + ")";
       };
       return $timeout(function() {
-        var color, locs;
-        locs = svg.selectAll(".svg-town").data($rootScope.displayedLocations);
-        color = "#555";
-        locs.selectAll("polyline").attr("stroke", color);
-        locs.selectAll("rect").attr("stroke", color);
-        locs.selectAll("path").attr("stroke", color);
-        locs.transition().duration(500).attr("transform", transformFunc).attr("opacity", 1);
-        return locs.insert("rect", "rect").attr("width", function(d) {
-          return 20;
-        }).attr("height", function(d) {
-          return 20;
-        }).attr("fill", "rgba(6, 212, 0, 0.3)");
+        var locs;
+        locs = svg.selectAll(".svg-town").data($rootScope.displayedLocations).attr("transform", transformFunc);
+        if (locs.attr("opacity") < 1) {
+          locs.transition().delay(function(d, i) {
+            return i * 200;
+          }).duration(1000).attr("opacity", 1);
+          return locs.insert("rect", "rect").attr("width", function(d) {
+            return d.X2 - d.X1;
+          }).attr("height", function(d) {
+            return d.Y2 - d.Y1;
+          }).attr("fill", "rgba(6, 212, 0, 0.3)");
+        }
       }, 0);
     };
     $scope.mapClick = function($event) {

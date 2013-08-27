@@ -4,6 +4,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     toonRadius = 5
     scaleX = null
     scaleY = null
+    $scope.renderedLocationIds = []
 
     svg = d3.select("svg")
         .attr("height", 500)
@@ -59,14 +60,20 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             .data([coords])
         console.log 'toon coords:', coords
         
-        toonWidth = 15
+        translate = "translate(#{coords.x}, #{coords.y})"
 
-        myLoc.attr("opacity", 0)
-            .attr("transform", "translate(#{coords.x}, #{coords.y})")
-            .transition()
-            .delay(500)
-            .duration(500)
-            .attr("opacity", 1)
+        if myLoc.attr("opacity") < 1
+            myLoc.attr("transform", translate)
+                .transition()
+                .delay(500)
+                .duration(500)
+                .attr("opacity", 1)
+        else
+            myLoc.transition()
+                .delay(500)
+                .duration(500)
+                .attr("transform", translate)
+
 
     renderDestination = (destX, destY) ->
         yOffset = 10
@@ -115,27 +122,29 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         $timeout ->
             locs = svg.selectAll(".svg-town")
                 .data($rootScope.displayedLocations)
-
-            color = "#555"
-            locs.selectAll("polyline")
-                .attr("stroke", color)
-            locs.selectAll("rect")
-                .attr("stroke", color)
-            locs.selectAll("path")
-                .attr("stroke", color)
-
-            locs.transition()
-                .duration(500)
                 .attr("transform", transformFunc)
-                .attr("opacity", 1)
 
-            locs.insert("rect", "rect")
-                .attr("width", (d) -> 20)
-                .attr("height", (d) -> 20)
-                # .attr("width", (d) -> d.X2 - d.X1)
-                # .attr("height", (d) -> d.Y2 - d.Y1)
-                .attr("fill", "rgba(6, 212, 0, 0.3)")
-                # .attr("stroke", "#555")
+            if locs.attr("opacity") < 1
+                locs.transition()
+                    .delay((d, i) -> i * 200)
+                    .duration(1000)
+                    .attr("opacity", 1)
+
+                locs.insert("rect", "rect")
+                    # .attr("width", (d) -> 20)
+                    # .attr("height", (d) -> 20)
+                    .attr("width", (d) -> d.X2 - d.X1)
+                    .attr("height", (d) -> d.Y2 - d.Y1)
+                    .attr("fill", "rgba(6, 212, 0, 0.3)")
+
+            # color = "#555"
+            # locs.selectAll("polyline")
+            #     .attr("stroke", color)
+            # locs.selectAll("rect")
+            #     .attr("stroke", color)
+            # locs.selectAll("path")
+            #     .attr("stroke", color)
+
         , 0
 
 

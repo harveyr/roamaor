@@ -7,8 +7,6 @@ import (
 )
 
 const (
-	WORLD_WIDTH = 1000
-	WORLD_HEIGHT  = 1000
 	LOCATION_COLLECTION = "locations"
 )
 

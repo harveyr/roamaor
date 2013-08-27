@@ -3,6 +3,7 @@ app = angular.module(APP_NAME, [
 ]).run ($rootScope, $http) ->
     $rootScope.appName = "Roamoar"
     $rootScope.myToon = null
+    $rootScope.displayedLocations = []
 
     $rootScope.alertUser = (string) ->
         $rootScope.userAlert = string
@@ -11,6 +12,11 @@ app = angular.module(APP_NAME, [
         if !toon
             throw "setMyToon received null toon"
         $rootScope.myToon = toon
+
+    updateDisplayedLocations = (locations) ->
+        notDisplayed = _.difference(locations, $rootScope.displayedLocations)
+        $rootScope.displayedLocations = $rootScope.displayedLocations.concat(notDisplayed)
+
 
     $rootScope.fetchBundle = ->
         $http.get("/api/bootstrap").then (response) ->
@@ -26,6 +32,6 @@ app = angular.module(APP_NAME, [
             $rootScope.logTypes = response.data.logTypes
             if response.data.toon 
                 $rootScope.setMyToon(response.data.toon)
-                $rootScope.displayedLocations = response.data.visited
+                updateDisplayedLocations(response.data.visited)
 
     $rootScope.fetchBundle()
