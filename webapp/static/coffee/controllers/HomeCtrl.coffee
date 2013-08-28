@@ -60,13 +60,44 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     , 300
 
+    selectToonSvg = ->
+        svg.selectAll("#my-toon")
+
+    walkToon = ->
+        toon = $rootScope.myToon
+        toonSvg = selectToonSvg()
+        if toon.LocX == toon.DestX and toon.LocY == toon.DestY
+            toonSvg.select(".legs-walk").attr("opacity", 0)
+            toonSvg.select(".legs-stationary").attr("opacity", 1)
+            return
+
+        delay = 300
+        toonSvg.select(".legs-stationary").attr("opacity", 0)
+        
+        legs = toonSvg.select(".legs-walk")
+        legs.attr("opacity", 1)
+        legLines = legs.selectAll("line")
+            .data([1, -1])
+
+        if legLines.attr("transform")
+            legLines.attr("transform", "")
+        else
+            legLines.attr "transform", (d) ->
+                angle = d * 20
+                "rotate(#{angle}, 10, 10)"
+
+        $timeout ->
+            walkToon()
+        , delay
+
+
     renderToon = ->
         if !$rootScope.myToon
             throw "myToon not set"
         toon = $rootScope.myToon
         coords = gameToMapCoords(toon.LocX, toon.LocY)
 
-        myLoc = svg.selectAll("#my-toon")
+        toonSvg = svg.selectAll("#my-toon")
             .data([coords])
 
         translate = "translate(#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
@@ -80,23 +111,26 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         else if hpPercent < 0.6
             healthBarColor = "#ffea00"
 
-        if myLoc.attr("opacity") < 1
-            myLoc.selectAll("#my-health-bar")
+        toonSvg.selectAll("toon-legs")
+            .transform
+
+        if toonSvg.attr("opacity") < 1
+            toonSvg.selectAll("#my-health-bar")
                 .attr("height", healthBarHeight)
                 .attr("y", maxHealthBarHeight - healthBarHeight + 1)
                 .style("fill", healthBarColor)
 
-            myLoc.attr("transform", translate)
+            toonSvg.attr("transform", translate)
                 .transition()
                 .delay(500)
                 .duration(500)
                 .attr("opacity", 1)
         else
-            myLoc.transition()
+            toonSvg.transition()
                 .duration(100)
                 .attr("transform", translate)
 
-            myLoc.selectAll("#my-health-bar")
+            toonSvg.selectAll("#my-health-bar")
                 .transition()
                 .attr("height", healthBarHeight)
                 .attr("y", maxHealthBarHeight - healthBarHeight + 1)
@@ -201,13 +235,13 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     svg.call(zoom)
 
     svg.on "click", ->
-        console.log 'CLICK d3.event:', d3.event
         now = new Date()
         if now.getTime() - lastZoom.getTime() > 1000
             setDestination(d3.event.offsetX, d3.event.offsetY)
 
     if $rootScope.myToon
         renderToon()
+        walkToon()
 
     $rootScope.$watch "displayedLocations", ->
         renderLocations()

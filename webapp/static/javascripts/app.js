@@ -77,7 +77,7 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var applyZoom, gameToMapCoords, lastZoom, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, xScale, yScale, zoom;
+    var applyZoom, gameToMapCoords, lastZoom, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, selectToonSvg, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, walkToon, xScale, yScale, zoom;
     lastZoom = new Date();
     svgHeight = 500;
     map = $(".game-map");
@@ -118,14 +118,44 @@
     $scope.applyZoom = _.throttle(function() {
       return svg.selectAll("#my-toon");
     }, 300);
+    selectToonSvg = function() {
+      return svg.selectAll("#my-toon");
+    };
+    walkToon = function() {
+      var delay, legLines, legs, toon, toonSvg;
+      toon = $rootScope.myToon;
+      toonSvg = selectToonSvg();
+      if (toon.LocX === toon.DestX && toon.LocY === toon.DestY) {
+        toonSvg.select(".legs-walk").attr("opacity", 0);
+        toonSvg.select(".legs-stationary").attr("opacity", 1);
+        return;
+      }
+      delay = 300;
+      toonSvg.select(".legs-stationary").attr("opacity", 0);
+      legs = toonSvg.select(".legs-walk");
+      legs.attr("opacity", 1);
+      legLines = legs.selectAll("line").data([1, -1]);
+      if (legLines.attr("transform")) {
+        legLines.attr("transform", "");
+      } else {
+        legLines.attr("transform", function(d) {
+          var angle;
+          angle = d * 20;
+          return "rotate(" + angle + ", 10, 10)";
+        });
+      }
+      return $timeout(function() {
+        return walkToon();
+      }, delay);
+    };
     renderToon = function() {
-      var coords, healthBarColor, healthBarHeight, hpPercent, maxHealthBarHeight, myLoc, toon, translate;
+      var coords, healthBarColor, healthBarHeight, hpPercent, maxHealthBarHeight, toon, toonSvg, translate;
       if (!$rootScope.myToon) {
         throw "myToon not set";
       }
       toon = $rootScope.myToon;
       coords = gameToMapCoords(toon.LocX, toon.LocY);
-      myLoc = svg.selectAll("#my-toon").data([coords]);
+      toonSvg = svg.selectAll("#my-toon").data([coords]);
       translate = "translate(" + coords.x + ", " + coords.y + ") scale(" + $scope.zoomScale + ")";
       maxHealthBarHeight = 15;
       hpPercent = toon.Hp / toon.MaxHp;
@@ -136,12 +166,13 @@
       } else if (hpPercent < 0.6) {
         healthBarColor = "#ffea00";
       }
-      if (myLoc.attr("opacity") < 1) {
-        myLoc.selectAll("#my-health-bar").attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
-        return myLoc.attr("transform", translate).transition().delay(500).duration(500).attr("opacity", 1);
+      toonSvg.selectAll("toon-legs").transform;
+      if (toonSvg.attr("opacity") < 1) {
+        toonSvg.selectAll("#my-health-bar").attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
+        return toonSvg.attr("transform", translate).transition().delay(500).duration(500).attr("opacity", 1);
       } else {
-        myLoc.transition().duration(100).attr("transform", translate);
-        return myLoc.selectAll("#my-health-bar").transition().attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
+        toonSvg.transition().duration(100).attr("transform", translate);
+        return toonSvg.selectAll("#my-health-bar").transition().attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
       }
     };
     renderDestination = function(destX, destY) {
@@ -216,7 +247,6 @@
     svg.call(zoom);
     svg.on("click", function() {
       var now;
-      console.log('CLICK d3.event:', d3.event);
       now = new Date();
       if (now.getTime() - lastZoom.getTime() > 1000) {
         return setDestination(d3.event.offsetX, d3.event.offsetY);
@@ -224,6 +254,7 @@
     });
     if ($rootScope.myToon) {
       renderToon();
+      walkToon();
     }
     $rootScope.$watch("displayedLocations", function() {
       return renderLocations();
