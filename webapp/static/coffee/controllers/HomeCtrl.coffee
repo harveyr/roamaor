@@ -42,8 +42,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     gameToMapCoords = (inputX, inputY) ->
         scaled =
-            x: inputX * svgWidthScale + $scope.translate[0]
-            y: inputY * svgHeightScale + $scope.translate[1]
+            x: inputX * svgWidthScale * $scope.zoomScale + $scope.translate[0]
+            y: inputY * svgHeightScale * $scope.zoomScale + $scope.translate[1]
 
     mapToGameCoords = (inputX, inputY) ->
         svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth
@@ -186,30 +186,13 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     applyZoom = _.throttle ->
         renderToon()
         renderLocations()
-    , 300
-
-    updateZoomScale = ->
-        console.log 'd3.event:', d3.event
-        console.log 'd3.event.translate:', d3.event.translate
-
-        if d3.event.sourceEvent.type == "mousemove"
-            wheelDelta = d3.event.sourceEvent.wheelDelta
-            if wheelDelta > 0
-                if $scope.zoomScale > 3
-                    return
-                zoomMod = 0.1
-            if wheelDelta < 0
-                if $scope.zoomScale < 0.4
-                    return
-                zoomMod = -0.1
-
-            $scope.zoomScale = $scope.zoomScale + zoomMod
-            $scope.translate = d3.event.translate
-        applyZoom()
+    , 100
 
     zoom = d3.behavior.zoom()
         .on "zoom", ->
-            updateZoomScale()
+            $scope.translate = d3.event.translate
+            $scope.zoomScale = d3.event.scale
+            applyZoom()
     zoom.scaleExtent([0.4, 3.0])
 
     svg.call(zoom)

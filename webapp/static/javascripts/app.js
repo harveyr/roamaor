@@ -77,7 +77,7 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var applyZoom, gameToMapCoords, initialXRange, initialYRange, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, toonRadius, updateZoomScale, xScale, yScale, zoom, zoomCenterX, zoomCenterY;
+    var applyZoom, gameToMapCoords, initialXRange, initialYRange, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, toonRadius, xScale, yScale, zoom, zoomCenterX, zoomCenterY;
     svgHeight = 500;
     map = $(".game-map");
     svg = d3.select("svg").attr("height", svgHeight);
@@ -108,8 +108,8 @@
     gameToMapCoords = function(inputX, inputY) {
       var scaled;
       return scaled = {
-        x: inputX * svgWidthScale + $scope.translate[0],
-        y: inputY * svgHeightScale + $scope.translate[1]
+        x: inputX * svgWidthScale * $scope.zoomScale + $scope.translate[0],
+        y: inputY * svgHeightScale * $scope.zoomScale + $scope.translate[1]
       };
     };
     mapToGameCoords = function(inputX, inputY) {
@@ -221,32 +221,11 @@
     applyZoom = _.throttle(function() {
       renderToon();
       return renderLocations();
-    }, 300);
-    updateZoomScale = function() {
-      var wheelDelta, zoomMod;
-      console.log('d3.event:', d3.event);
-      console.log('d3.event.translate:', d3.event.translate);
-      if (d3.event.sourceEvent.type === "mousemove") {
-        wheelDelta = d3.event.sourceEvent.wheelDelta;
-        if (wheelDelta > 0) {
-          if ($scope.zoomScale > 3) {
-            return;
-          }
-          zoomMod = 0.1;
-        }
-        if (wheelDelta < 0) {
-          if ($scope.zoomScale < 0.4) {
-            return;
-          }
-          zoomMod = -0.1;
-        }
-        $scope.zoomScale = $scope.zoomScale + zoomMod;
-        $scope.translate = d3.event.translate;
-      }
-      return applyZoom();
-    };
+    }, 100);
     zoom = d3.behavior.zoom().on("zoom", function() {
-      return updateZoomScale();
+      $scope.translate = d3.event.translate;
+      $scope.zoomScale = d3.event.scale;
+      return applyZoom();
     });
     zoom.scaleExtent([0.4, 3.0]);
     svg.call(zoom);
