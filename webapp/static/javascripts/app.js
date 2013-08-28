@@ -180,29 +180,26 @@
         return toonSvg.selectAll(".toon-health-bar").transition().attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
       }
     };
-    renderDestination = function(destX, destY) {
-      var destPointData, height, myDest, width, yOffset;
-      yOffset = 10;
-      width = 10;
-      height = 10;
-      destPointData = [
-        {
-          x: destX,
-          y: destY - yOffset
-        }, {
-          x: destX - width / 2,
-          y: destY - yOffset - height
-        }, {
-          x: destX + width / 2,
-          y: destY - yOffset - height
-        }, {
-          x: destX,
-          y: destY - yOffset
-        }
-      ];
-      myDest = svg.selectAll("#my-destination").data(destPointData);
-      d3.select("#my-dest-point").remove();
-      return svg.append("path").attr("id", "my-dest-point").attr("d", lineFunc(destPointData)).attr("stroke", "white").attr("stroke-width", 1).attr("fill", "none").attr("opacity", 0).transition().duration(600).attr("opacity", 1).attr("transform", "translate(0, " + yOffset + ")");
+    renderDestination = function(animate) {
+      var coords, endTrans, height, myDest, startTrans, startY, targetX, targetY, width, yAnimOffset;
+      if (animate == null) {
+        animate = false;
+      }
+      coords = gameToMapCoords($rootScope.myToon.DestX, $rootScope.myToon.DestY);
+      width = 18;
+      height = 21;
+      yAnimOffset = 10;
+      targetX = coords.x - width / 2 * $scope.zoomScale;
+      targetY = coords.y - height * $scope.zoomScale;
+      startY = targetY - yAnimOffset;
+      myDest = svg.selectAll("#my-destination");
+      startTrans = "translate(" + targetX + ", " + startY + ") scale(" + $scope.zoomScale + ")";
+      endTrans = "translate(" + targetX + ", " + targetY + ") scale(" + $scope.zoomScale + ")";
+      if (!animate) {
+        return myDest.attr("transform", endTrans);
+      } else {
+        return myDest.attr("transform", startTrans).transition().duration(500).attr("transform", endTrans);
+      }
     };
     selectLocations = function() {
       return d3.selectAll(".svg-town");
@@ -232,11 +229,12 @@
       }, 0);
     };
     setDestination = function(offsetX, offsetY) {
-      var postData;
-      renderDestination(offsetX, offsetY);
-      postData = mapToGameCoords(offsetX, offsetY);
-      console.log('postData:', postData);
-      $http.post("/api/destination", postData).then(function(response) {
+      var gameCoords;
+      gameCoords = mapToGameCoords(offsetX, offsetY);
+      $rootScope.myToon.DestX = gameCoords.x;
+      $rootScope.myToon.DestY = gameCoords.y;
+      renderDestination(true);
+      $http.post("/api/destination", gameCoords).then(function(response) {
         if (response.data.success) {
           return $rootScope.setMyToon(response.data.toon);
         } else {
@@ -247,7 +245,8 @@
     };
     applyZoom = _.throttle(function() {
       renderToon();
-      return renderLocations();
+      renderLocations();
+      return renderDestination(false);
     }, 100);
     zoom = d3.behavior.zoom().on("zoom", function() {
       $scope.translate = d3.event.translate;

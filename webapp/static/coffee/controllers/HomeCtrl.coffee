@@ -147,32 +147,27 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
                 .attr("y", maxHealthBarHeight - healthBarHeight + 1)
                 .style("fill", healthBarColor)
 
-    renderDestination = (destX, destY) ->
-        yOffset = 10
-        width = 10
-        height = 10
-        destPointData = [
-            {x: destX, y: destY - yOffset},
-            {x: destX - width / 2, y: destY - yOffset - height},
-            {x: destX + width / 2, y: destY - yOffset - height},
-            {x: destX, y: destY - yOffset},
-        ]
+    renderDestination = (animate = false) ->
+        coords = gameToMapCoords($rootScope.myToon.DestX, $rootScope.myToon.DestY)
+        width = 18
+        height = 21
+        yAnimOffset = 10
+        targetX = coords.x - width / 2 * $scope.zoomScale
+        targetY = coords.y - height * $scope.zoomScale
+        startY = targetY - yAnimOffset
 
         myDest = svg.selectAll("#my-destination")
-            .data(destPointData)
+        startTrans = "translate(#{targetX}, #{startY}) scale(#{$scope.zoomScale})"
+        endTrans = "translate(#{targetX}, #{targetY}) scale(#{$scope.zoomScale})"
 
-        d3.select("#my-dest-point").remove()
-        svg.append("path")
-            .attr("id", "my-dest-point")
-            .attr("d", lineFunc(destPointData))
-            .attr("stroke", "white")
-            .attr("stroke-width", 1)
-            .attr("fill", "none")
-            .attr("opacity", 0)
+        if !animate
+            myDest.attr("transform", endTrans)
+        else
+            myDest.attr("transform", startTrans)
             .transition()
-            .duration(600)
-            .attr("opacity", 1)
-            .attr("transform", "translate(0, #{yOffset})")
+            .duration(500)
+            .attr("transform", endTrans)
+
 
     selectLocations = ->
         d3.selectAll(".svg-town")
@@ -215,10 +210,12 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         , 0
 
     setDestination = (offsetX, offsetY) ->
-        renderDestination(offsetX, offsetY)
-        postData = mapToGameCoords(offsetX, offsetY)
-        console.log 'postData:', postData
-        $http.post("/api/destination", postData).then (response) ->
+        gameCoords = mapToGameCoords(offsetX, offsetY)
+        # renderDestination(scaledMapCoords.x, scaledMapCoords.y, true)
+        $rootScope.myToon.DestX = gameCoords.x
+        $rootScope.myToon.DestY = gameCoords.y
+        renderDestination(true)
+        $http.post("/api/destination", gameCoords).then (response) ->
             if response.data.success
                 $rootScope.setMyToon response.data.toon
             else 
@@ -228,6 +225,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     applyZoom = _.throttle ->
         renderToon()
         renderLocations()
+        renderDestination(false)
     , 100
 
     zoom = d3.behavior.zoom()
