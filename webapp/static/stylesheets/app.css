@@ -7246,45 +7246,45 @@ a.th {
 
 /* line 105, ../sass/app.scss */
 .game-map {
-  background-image: url("/static/img/mapbg.jpg");
-  background-repeat: no-repeat;
+  height: 573px;
   position: relative;
   top: -15px;
+  background-image: url("/static/img/mapbg.jpg");
+  background-repeat: no-repeat;
   background-position: -3px 13px;
-  padding-left: 33px;
-  padding-top: 42px;
+  padding-left: 37px;
+  padding-top: 45px;
   padding-right: 33px;
-  padding-bottom: 54px;
 }
 
-/* line 117, ../sass/app.scss */
+/* line 118, ../sass/app.scss */
 .button.warn {
   background-color: #ed9c28;
 }
 
-/* line 122, ../sass/app.scss */
+/* line 123, ../sass/app.scss */
 .label.victory {
   background-color: #ed9c28;
 }
-/* line 125, ../sass/app.scss */
+/* line 126, ../sass/app.scss */
 .label.defeat {
   background-color: #c60f13;
 }
-/* line 128, ../sass/app.scss */
+/* line 129, ../sass/app.scss */
 .label.log-label {
   width: 65px;
 }
 
-/* line 133, ../sass/app.scss */
+/* line 134, ../sass/app.scss */
 .row.log-item {
   padding: 10px;
 }
-/* line 136, ../sass/app.scss */
+/* line 137, ../sass/app.scss */
 .row.log-item:hover {
   background-color: #222;
 }
 
-/* line 141, ../sass/app.scss */
+/* line 142, ../sass/app.scss */
 .dim {
   color: #b0b0b0;
 }

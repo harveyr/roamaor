@@ -12,7 +12,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         .attr("height", svgHeight)
 
     mapWidth = map.width()
-    mapHeight = svgHeight + 56
+    mapHeight = svgHeight + 60
     svgWidth = parseInt(svg.style("width"))
     svgHeight = parseInt(svg.style("height"))
     svgWidthScale = svgWidth / $rootScope.worldWidth
@@ -125,7 +125,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         toon = $rootScope.myToon
         coords = gameToMapCoords(toon.LocX, toon.LocY)
 
-        toonSvg = svg.selectAll("#my-toon")
+        toonSvg = svg.select("#my-toon")
 
         transform = "translate(#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
 
@@ -154,9 +154,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         else
             toonSvg.selectAll(".dead-toon")
                 .attr("opacity", 0)
-            toonSvg.selectAll(".healthy-toon-toon")
+            toonSvg.selectAll(".healthy-toon")
                 .attr("opacity", 1)
-
 
         if toonSvg.attr("opacity") < 1
             drawHealthBar(false)
@@ -250,43 +249,53 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     drawGrid = ->
         console.log 'draw grid'
-        gridX = svg.selectAll(".grid-line-x")
+        grid = svg.select("#gridlines")
+        gridX = grid.selectAll(".grid-line-x")
             .data(gridLinesX)
 
         gridX.enter()
-            .insert("svg:line")
+            .append("svg:line")
             .attr("class", "grid-line-x")
+
+        strokeFunc = (d) ->
+            if d == 0
+                return "#333"
+            else
+                return "#999"
+
+        strokeWidthFunc = (d) ->
+            1
 
         gridX.attr("x1", (d) -> xScale(d))
             .attr("y1", yScale(0))
             .attr("x2", (d) -> xScale(d))
             .attr("y2", yScale($rootScope.worldHeight))
-            .style("stroke", "#555")
-            .style("stroke-width", 1)
+            .style("stroke", strokeFunc)
+            .style("stroke-width", strokeWidthFunc)
 
         gridX.exit().remove()
 
-        gridY = svg.selectAll(".grid-line-y")
+        gridY = grid.selectAll(".grid-line-y")
             .data(gridLinesY)
 
         gridY.enter()
-            .insert("svg:line")
+            .append("svg:line")
             .attr("class", "grid-line-y")
 
         gridY.attr("x1", xScale(0))
             .attr("y1", (d) -> yScale(d))
             .attr("x2", xScale($rootScope.worldWidth))
             .attr("y2", (d) -> yScale(d))
-            .style("stroke", "#555")
-            .style("stroke-width", 1)
+            .style("stroke", strokeFunc)
+            .style("stroke-width", strokeWidthFunc)
 
         gridY.exit().remove()
 
     updateView = _.throttle ->
+        drawGrid()
         drawToon()
         drawLocations()
         drawDestination(false)
-        drawGrid()
     , 100
 
     zoom = d3.behavior.zoom()

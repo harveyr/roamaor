@@ -33,3 +33,4 @@ func TickBeing(b *Being, multiplier float64) {
     ApplyProgress(b)
 	b.UpdateLastTick()
 }
+	

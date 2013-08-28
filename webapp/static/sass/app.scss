@@ -103,15 +103,16 @@
 
 $map-bg: #E7E7E7;
 .game-map {
-    background-image:url("/static/img/mapbg.jpg");
-    background-repeat: no-repeat;
+    height: 573px;
     position: relative;
     top: -15px;
-    background-position: -3px 13px;
-    padding-left: 33px;
-    padding-top: 42px;
+    padding-left: 37px;
+    padding-top: 45px;
     padding-right: 33px;
-    padding-bottom: 54px;
+    
+    background-image:url("/static/img/mapbg.jpg");
+    background-repeat: no-repeat;
+    background-position: -3px 13px;
 }
 
 .button.warn {

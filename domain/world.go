@@ -3,8 +3,8 @@ package domain
 import "log"
 
 const (
-	WORLD_WIDTH = 5000
-	WORLD_HEIGHT  = 5000
+	WORLD_WIDTH = 2000
+	WORLD_HEIGHT  = 2000
 )
 
 func CreateOrUpdateLocation(name string, x int, y int, w int, h int) {

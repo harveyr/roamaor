@@ -84,7 +84,7 @@
     map = $(".game-map");
     svg = d3.select("svg").attr("height", svgHeight);
     mapWidth = map.width();
-    mapHeight = svgHeight + 56;
+    mapHeight = svgHeight + 60;
     svgWidth = parseInt(svg.style("width"));
     svgHeight = parseInt(svg.style("height"));
     svgWidthScale = svgWidth / $rootScope.worldWidth;
@@ -184,7 +184,7 @@
       }
       toon = $rootScope.myToon;
       coords = gameToMapCoords(toon.LocX, toon.LocY);
-      toonSvg = svg.selectAll("#my-toon");
+      toonSvg = svg.select("#my-toon");
       transform = "translate(" + coords.x + ", " + coords.y + ") scale(" + $scope.zoomScale + ")";
       maxHealthBarHeight = 15;
       hpPercent = toon.Hp / toon.MaxHp;
@@ -206,7 +206,7 @@
         return;
       } else {
         toonSvg.selectAll(".dead-toon").attr("opacity", 0);
-        toonSvg.selectAll(".healthy-toon-toon").attr("opacity", 1);
+        toonSvg.selectAll(".healthy-toon").attr("opacity", 1);
       }
       if (toonSvg.attr("opacity") < 1) {
         drawHealthBar(false);
@@ -284,30 +284,41 @@
       return walkToon();
     };
     drawGrid = function() {
-      var gridX, gridY;
+      var grid, gridX, gridY, strokeFunc, strokeWidthFunc;
       console.log('draw grid');
-      gridX = svg.selectAll(".grid-line-x").data(gridLinesX);
-      gridX.enter().insert("svg:line").attr("class", "grid-line-x");
+      grid = svg.select("#gridlines");
+      gridX = grid.selectAll(".grid-line-x").data(gridLinesX);
+      gridX.enter().append("svg:line").attr("class", "grid-line-x");
+      strokeFunc = function(d) {
+        if (d === 0) {
+          return "#333";
+        } else {
+          return "#999";
+        }
+      };
+      strokeWidthFunc = function(d) {
+        return 1;
+      };
       gridX.attr("x1", function(d) {
         return xScale(d);
       }).attr("y1", yScale(0)).attr("x2", function(d) {
         return xScale(d);
-      }).attr("y2", yScale($rootScope.worldHeight)).style("stroke", "#555").style("stroke-width", 1);
+      }).attr("y2", yScale($rootScope.worldHeight)).style("stroke", strokeFunc).style("stroke-width", strokeWidthFunc);
       gridX.exit().remove();
-      gridY = svg.selectAll(".grid-line-y").data(gridLinesY);
-      gridY.enter().insert("svg:line").attr("class", "grid-line-y");
+      gridY = grid.selectAll(".grid-line-y").data(gridLinesY);
+      gridY.enter().append("svg:line").attr("class", "grid-line-y");
       gridY.attr("x1", xScale(0)).attr("y1", function(d) {
         return yScale(d);
       }).attr("x2", xScale($rootScope.worldWidth)).attr("y2", function(d) {
         return yScale(d);
-      }).style("stroke", "#555").style("stroke-width", 1);
+      }).style("stroke", strokeFunc).style("stroke-width", strokeWidthFunc);
       return gridY.exit().remove();
     };
     updateView = _.throttle(function() {
+      drawGrid();
       drawToon();
       drawLocations();
-      drawDestination(false);
-      return drawGrid();
+      return drawDestination(false);
     }, 100);
     zoom = d3.behavior.zoom().on("zoom", function() {
       $scope.translate = d3.event.translate;
