@@ -2,6 +2,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     # See ColorBrewer! https://github.com/mbostock/d3/wiki/Ordinal-Scales
 
+    lastZoom = new Date()
+
     svgHeight = 500
     map = $(".game-map")
     svg = d3.select("svg")
@@ -44,11 +46,14 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         #     y: yScale(inputY) * $scope.zoomScale + $scope.translate[1]
 
     mapToGameCoords = (inputX, inputY) ->
-        svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth
-        svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight
-        scaled =
-            x: inputX / svgWidthScale
-            y: inputY / svgHeightScale
+        coords =
+            x: xScale.invert(inputX) / $scope.zoomScale - $scope.translate[0]
+            y: yScale.invert(inputY) / $scope.zoomScale - $scope.translate[1]
+        # svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth
+        # svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight
+        # scaled =
+        #     x: inputX / svgWidthScale
+        #     y: inputY / svgHeightScale
 
     $scope.applyZoom = _.throttle ->
         svg.selectAll("#my-toon")
@@ -167,8 +172,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     setDestination = (offsetX, offsetY) ->
         renderDestination(offsetX, offsetY)
-        console.log("offsets", offsetX, offsetY, "inverted:", xScale.invert(offsetX), yScale.invert(offsetY))
 
+        console.log 'setDestination: ', [offsetX, offsetY], mapToGameCoords(offsetX, offsetY)
         # postData = mapToGameCoords(destX, destY)
         # console.log 'postData:', postData
         # $http.post("/api/destination", postData).then (response) ->
@@ -186,6 +191,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         .on "zoom", ->
             $scope.translate = d3.event.translate
             $scope.zoomScale = d3.event.scale
+            lastZoom = new Date()
             applyZoom()
     
     zoom.scaleExtent([0.4, 3.0])
@@ -195,7 +201,10 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     svg.call(zoom)
 
     svg.on "click", ->
-        setDestination(d3.event.offsetX, d3.event.offsetY)
+        console.log 'CLICK d3.event:', d3.event
+        now = new Date()
+        if now.getTime() - lastZoom.getTime() > 1000
+            setDestination(d3.event.offsetX, d3.event.offsetY)
 
     if $rootScope.myToon
         renderToon()

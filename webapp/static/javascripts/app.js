@@ -77,7 +77,8 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var applyZoom, gameToMapCoords, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, xScale, yScale, zoom;
+    var applyZoom, gameToMapCoords, lastZoom, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, xScale, yScale, zoom;
+    lastZoom = new Date();
     svgHeight = 500;
     map = $(".game-map");
     svg = d3.select("svg").attr("height", svgHeight);
@@ -108,12 +109,10 @@
       };
     };
     mapToGameCoords = function(inputX, inputY) {
-      var scaled;
-      svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth;
-      svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight;
-      return scaled = {
-        x: inputX / svgWidthScale,
-        y: inputY / svgHeightScale
+      var coords;
+      return coords = {
+        x: xScale.invert(inputX) / $scope.zoomScale - $scope.translate[0],
+        y: yScale.invert(inputY) / $scope.zoomScale - $scope.translate[1]
       };
     };
     $scope.applyZoom = _.throttle(function() {
@@ -198,7 +197,7 @@
     };
     setDestination = function(offsetX, offsetY) {
       renderDestination(offsetX, offsetY);
-      return console.log("offsets", offsetX, offsetY, "inverted:", xScale.invert(offsetX), yScale.invert(offsetY));
+      return console.log('setDestination: ', [offsetX, offsetY], mapToGameCoords(offsetX, offsetY));
     };
     applyZoom = _.throttle(function() {
       renderToon();
@@ -207,6 +206,7 @@
     zoom = d3.behavior.zoom().on("zoom", function() {
       $scope.translate = d3.event.translate;
       $scope.zoomScale = d3.event.scale;
+      lastZoom = new Date();
       return applyZoom();
     });
     zoom.scaleExtent([0.4, 3.0]);
@@ -215,7 +215,12 @@
     zoom.size([svgWidth, svgHeight]);
     svg.call(zoom);
     svg.on("click", function() {
-      return setDestination(d3.event.offsetX, d3.event.offsetY);
+      var now;
+      console.log('CLICK d3.event:', d3.event);
+      now = new Date();
+      if (now.getTime() - lastZoom.getTime() > 1000) {
+        return setDestination(d3.event.offsetX, d3.event.offsetY);
+      }
     });
     if ($rootScope.myToon) {
       renderToon();
