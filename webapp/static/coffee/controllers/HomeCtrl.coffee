@@ -19,7 +19,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     svgHeightScale = svgHeight / $rootScope.worldHeight
     walkPromise = null
 
-    gridDiameter = 50
+    gridDiameter = 200
     gridLinesX = d3.range(0, $rootScope.worldWidth, gridDiameter)
     gridLinesY = d3.range(0, $rootScope.worldHeight, gridDiameter)
 
@@ -61,6 +61,10 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     walkToon = (step = 1) ->
         $timeout.cancel walkPromise
         toon = $rootScope.myToon
+
+        if toon.Hp / toon.MaxHp < 0.15
+            return
+
         legs = selectToonSvg().select(".toon-legs")
 
         if toon.LocX == toon.DestX and toon.LocY == toon.DestY
@@ -92,6 +96,29 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         , delay
 
 
+    drawHealthBar = (anim = true) ->
+        toon = $rootScope.myToon
+        maxHealthBarHeight = 15
+        hpPercent = (toon.Hp / toon.MaxHp)
+        healthBarHeight = Math.max(1, hpPercent * maxHealthBarHeight)
+        healthBarColor = "#15ff00"
+        if hpPercent < .4
+            healthBarColor = "red"
+        else if hpPercent < 0.6
+            healthBarColor = "#ffea00"
+
+        healthBar = selectToonSvg().selectAll(".toon-health-bar")
+        if anim
+            healthBar.transition()
+            .attr("height", healthBarHeight)
+            .attr("y", maxHealthBarHeight - healthBarHeight + 1)
+            .style("fill", healthBarColor)
+        else
+            healthBar.attr("height", healthBarHeight)
+            .attr("y", maxHealthBarHeight - healthBarHeight + 1)
+            .style("fill", healthBarColor)
+
+
     drawToon = ->
         if !$rootScope.myToon
             throw "myToon not set"
@@ -99,9 +126,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         coords = gameToMapCoords(toon.LocX, toon.LocY)
 
         toonSvg = svg.selectAll("#my-toon")
-            .data([coords])
 
-        translate = "translate(#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
+        transform = "translate(#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
 
         maxHealthBarHeight = 15
         hpPercent = (toon.Hp / toon.MaxHp)
@@ -112,16 +138,29 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         else if hpPercent < 0.6
             healthBarColor = "#ffea00"
 
-        toonSvg.selectAll("toon-legs")
-            .transform
+        if hpPercent < 0.15
+            toonSvg.selectAll(".healthy-toon")
+                .attr("opacity", "0")
+            deadToon = toonSvg.selectAll(".dead-toon")
+                .attr("opacity", "1")
+            deadToon.selectAll("polygon")
+                .style("fill", "#ff7e86")
+            deadToon.selectAll("polyline")
+                .style("fill", "#ff7e86")
+            toonSvg.attr("transform", transform)
+            toonSvg.attr("opacity", 1)
+            drawHealthBar(true)
+            return
+        else
+            toonSvg.selectAll(".dead-toon")
+                .attr("opacity", 0)
+            toonSvg.selectAll(".healthy-toon-toon")
+                .attr("opacity", 1)
+
 
         if toonSvg.attr("opacity") < 1
-            toonSvg.selectAll(".toon-health-bar")
-                .attr("height", healthBarHeight)
-                .attr("y", maxHealthBarHeight - healthBarHeight + 1)
-                .style("fill", healthBarColor)
-
-            toonSvg.attr("transform", translate)
+            drawHealthBar(false)
+            toonSvg.attr("transform", transform)
                 .transition()
                 .delay(500)
                 .duration(500)
@@ -129,13 +168,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         else
             toonSvg.transition()
                 .duration(100)
-                .attr("transform", translate)
-
-            toonSvg.selectAll(".toon-health-bar")
-                .transition()
-                .attr("height", healthBarHeight)
-                .attr("y", maxHealthBarHeight - healthBarHeight + 1)
-                .style("fill", healthBarColor)
+                .attr("transform", transform)
+            drawHealthBar(true)
         walkToon()
 
     drawDestination = (animate = false) ->

@@ -13,25 +13,48 @@
             <svg id="game-map-svg" 
                 xmlns="http://www.w3.org/2000/svg" version="1.1">
                 <g id="my-toon" opacity="0">
-                    <g class="toon-legs">
-                        <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="5.514" y1="16.046" x2="5.514" y2="23.453"/>
-                        <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="10.258" y1="15.778" x2="10.258" y2="23.453"/>
+                    <g class="healthy-toon">
+                        <g class="toon-legs">
+                            <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="5.514" y1="16.046" x2="5.514" y2="23.453"/>
+                            <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="10.258" y1="15.778" x2="10.258" y2="23.453"/>
+                        </g>
+                        <g class="toon-body">
+                            <polygon fill="#A0A0A0" stroke="#000000" stroke-miterlimit="10" points="3.416,6.313 2.857,13.984 7.607,17.672 13.295,13.609 
+                                12.488,6.313    "/>
+                            <polygon fill="#A0A0A0" stroke="#000000" stroke-miterlimit="10" points="8.584,1.172 1.357,5.797 8.076,8.422 14.982,5.484    "/>
+                            <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="4.232,9.797 5.67,9.109 6.795,9.797 
+                                    "/>
+                            <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="8.977,9.797 10.414,9.109 
+                                11.539,9.797    "/>
+                            <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="7.545,10.484 6.045,12.484 
+                                7.545,12.172    "/>
+                            <path fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" d="M5.514,14.109c0.219,0,3.906,0,3.906,0
+                                l0.838-0.562"/>
+                            <line fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="5.356" y1="9.797" x2="5.671" y2="9.797"/>
+                            <line fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="10.101" y1="9.797" x2="10.415" y2="9.797"/>
+                       </g>
                     </g>
-                    <g class="toon-body">
-                        <polygon fill="#A0A0A0" stroke="#000000" stroke-miterlimit="10" points="3.416,6.313 2.857,13.984 7.607,17.672 13.295,13.609 
-                            12.488,6.313    "/>
-                        <polygon fill="#A0A0A0" stroke="#000000" stroke-miterlimit="10" points="8.584,1.172 1.357,5.797 8.076,8.422 14.982,5.484    "/>
-                        <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="4.232,9.797 5.67,9.109 6.795,9.797 
+
+                    <g class="dead-toon" opacity="0">
+                        <g>
+                            <polyline fill="none" stroke="#000000" stroke-miterlimit="10" points="5.514,16.046 5,17.672 4.046,18.518 3.208,16.046   "/>
+                            <polyline fill="none" stroke="#000000" stroke-miterlimit="10" points="10.258,15.778 10.792,17.501 11.958,17.123 13.295,19.082   
                                 "/>
-                        <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="8.977,9.797 10.414,9.109 
-                            11.539,9.797    "/>
-                        <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="7.545,10.484 6.045,12.484 
-                            7.545,12.172    "/>
-                        <path fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" d="M5.514,14.109c0.219,0,3.906,0,3.906,0
-                            l0.838-0.562"/>
-                        <line fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="5.356" y1="9.797" x2="5.671" y2="9.797"/>
-                        <line fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="10.101" y1="9.797" x2="10.415" y2="9.797"/>
-                   </g>
+                        </g>
+                        <g>
+                            <polygon fill="#A0A0A0" stroke="#000000" stroke-miterlimit="10" points="3.416,6.313 2.857,13.984 7.607,17.672 13.295,13.609 
+                                12.488,6.313    "/>
+                            <polygon fill="#A0A0A0" stroke="#000000" stroke-miterlimit="10" points="8.584,1.172 1.357,5.797 8.076,8.422 14.982,5.484    "/>
+                            <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="7.545,10.484 6.045,12.484 
+                                7.545,12.172    "/>
+                            <path fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" d="M5.514,14.109c0.219,0,3.906,0,3.906,0
+                                L10,14.688"/>
+                            <line fill="none" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="4.458" y1="8.791" x2="5.918" y2="10.25"/>
+                            <line fill="none" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="4.469" y1="10.256" x2="6.098" y2="8.848"/>
+                            <line fill="none" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="9.626" y1="8.788" x2="11.086" y2="10.247"/>
+                            <line fill="none" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="9.636" y1="10.253" x2="11.266" y2="8.845"/>
+                        </g>
+                    </g>
                    <rect class="toon-health-bar" x="16.469" y="0.219" fill="#A0A0A0" stroke="#000000" stroke-width="0.25" stroke-miterlimit="10" width="3.25" height="14.469"/>
                 </g>
 
@@ -47,7 +70,6 @@
                 </g>
 
                 <path id="my-destination" fill="#B72121" stroke="#000000" stroke-width="0.25" stroke-miterlimit="10" d="M10.308,18.594L8.938,8.562L3.933,7.016 c0-3.521,2.854-6.375,6.375-6.375c3.521,0,6.375,2.854,6.374,6.375l-5.006,1.546C11.676,8.562,10.307,18.594,10.308,18.594z"/>
-
             </svg>
         </div>
     </div>

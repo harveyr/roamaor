@@ -164,7 +164,7 @@ func NewMob(level int) *Being {
 	b := new(Being)
 	b.Name = RandMobName(level)
 	b.Level = level
-	b.Hp = 20 + 10 * level
+	b.Hp = 20 + 20 * level
 	b.BeingType = BEING_MOB
 	b.Created = time.Now().UTC()
 	return b
