@@ -138,7 +138,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         else if hpPercent < 0.6
             healthBarColor = "#ffea00"
 
-        if hpPercent < 0.15
+        if hpPercent < 0.1
             toonSvg.selectAll(".healthy-toon")
                 .attr("opacity", "0")
             deadToon = toonSvg.selectAll(".dead-toon")
@@ -211,16 +211,22 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
             if locs.attr("opacity") < 1
                 locs.transition()
-                    .delay((d, i) -> i * 200)
-                    .duration(1000)
+                    .delay((d, i) -> i * 100)
+                    .duration(300)
                     .attr("opacity", 1)
-
-                locs.insert("rect", "rect")
-                    # .attr("width", (d) -> 20)
-                    # .attr("height", (d) -> 20)
-                    .attr("width", (d) -> d.X2 - d.X1)
-                    .attr("height", (d) -> d.Y2 - d.Y1)
+                    .select(".location-span")
+                    .attr("width", (d) -> xScale(d.X2 - d.X1))
+                    .attr("height", (d) -> yScale(d.Y2 - d.Y1))
+                    .attr("transform", (d) ->
+                        x = xScale((d.X1 - d.X2) / 2 + 10)
+                        y = yScale((d.Y1 - d.Y2) / 2 + 10)
+                        "translate(#{x}, #{y})"
+                    )
                     .attr("fill", "rgba(6, 212, 0, 0.3)")
+
+                # locs.insert("rect", "rect")
+                #     .attr("width", (d) -> )
+                #     .attr("height", (d) -> yScale(d.Y2 - d.Y1))
 
             # color = "#555"
             # locs.selectAll("polyline")

@@ -195,7 +195,7 @@
       } else if (hpPercent < 0.6) {
         healthBarColor = "#ffea00";
       }
-      if (hpPercent < 0.15) {
+      if (hpPercent < 0.1) {
         toonSvg.selectAll(".healthy-toon").attr("opacity", "0");
         deadToon = toonSvg.selectAll(".dead-toon").attr("opacity", "1");
         deadToon.selectAll("polygon").style("fill", "#ff7e86");
@@ -254,13 +254,17 @@
         var locs;
         locs = selectLocations().data($rootScope.displayedLocations).attr("transform", locationTransform);
         if (locs.attr("opacity") < 1) {
-          locs.transition().delay(function(d, i) {
-            return i * 200;
-          }).duration(1000).attr("opacity", 1);
-          return locs.insert("rect", "rect").attr("width", function(d) {
-            return d.X2 - d.X1;
+          return locs.transition().delay(function(d, i) {
+            return i * 100;
+          }).duration(300).attr("opacity", 1).select(".location-span").attr("width", function(d) {
+            return xScale(d.X2 - d.X1);
           }).attr("height", function(d) {
-            return d.Y2 - d.Y1;
+            return yScale(d.Y2 - d.Y1);
+          }).attr("transform", function(d) {
+            var x, y;
+            x = xScale((d.X1 - d.X2) / 2 + 10);
+            y = yScale((d.Y1 - d.Y2) / 2 + 10);
+            return "translate(" + x + ", " + y + ")";
           }).attr("fill", "rgba(6, 212, 0, 0.3)");
         }
       }, 0);

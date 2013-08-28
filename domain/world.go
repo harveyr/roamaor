@@ -29,7 +29,7 @@ func InitWorldLocations() {
 	log.Print("--- Initializing World Locations ---")
 
 	CreateOrUpdateLocation("Newbville", 20, 20, 20, 20)
-	CreateOrUpdateLocation("Tonky", 60, 80, 20, 20)
+	CreateOrUpdateLocation("Tonky", 100, 100, 50, 50)
 
 	log.Print("------------------------------------")
 	print("\n")
