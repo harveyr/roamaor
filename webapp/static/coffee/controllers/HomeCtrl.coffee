@@ -5,6 +5,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     scaleX = null
     scaleY = null
     $scope.renderedLocationIds = []
+    $scope.zoomScale = 1
 
     svgHeight = 500
     svg = d3.select("svg")
@@ -49,7 +50,11 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             y: inputY * svgHeightScale
         # console.log 'gameToMapCoords scaled:', inputX, inputY, scaled
         scaled
-        
+
+    $scope.applyZoom = _.throttle ->
+        svg.selectAll("#my-toon")
+
+    , 300
 
     renderToon = ->
         if !$rootScope.myToon
@@ -60,8 +65,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         myLoc = svg.selectAll("#my-toon")
             .data([coords])
         console.log 'toon coords:', coords
-        
-        translate = "translate(#{coords.x}, #{coords.y})"
+
+        translate = "translate(#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
 
         maxHealthBarHeight = 15
         hpPercent = (toon.Hp / toon.MaxHp)
@@ -85,8 +90,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
                 .attr("opacity", 1)
         else
             myLoc.transition()
-                .delay(500)
-                .duration(500)
+                .duration(100)
                 .attr("transform", translate)
 
             myLoc.selectAll("#my-health-bar")
@@ -138,7 +142,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         transformFunc = (d) ->
             x = d.X1 + d.X2 / 2
             y = d.Y1 + d.Y2 / 2
-            "translate (#{x}, #{y})"
+            "translate (#{x}, #{y}) scale(#{$scope.zoomScale})"
 
         $timeout ->
             locs = svg.selectAll(".svg-town")
@@ -168,7 +172,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
         , 0
 
-
     $scope.mapClick = ($event) ->
         destX = $event.offsetX
         destY = $event.offsetY
@@ -185,12 +188,19 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             else 
                 $rootScope.alertUser "Failed to set destination: #{response.data.reason}" 
 
+    applyZoom = _.throttle ->
+        renderToon()
+        renderLocations()
+    , 300
 
     zoom = d3.behavior.zoom()
         .on "zoom", ->
-            svg.selectAll("g")
-                .attr("transform")
+            console.log 'd3.event:', d3.event
+            console.log 'd3.event.scale:', d3.event.scale
+            $scope.zoomScale = d3.event.scale
+            applyZoom()
 
+    svg.call(zoom)
 
     if $rootScope.myToon
         renderToon()

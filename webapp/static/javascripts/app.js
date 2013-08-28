@@ -77,12 +77,13 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var gameToMapCoords, lineFunc, map, mapColor, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, scaleX, scaleY, svg, svgHeight, toonRadius, toonSvgCoords, zoom;
+    var applyZoom, gameToMapCoords, lineFunc, map, mapColor, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, scaleX, scaleY, svg, svgHeight, toonRadius, toonSvgCoords, zoom;
     mapColor = "#E7E7E7";
     toonRadius = 5;
     scaleX = null;
     scaleY = null;
     $scope.renderedLocationIds = [];
+    $scope.zoomScale = 1;
     svgHeight = 500;
     svg = d3.select("svg").attr("height", svgHeight);
     map = $(".game-map");
@@ -122,6 +123,9 @@
       };
       return scaled;
     };
+    $scope.applyZoom = _.throttle(function() {
+      return svg.selectAll("#my-toon");
+    }, 300);
     renderToon = function() {
       var coords, healthBarColor, healthBarHeight, hpPercent, maxHealthBarHeight, myLoc, toon, translate;
       if (!$rootScope.myToon) {
@@ -131,7 +135,7 @@
       coords = gameToMapCoords(toon.LocX, toon.LocY);
       myLoc = svg.selectAll("#my-toon").data([coords]);
       console.log('toon coords:', coords);
-      translate = "translate(" + coords.x + ", " + coords.y + ")";
+      translate = "translate(" + coords.x + ", " + coords.y + ") scale(" + $scope.zoomScale + ")";
       maxHealthBarHeight = 15;
       hpPercent = toon.Hp / toon.MaxHp;
       healthBarHeight = hpPercent * maxHealthBarHeight;
@@ -145,7 +149,7 @@
         myLoc.selectAll("#my-health-bar").attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
         return myLoc.attr("transform", translate).transition().delay(500).duration(500).attr("opacity", 1);
       } else {
-        myLoc.transition().delay(500).duration(500).attr("transform", translate);
+        myLoc.transition().duration(100).attr("transform", translate);
         return myLoc.selectAll("#my-health-bar").transition().attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
       }
     };
@@ -190,7 +194,7 @@
         var x, y;
         x = d.X1 + d.X2 / 2;
         y = d.Y1 + d.Y2 / 2;
-        return "translate (" + x + ", " + y + ")";
+        return "translate (" + x + ", " + y + ") scale(" + $scope.zoomScale + ")";
       };
       return $timeout(function() {
         var locs;
@@ -224,9 +228,17 @@
         }
       });
     };
+    applyZoom = _.throttle(function() {
+      renderToon();
+      return renderLocations();
+    }, 300);
     zoom = d3.behavior.zoom().on("zoom", function() {
-      return svg.selectAll("g").attr("transform");
+      console.log('d3.event:', d3.event);
+      console.log('d3.event.scale:', d3.event.scale);
+      $scope.zoomScale = d3.event.scale;
+      return applyZoom();
     });
+    svg.call(zoom);
     if ($rootScope.myToon) {
       renderToon();
     }
@@ -362,7 +374,6 @@
         createdDate = parseDate(scope.item.Created);
         now = new Date();
         scope.age = now.getUTCMinutes() - createdDate.getUTCMinutes();
-        console.log('scope.item.Data:', scope.item.Data);
         switch (scope.item.LogType) {
           case $rootScope.logTypes.fight:
             scope.action = "man-danced with a <span class=\"dim\">Level " + scope.item.Data.opponentLevel + " " + scope.item.Data.opponentName + "</span>.";

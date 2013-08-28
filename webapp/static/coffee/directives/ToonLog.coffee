@@ -47,7 +47,6 @@ angular.module(DIRECTIVE_MODULE).directive "toonLog", ($rootScope) ->
             createdDate = parseDate(scope.item.Created)
             now = new Date()
             scope.age = now.getUTCMinutes() - createdDate.getUTCMinutes()
-            console.log 'scope.item.Data:', scope.item.Data
 
             switch scope.item.LogType
 
