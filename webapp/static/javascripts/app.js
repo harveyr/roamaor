@@ -77,7 +77,7 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var applyZoom, gameToMapCoords, healthColors, lastZoom, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, selectToonSvg, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, walkPromise, walkToon, xScale, yScale, zoom;
+    var drawDestination, drawGrid, drawLocations, drawToon, gameToMapCoords, gridDiameter, gridLinesX, gridLinesY, healthColors, lastZoom, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, selectLocations, selectToonSvg, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, updateView, walkPromise, walkToon, xScale, yScale, zoom;
     lastZoom = new Date();
     healthColors = ["#FF000E", "#FF2D0B", "#FF5B08", "#FF8905", "#FFB702", "#D0EA00", "#A2EF00", "#73F400", "#45F900", "#17FF00"];
     svgHeight = 500;
@@ -90,6 +90,9 @@
     svgWidthScale = svgWidth / $rootScope.worldWidth;
     svgHeightScale = svgHeight / $rootScope.worldHeight;
     walkPromise = null;
+    gridDiameter = 50;
+    gridLinesX = d3.range(0, $rootScope.worldWidth, gridDiameter);
+    gridLinesY = d3.range(0, $rootScope.worldHeight, gridDiameter);
     xScale = d3.scale.linear();
     yScale = d3.scale.linear();
     $scope.zoomScale = 1;
@@ -106,20 +109,17 @@
     gameToMapCoords = function(inputX, inputY) {
       var scaled;
       return scaled = {
-        x: xScale(inputX) * $scope.zoomScale + $scope.translate[0],
-        y: yScale(inputY) * $scope.zoomScale + $scope.translate[1]
+        x: xScale(inputX),
+        y: yScale(inputY)
       };
     };
     mapToGameCoords = function(inputX, inputY) {
       var coords;
       return coords = {
-        x: xScale.invert(inputX) / $scope.zoomScale - $scope.translate[0],
-        y: yScale.invert(inputY) / $scope.zoomScale - $scope.translate[1]
+        x: xScale.invert(inputX),
+        y: yScale.invert(inputY)
       };
     };
-    $scope.applyZoom = _.throttle(function() {
-      return svg.selectAll("#my-toon");
-    }, 300);
     selectToonSvg = function() {
       return svg.selectAll("#my-toon");
     };
@@ -152,7 +152,7 @@
         return walkToon(step * -1);
       }, delay);
     };
-    renderToon = function() {
+    drawToon = function() {
       var coords, healthBarColor, healthBarHeight, hpPercent, maxHealthBarHeight, toon, toonSvg, translate;
       if (!$rootScope.myToon) {
         throw "myToon not set";
@@ -164,7 +164,6 @@
       maxHealthBarHeight = 15;
       hpPercent = toon.Hp / toon.MaxHp;
       healthBarHeight = hpPercent * maxHealthBarHeight;
-      console.log('healthBarColor:', healthBarColor);
       healthBarColor = "#15ff00";
       if (hpPercent < .4) {
         healthBarColor = "red";
@@ -174,13 +173,14 @@
       toonSvg.selectAll("toon-legs").transform;
       if (toonSvg.attr("opacity") < 1) {
         toonSvg.selectAll(".toon-health-bar").attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
-        return toonSvg.attr("transform", translate).transition().delay(500).duration(500).attr("opacity", 1);
+        toonSvg.attr("transform", translate).transition().delay(500).duration(500).attr("opacity", 1);
       } else {
         toonSvg.transition().duration(100).attr("transform", translate);
-        return toonSvg.selectAll(".toon-health-bar").transition().attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
+        toonSvg.selectAll(".toon-health-bar").transition().attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
       }
+      return walkToon();
     };
-    renderDestination = function(animate) {
+    drawDestination = function(animate) {
       var coords, endTrans, height, myDest, startTrans, startY, targetX, targetY, width, yAnimOffset;
       if (animate == null) {
         animate = false;
@@ -209,7 +209,7 @@
       coords = gameToMapCoords(d.X1 + d.X2 / 2, d.Y1 + d.Y2 / 2);
       return "translate (" + coords.x + ", " + coords.y + ") scale(" + $scope.zoomScale + ")";
     };
-    renderLocations = function() {
+    drawLocations = function() {
       if (!$rootScope.displayedLocations || $rootScope.displayedLocations.length === 0) {
         return;
       }
@@ -231,9 +231,12 @@
     setDestination = function(offsetX, offsetY) {
       var gameCoords;
       gameCoords = mapToGameCoords(offsetX, offsetY);
+      if (gameCoords.x < 0 || gameCoords.y < 0) {
+        return;
+      }
       $rootScope.myToon.DestX = gameCoords.x;
       $rootScope.myToon.DestY = gameCoords.y;
-      renderDestination(true);
+      drawDestination(true);
       $http.post("/api/destination", gameCoords).then(function(response) {
         if (response.data.success) {
           return $rootScope.setMyToon(response.data.toon);
@@ -243,22 +246,43 @@
       });
       return walkToon();
     };
-    applyZoom = _.throttle(function() {
-      renderToon();
-      renderLocations();
-      return renderDestination(false);
+    drawGrid = function() {
+      var gridX, gridY;
+      console.log('draw grid');
+      gridX = svg.selectAll(".grid-line-x").data(gridLinesX);
+      gridX.enter().insert("svg:line").attr("class", "grid-line-x");
+      gridX.attr("x1", function(d) {
+        return xScale(d);
+      }).attr("y1", yScale(0)).attr("x2", function(d) {
+        return xScale(d);
+      }).attr("y2", yScale($rootScope.worldHeight)).style("stroke", "#555").style("stroke-width", 1);
+      gridX.exit().remove();
+      gridY = svg.selectAll(".grid-line-y").data(gridLinesY);
+      gridY.enter().insert("svg:line").attr("class", "grid-line-y");
+      gridY.attr("x1", xScale(0)).attr("y1", function(d) {
+        return yScale(d);
+      }).attr("x2", xScale($rootScope.worldWidth)).attr("y2", function(d) {
+        return yScale(d);
+      }).style("stroke", "#555").style("stroke-width", 1);
+      return gridY.exit().remove();
+    };
+    updateView = _.throttle(function() {
+      drawToon();
+      drawLocations();
+      drawDestination(false);
+      return drawGrid();
     }, 100);
     zoom = d3.behavior.zoom().on("zoom", function() {
       $scope.translate = d3.event.translate;
       $scope.zoomScale = d3.event.scale;
       lastZoom = new Date();
-      return applyZoom();
+      return updateView();
     });
     zoom.scaleExtent([0.4, 3.0]);
     zoom.x(xScale);
     zoom.y(yScale);
     zoom.size([svgWidth, svgHeight]);
-    svg.call(zoom);
+    zoom(svg);
     svg.on("click", function() {
       var now;
       now = new Date();
@@ -266,16 +290,22 @@
         return setDestination(d3.event.offsetX, d3.event.offsetY);
       }
     });
+    $scope.toonZoom = function() {
+      var coords, toon;
+      console.log('here');
+      toon = $rootScope.myToon;
+      coords = gameToMapCoords(toon.LocX, toon.LocY);
+      zoom.center([coords.x, coords.y]);
+      zoom.scale(2);
+      return zoom.event(svg);
+    };
     if ($rootScope.myToon) {
-      renderToon();
+      drawToon();
+      drawDestination();
     }
-    $rootScope.$watch("displayedLocations", function() {
-      renderLocations();
-      return walkToon();
-    });
     return $rootScope.$watch("myToon", function() {
       if ($rootScope.myToon) {
-        return renderToon();
+        return updateView();
       }
     });
   });

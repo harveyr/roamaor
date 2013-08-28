@@ -19,6 +19,11 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     svgHeightScale = svgHeight / $rootScope.worldHeight
     walkPromise = null
 
+    gridDiameter = 50
+    gridLinesX = d3.range(0, $rootScope.worldWidth, gridDiameter)
+    gridLinesY = d3.range(0, $rootScope.worldHeight, gridDiameter)
+
+
     xScale = d3.scale.linear()
         # .domain([0, $rootScope.worldWidth])
         # .range([0, 500])
@@ -42,26 +47,13 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     gameToMapCoords = (inputX, inputY) ->
         scaled =
-            x: xScale(inputX) * $scope.zoomScale + $scope.translate[0]
-            y: yScale(inputY) * $scope.zoomScale + $scope.translate[1]
-        # scaled =
-        #     x: xScale(inputX) * $scope.zoomScale + $scope.translate[0]
-        #     y: yScale(inputY) * $scope.zoomScale + $scope.translate[1]
+            x: xScale(inputX)
+            y: yScale(inputY)
 
     mapToGameCoords = (inputX, inputY) ->
         coords =
-            x: xScale.invert(inputX) / $scope.zoomScale - $scope.translate[0]
-            y: yScale.invert(inputY) / $scope.zoomScale - $scope.translate[1]
-        # svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth
-        # svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight
-        # scaled =
-        #     x: inputX / svgWidthScale
-        #     y: inputY / svgHeightScale
-
-    $scope.applyZoom = _.throttle ->
-        svg.selectAll("#my-toon")
-
-    , 300
+            x: xScale.invert(inputX)
+            y: yScale.invert(inputY)
 
     selectToonSvg = ->
         svg.selectAll("#my-toon")
@@ -100,7 +92,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         , delay
 
 
-    renderToon = ->
+    drawToon = ->
         if !$rootScope.myToon
             throw "myToon not set"
         toon = $rootScope.myToon
@@ -114,8 +106,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         maxHealthBarHeight = 15
         hpPercent = (toon.Hp / toon.MaxHp)
         healthBarHeight = hpPercent * maxHealthBarHeight
-        # healthBarColor = healthColors[Math.floor(hpPercent * 10) - 1]
-        console.log 'healthBarColor:', healthBarColor
         healthBarColor = "#15ff00"
         if hpPercent < .4
             healthBarColor = "red"
@@ -146,8 +136,9 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
                 .attr("height", healthBarHeight)
                 .attr("y", maxHealthBarHeight - healthBarHeight + 1)
                 .style("fill", healthBarColor)
+        walkToon()
 
-    renderDestination = (animate = false) ->
+    drawDestination = (animate = false) ->
         coords = gameToMapCoords($rootScope.myToon.DestX, $rootScope.myToon.DestY)
         width = 18
         height = 21
@@ -176,8 +167,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         coords = gameToMapCoords(d.X1 + d.X2 / 2, d.Y1 + d.Y2 / 2)
         "translate (#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
 
-    renderLocations = ->
-
+    drawLocations = ->
         if !$rootScope.displayedLocations or $rootScope.displayedLocations.length == 0 
             return
 
@@ -211,10 +201,12 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     setDestination = (offsetX, offsetY) ->
         gameCoords = mapToGameCoords(offsetX, offsetY)
-        # renderDestination(scaledMapCoords.x, scaledMapCoords.y, true)
+        if gameCoords.x < 0 || gameCoords.y < 0
+            return
+        # drawDestination(scaledMapCoords.x, scaledMapCoords.y, true)
         $rootScope.myToon.DestX = gameCoords.x
         $rootScope.myToon.DestY = gameCoords.y
-        renderDestination(true)
+        drawDestination(true)
         $http.post("/api/destination", gameCoords).then (response) ->
             if response.data.success
                 $rootScope.setMyToon response.data.toon
@@ -222,10 +214,45 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
                 $rootScope.alertUser "Failed to set destination: #{response.data.reason}" 
         walkToon()
 
-    applyZoom = _.throttle ->
-        renderToon()
-        renderLocations()
-        renderDestination(false)
+    drawGrid = ->
+        console.log 'draw grid'
+        gridX = svg.selectAll(".grid-line-x")
+            .data(gridLinesX)
+
+        gridX.enter()
+            .insert("svg:line")
+            .attr("class", "grid-line-x")
+
+        gridX.attr("x1", (d) -> xScale(d))
+            .attr("y1", yScale(0))
+            .attr("x2", (d) -> xScale(d))
+            .attr("y2", yScale($rootScope.worldHeight))
+            .style("stroke", "#555")
+            .style("stroke-width", 1)
+
+        gridX.exit().remove()
+
+        gridY = svg.selectAll(".grid-line-y")
+            .data(gridLinesY)
+
+        gridY.enter()
+            .insert("svg:line")
+            .attr("class", "grid-line-y")
+
+        gridY.attr("x1", xScale(0))
+            .attr("y1", (d) -> yScale(d))
+            .attr("x2", xScale($rootScope.worldWidth))
+            .attr("y2", (d) -> yScale(d))
+            .style("stroke", "#555")
+            .style("stroke-width", 1)
+
+        gridY.exit().remove()
+
+    updateView = _.throttle ->
+        drawToon()
+        drawLocations()
+        drawDestination(false)
+        drawGrid()
     , 100
 
     zoom = d3.behavior.zoom()
@@ -233,26 +260,31 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             $scope.translate = d3.event.translate
             $scope.zoomScale = d3.event.scale
             lastZoom = new Date()
-            applyZoom()
+            updateView()
     
     zoom.scaleExtent([0.4, 3.0])
     zoom.x(xScale)
     zoom.y(yScale)
     zoom.size([svgWidth, svgHeight])
-    svg.call(zoom)
+    zoom(svg)
 
     svg.on "click", ->
         now = new Date()
         if now.getTime() - lastZoom.getTime() > 1000
             setDestination(d3.event.offsetX, d3.event.offsetY)
 
-    if $rootScope.myToon
-        renderToon()
+    $scope.toonZoom = ->
+        console.log 'here'
+        toon = $rootScope.myToon
+        coords = gameToMapCoords(toon.LocX, toon.LocY)
+        zoom.center([coords.x, coords.y])
+        zoom.scale(2)
+        zoom.event(svg)
 
-    $rootScope.$watch "displayedLocations", ->
-        renderLocations()
-        walkToon()
+    if $rootScope.myToon
+        drawToon()
+        drawDestination()
 
     $rootScope.$watch "myToon", ->
         if $rootScope.myToon
-            renderToon()
+            updateView()
