@@ -6,14 +6,15 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     scaleY = null
     $scope.renderedLocationIds = []
 
+    svgHeight = 500
     svg = d3.select("svg")
-        .attr("height", 500)
+        .attr("height", svgHeight)
         # .style("background-color", mapColor)
         # .style("box-shadow", "1px 1px 1px #999")
 
     map = $(".game-map")
     mapWidth = map.width()
-    mapHeight = map.height() - 9
+    mapHeight = svgHeight + 56
 
     $scope.mapStyle =
         "background-size": "#{mapWidth}px #{mapHeight}px"

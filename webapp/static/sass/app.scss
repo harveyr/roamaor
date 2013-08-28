@@ -108,10 +108,10 @@ $map-bg: #E7E7E7;
     position: relative;
     top: -15px;
     background-position: -3px 13px;
-    padding-left: 42px;
-    padding-top: 21px;
-    padding-right: 37px;
-    padding-bottom: 16px;
+    padding-left: 33px;
+    padding-top: 42px;
+    padding-right: 33px;
+    padding-bottom: 54px;
 }
 
 .button.warn {
@@ -138,4 +138,7 @@ $map-bg: #E7E7E7;
     }
 }
 
+.dim {
+    color: $dim-color;
+}
 

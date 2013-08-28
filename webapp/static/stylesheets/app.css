@@ -7251,10 +7251,10 @@ a.th {
   position: relative;
   top: -15px;
   background-position: -3px 13px;
-  padding-left: 42px;
-  padding-top: 21px;
-  padding-right: 37px;
-  padding-bottom: 16px;
+  padding-left: 33px;
+  padding-top: 42px;
+  padding-right: 33px;
+  padding-bottom: 54px;
 }
 
 /* line 117, ../sass/app.scss */
@@ -7282,4 +7282,9 @@ a.th {
 /* line 136, ../sass/app.scss */
 .row.log-item:hover {
   background-color: #222;
+}
+
+/* line 141, ../sass/app.scss */
+.dim {
+  color: #b0b0b0;
 }

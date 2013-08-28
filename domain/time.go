@@ -6,31 +6,30 @@ import (
 	"math/rand"
 )
 
-func ShouldFight(b *Being) (shouldFight bool) {
+func ShouldFight(b *Being, tickSeconds float64) (shouldFight bool) {
 	shouldFight = false
-	if rand.Float32() > 0.95 {
-		if float64(b.Hp) / float64(b.MaxHp) >= 0.5 {
-			shouldFight = true
-		}
+	fightsPerHour := float64(0.3)
+	threshold := fightsPerHour / 3600 * tickSeconds
+	if rand.Float64() < threshold {
+		shouldFight = true
 	}
 	return
 }
 
 func TickBeing(b *Being, multiplier float64) {
-	// tickTime := math.Min(3600, b.SinceLastTick() * multiplier)
-	tickTime := 60 * multiplier
-	log.Printf("--- Ticking %s [%f seconds] ---\n", b, tickTime)
-	log.Print("b.LocationsVisited: ", b.LocationsVisited)
+	// tickSeconds := math.Min(3600, b.SinceLastTick() * multiplier)
+	tickSeconds := 60 * multiplier
+	log.Printf("--- Ticking %s [%f seconds] ---\n", b, tickSeconds)
 
-	Heal(b, tickTime)
+	Heal(b, tickSeconds)
 
-	if ShouldFight(b) {
+	if ShouldFight(b, tickSeconds) {
 		mob := NewMob(b.Level)
-		EquipBeingChance(b, 0.3)
+		EquipBeingChance(mob, 0.3)
 		Fight(b, mob)
 	}
 
-    Roam(b, tickTime)
+    Roam(b, tickSeconds)
     ApplyProgress(b)
 	b.UpdateLastTick()
 }

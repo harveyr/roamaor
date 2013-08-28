@@ -2,8 +2,10 @@ package domain
 
 import (
 	"math"
-	"log"
+	"fmt"
 )
+
+var _ string = fmt.Sprintf("")
 
 func Distance(x1 float64, y1 float64, x2 float64, y2 float64) (d float64) {
 	xDiff := math.Abs(x2 - x1)
@@ -12,14 +14,17 @@ func Distance(x1 float64, y1 float64, x2 float64, y2 float64) (d float64) {
 	return
 }
 
-func Roam(b *Being, time float64) {
-    potentialDistance := b.Speed() * time / 60
+func Roam(b *Being, tickTime float64) {
+	if b.HpPercent() < 0.1 {
+		return
+	}
+    potentialDistance := b.Speed() * tickTime / 3600
 
     var xMove, yMove float64 = 0, 0
     xDiff := (b.DestX - b.LocX)
     yDiff := (b.DestY - b.LocY)
-    log.Print("xDiff: ", xDiff)
-    log.Print("yDiff: ", yDiff)
+    // log.Print("xDiff: ", xDiff)
+    // log.Print("yDiff: ", yDiff)
 
     if xDiff == 0 && yDiff == 0 {
     	// We're there!

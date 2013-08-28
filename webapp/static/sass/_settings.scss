@@ -73,7 +73,7 @@ $font-smoothing: antialiased;
 $alert-color: #c60f13;
 // $success-color: #5da423;
 $warn-color: #ed9c28;
-
+$dim-color: darken($body-font-color, 15%);
 // Make sure border radius matches unless we want it different.
 
 // $global-radius: 3px;

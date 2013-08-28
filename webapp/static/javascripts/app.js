@@ -77,16 +77,17 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var gameToMapCoords, lineFunc, map, mapColor, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, scaleX, scaleY, svg, toonRadius, toonSvgCoords, zoom;
+    var gameToMapCoords, lineFunc, map, mapColor, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, scaleX, scaleY, svg, svgHeight, toonRadius, toonSvgCoords, zoom;
     mapColor = "#E7E7E7";
     toonRadius = 5;
     scaleX = null;
     scaleY = null;
     $scope.renderedLocationIds = [];
-    svg = d3.select("svg").attr("height", 500);
+    svgHeight = 500;
+    svg = d3.select("svg").attr("height", svgHeight);
     map = $(".game-map");
     mapWidth = map.width();
-    mapHeight = map.height() - 9;
+    mapHeight = svgHeight + 56;
     $scope.mapStyle = {
       "background-size": "" + mapWidth + "px " + mapHeight + "px"
     };
@@ -348,12 +349,23 @@
       scope: {
         item: '='
       },
-      template: "<div class=\"row log-item\">\n    <div class=\"small-3 large-2 columns\">\n        <div class=\"label log-label {{labelClass}}\">\n            <small>\n                {{labelText | uppercase}}\n            </small>\n        </div>\n    </div>\n    <div class=\"small-9 large-10 columns\">\n        {{name}}\n        <span ng-bind-html-unsafe=\"action\"></span>\n    </div>\n</div>",
+      template: "<div class=\"row log-item\">\n    <div class=\"small-3 large-2 columns\">\n        <div class=\"label log-label {{labelClass}}\">\n            <small>\n                {{labelText | uppercase}}\n            </small>\n        </div>\n    </div>\n    <div class=\"small-9 large-10 columns\">\n        {{name}}\n        <span ng-bind-html-unsafe=\"action\"></span>\n\n        <div ng-show=\"item.Data.weaponWonName\">\n            <span class=\"label\">Weapon Acquired</span>\n            <span class=\"dim\">\n                Level {{item.Data.weaponWonLevel}} {{item.Data.weaponWonName}}\n            </span>\n        </div>\n        <div>\n            <small>\n                <ng-pluralize count=\"age\"\n                    when=\"{\n                        0: 'Moments ago',\n                        1: 'One minute ago',\n                        'other': '{} minutes ago'\n                    }\">\n                </ng-pluralize>\n            </small>\n        </div>\n    </div>\n</div>",
       link: function(scope) {
+        var createdDate, now, parseDate;
         scope.name = $rootScope.myToon.Name;
+        parseDate = function(goDate) {
+          var matches, rex;
+          rex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).+?-(\d{2}:\d{2})/g;
+          matches = rex.exec(goDate);
+          return new Date(matches[1], parseInt(matches[2]) - 1, matches[3], matches[4], matches[5], matches[6]);
+        };
+        createdDate = parseDate(scope.item.Created);
+        now = new Date();
+        scope.age = now.getUTCMinutes() - createdDate.getUTCMinutes();
+        console.log('scope.item.Data:', scope.item.Data);
         switch (scope.item.LogType) {
           case $rootScope.logTypes.fight:
-            scope.action = "man-danced with a Level " + scope.item.Data.opponentLevel + " " + scope.item.Data.opponentName + ".";
+            scope.action = "man-danced with a <span class=\"dim\">Level " + scope.item.Data.opponentLevel + " " + scope.item.Data.opponentName + "</span>.";
             if (scope.item.Data.victor) {
               scope.labelText = "victory";
               return scope.labelClass = "victory";

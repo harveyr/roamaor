@@ -14,7 +14,7 @@ func main() {
 	var ticks int
 	var mult float64
 	flag.IntVar(&ticks, "t", 1, "number of ticks")
-	flag.Float64Var(&mult, "x", 1.0, "time multiplier")
+	flag.Float64Var(&mult, "m", 1.0, "time multiplier")
 	flag.Parse()
 
 	rand.Seed(time.Now().UTC().UnixNano())

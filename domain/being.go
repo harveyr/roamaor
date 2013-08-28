@@ -196,6 +196,10 @@ func (b *Being) Disarm() {
 	b.Weapon = Weapon{}
 }
 
+func (b *Being) HpPercent() float64 {
+	return float64(b.Hp) / float64(b.MaxHp)
+}
+
 func (b *Being) UpdateLastTick() {
 	b.LastTick = time.Now()
 	b.Save()
