@@ -77,7 +77,7 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var applyZoom, gameToMapCoords, initialXRange, initialYRange, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, toonRadius, xScale, yScale, zoom, zoomCenterX, zoomCenterY;
+    var applyZoom, gameToMapCoords, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, xScale, yScale, zoom;
     svgHeight = 500;
     map = $(".game-map");
     svg = d3.select("svg").attr("height", svgHeight);
@@ -87,15 +87,10 @@
     svgHeight = parseInt(svg.style("height"));
     svgWidthScale = svgWidth / $rootScope.worldWidth;
     svgHeightScale = svgHeight / $rootScope.worldHeight;
-    zoomCenterX = svgWidth / 2;
-    zoomCenterY = svgHeight / 2;
-    initialXRange = svgWidth;
-    initialYRange = svgHeight;
+    xScale = d3.scale.linear().domain([0, $rootScope.worldWidth]).range([0, 500]);
+    yScale = d3.scale.linear().domain([0, $rootScope.worldHeight]).range([0, 500]);
     $scope.zoomScale = 1;
     $scope.translate = [0, 0];
-    toonRadius = 5;
-    xScale = d3.scale.linear().domain([0, $rootScope.worldWidth]).range([0, initialXRange]);
-    yScale = d3.scale.linear().domain([0, $rootScope.worldHeight]).range([0, initialYRange]);
     $scope.mapStyle = {
       "background-size": "" + mapWidth + "px " + mapHeight + "px"
     };
@@ -108,8 +103,8 @@
     gameToMapCoords = function(inputX, inputY) {
       var scaled;
       return scaled = {
-        x: inputX * svgWidthScale * $scope.zoomScale + $scope.translate[0],
-        y: inputY * svgHeightScale * $scope.zoomScale + $scope.translate[1]
+        x: xScale(inputX) * $scope.zoomScale + $scope.translate[0],
+        y: yScale(inputY) * $scope.zoomScale + $scope.translate[1]
       };
     };
     mapToGameCoords = function(inputX, inputY) {
@@ -228,6 +223,8 @@
       return applyZoom();
     });
     zoom.scaleExtent([0.4, 3.0]);
+    zoom.x(xScale);
+    zoom.y(xScale);
     svg.call(zoom);
     if ($rootScope.myToon) {
       renderToon();
