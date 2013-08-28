@@ -15,11 +15,11 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     svgHeightScale = svgHeight / $rootScope.worldHeight
 
     xScale = d3.scale.linear()
-        .domain([0, $rootScope.worldWidth])
-        .range([0, 500])
+        # .domain([0, $rootScope.worldWidth])
+        # .range([0, 500])
     yScale = d3.scale.linear()
-        .domain([0, $rootScope.worldHeight])
-        .range([0, 500])
+        # .domain([0, $rootScope.worldHeight])
+        # .range([0, 500])
 
     $scope.zoomScale = 1
     $scope.translate = [0, 0]
@@ -36,10 +36,12 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         .attr("id", "my-dest-path")
 
     gameToMapCoords = (inputX, inputY) ->
-
         scaled =
             x: xScale(inputX) * $scope.zoomScale + $scope.translate[0]
             y: yScale(inputY) * $scope.zoomScale + $scope.translate[1]
+        # scaled =
+        #     x: xScale(inputX) * $scope.zoomScale + $scope.translate[0]
+        #     y: yScale(inputY) * $scope.zoomScale + $scope.translate[1]
 
     mapToGameCoords = (inputX, inputY) ->
         svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth
@@ -163,21 +165,17 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
         , 0
 
-    $scope.mapClick = ($event) ->
-        destX = $event.offsetX
-        destY = $event.offsetY
+    setDestination = (offsetX, offsetY) ->
+        renderDestination(offsetX, offsetY)
+        console.log("offsets", offsetX, offsetY, "inverted:", xScale.invert(offsetX), yScale.invert(offsetY))
 
-        renderDestination(destX, destY)
-        console.log 'destX:', destX
-        console.log 'destY:', destY
-
-        postData = mapToGameCoords(destX, destY)
-        console.log 'postData:', postData
-        $http.post("/api/destination", postData).then (response) ->
-            if response.data.success
-                $rootScope.setMyToon response.data.toon
-            else 
-                $rootScope.alertUser "Failed to set destination: #{response.data.reason}" 
+        # postData = mapToGameCoords(destX, destY)
+        # console.log 'postData:', postData
+        # $http.post("/api/destination", postData).then (response) ->
+        #     if response.data.success
+        #         $rootScope.setMyToon response.data.toon
+        #     else 
+        #         $rootScope.alertUser "Failed to set destination: #{response.data.reason}" 
 
     applyZoom = _.throttle ->
         renderToon()
@@ -192,9 +190,12 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     
     zoom.scaleExtent([0.4, 3.0])
     zoom.x(xScale)
-    zoom.y(xScale)
-
+    zoom.y(yScale)
+    zoom.size([svgWidth, svgHeight])
     svg.call(zoom)
+
+    svg.on "click", ->
+        setDestination(d3.event.offsetX, d3.event.offsetY)
 
     if $rootScope.myToon
         renderToon()

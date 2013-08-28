@@ -77,7 +77,7 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var applyZoom, gameToMapCoords, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, xScale, yScale, zoom;
+    var applyZoom, gameToMapCoords, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, xScale, yScale, zoom;
     svgHeight = 500;
     map = $(".game-map");
     svg = d3.select("svg").attr("height", svgHeight);
@@ -87,8 +87,8 @@
     svgHeight = parseInt(svg.style("height"));
     svgWidthScale = svgWidth / $rootScope.worldWidth;
     svgHeightScale = svgHeight / $rootScope.worldHeight;
-    xScale = d3.scale.linear().domain([0, $rootScope.worldWidth]).range([0, 500]);
-    yScale = d3.scale.linear().domain([0, $rootScope.worldHeight]).range([0, 500]);
+    xScale = d3.scale.linear();
+    yScale = d3.scale.linear();
     $scope.zoomScale = 1;
     $scope.translate = [0, 0];
     $scope.mapStyle = {
@@ -196,22 +196,9 @@
         }
       }, 0);
     };
-    $scope.mapClick = function($event) {
-      var destX, destY, postData;
-      destX = $event.offsetX;
-      destY = $event.offsetY;
-      renderDestination(destX, destY);
-      console.log('destX:', destX);
-      console.log('destY:', destY);
-      postData = mapToGameCoords(destX, destY);
-      console.log('postData:', postData);
-      return $http.post("/api/destination", postData).then(function(response) {
-        if (response.data.success) {
-          return $rootScope.setMyToon(response.data.toon);
-        } else {
-          return $rootScope.alertUser("Failed to set destination: " + response.data.reason);
-        }
-      });
+    setDestination = function(offsetX, offsetY) {
+      renderDestination(offsetX, offsetY);
+      return console.log("offsets", offsetX, offsetY, "inverted:", xScale.invert(offsetX), yScale.invert(offsetY));
     };
     applyZoom = _.throttle(function() {
       renderToon();
@@ -224,8 +211,12 @@
     });
     zoom.scaleExtent([0.4, 3.0]);
     zoom.x(xScale);
-    zoom.y(xScale);
+    zoom.y(yScale);
+    zoom.size([svgWidth, svgHeight]);
     svg.call(zoom);
+    svg.on("click", function() {
+      return setDestination(d3.event.offsetX, d3.event.offsetY);
+    });
     if ($rootScope.myToon) {
       renderToon();
     }
