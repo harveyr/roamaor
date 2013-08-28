@@ -77,18 +77,25 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var applyZoom, gameToMapCoords, lineFunc, map, mapColor, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, scaleX, scaleY, svg, svgHeight, toonRadius, toonSvgCoords, zoom;
-    mapColor = "#E7E7E7";
-    toonRadius = 5;
-    scaleX = null;
-    scaleY = null;
-    $scope.renderedLocationIds = [];
-    $scope.zoomScale = 1;
+    var applyZoom, gameToMapCoords, initialXRange, initialYRange, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, toonRadius, updateZoomScale, xScale, yScale, zoom, zoomCenterX, zoomCenterY;
     svgHeight = 500;
-    svg = d3.select("svg").attr("height", svgHeight);
     map = $(".game-map");
+    svg = d3.select("svg").attr("height", svgHeight);
     mapWidth = map.width();
     mapHeight = svgHeight + 56;
+    svgWidth = parseInt(svg.style("width"));
+    svgHeight = parseInt(svg.style("height"));
+    svgWidthScale = svgWidth / $rootScope.worldWidth;
+    svgHeightScale = svgHeight / $rootScope.worldHeight;
+    zoomCenterX = svgWidth / 2;
+    zoomCenterY = svgHeight / 2;
+    initialXRange = svgWidth;
+    initialYRange = svgHeight;
+    $scope.zoomScale = 1;
+    $scope.translate = [0, 0];
+    toonRadius = 5;
+    xScale = d3.scale.linear().domain([0, $rootScope.worldWidth]).range([0, initialXRange]);
+    yScale = d3.scale.linear().domain([0, $rootScope.worldHeight]).range([0, initialYRange]);
     $scope.mapStyle = {
       "background-size": "" + mapWidth + "px " + mapHeight + "px"
     };
@@ -98,30 +105,21 @@
       return d.y;
     }).interpolate('linear');
     myDestPath = svg.append("path").attr("id", "my-dest-path");
-    toonSvgCoords = function(toon) {
-      return {
-        x: toon.LocX + toonRadius,
-        y: svg.attr("height") - toon.LocY - toonRadius
+    gameToMapCoords = function(inputX, inputY) {
+      var scaled;
+      return scaled = {
+        x: inputX * svgWidthScale + $scope.translate[0],
+        y: inputY * svgHeightScale + $scope.translate[1]
       };
     };
     mapToGameCoords = function(inputX, inputY) {
-      var scaled, svgHeightScale, svgWidthScale;
+      var scaled;
       svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth;
       svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight;
       return scaled = {
         x: inputX / svgWidthScale,
         y: inputY / svgHeightScale
       };
-    };
-    gameToMapCoords = function(inputX, inputY) {
-      var scaled, svgHeightScale, svgWidthScale;
-      svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth;
-      svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight;
-      scaled = {
-        x: inputX * svgWidthScale,
-        y: inputY * svgHeightScale
-      };
-      return scaled;
     };
     $scope.applyZoom = _.throttle(function() {
       return svg.selectAll("#my-toon");
@@ -134,7 +132,6 @@
       toon = $rootScope.myToon;
       coords = gameToMapCoords(toon.LocX, toon.LocY);
       myLoc = svg.selectAll("#my-toon").data([coords]);
-      console.log('toon coords:', coords);
       translate = "translate(" + coords.x + ", " + coords.y + ") scale(" + $scope.zoomScale + ")";
       maxHealthBarHeight = 15;
       hpPercent = toon.Hp / toon.MaxHp;
@@ -177,28 +174,21 @@
       d3.select("#my-dest-point").remove();
       return svg.append("path").attr("id", "my-dest-point").attr("d", lineFunc(destPointData)).attr("stroke", "white").attr("stroke-width", 1).attr("fill", "none").attr("opacity", 0).transition().duration(600).attr("opacity", 1).attr("transform", "translate(0, " + yOffset + ")");
     };
+    selectLocations = function() {
+      return d3.selectAll(".svg-town");
+    };
+    locationTransform = function(d) {
+      var coords;
+      coords = gameToMapCoords(d.X1 + d.X2 / 2, d.Y1 + d.Y2 / 2);
+      return "translate (" + coords.x + ", " + coords.y + ") scale(" + $scope.zoomScale + ")";
+    };
     renderLocations = function() {
-      var allCoords, transformFunc;
-      console.log('renderLocations');
-      allCoords = [];
       if (!$rootScope.displayedLocations || $rootScope.displayedLocations.length === 0) {
         return;
       }
-      _.each($rootScope.displayedLocations, function(loc, idx) {
-        var coords;
-        coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2);
-        coords.id = loc.Id;
-        return allCoords.push(coords);
-      });
-      transformFunc = function(d) {
-        var x, y;
-        x = d.X1 + d.X2 / 2;
-        y = d.Y1 + d.Y2 / 2;
-        return "translate (" + x + ", " + y + ") scale(" + $scope.zoomScale + ")";
-      };
       return $timeout(function() {
         var locs;
-        locs = svg.selectAll(".svg-town").data($rootScope.displayedLocations).attr("transform", transformFunc);
+        locs = selectLocations().data($rootScope.displayedLocations).attr("transform", locationTransform);
         if (locs.attr("opacity") < 1) {
           locs.transition().delay(function(d, i) {
             return i * 200;
@@ -232,12 +222,33 @@
       renderToon();
       return renderLocations();
     }, 300);
-    zoom = d3.behavior.zoom().on("zoom", function() {
+    updateZoomScale = function() {
+      var wheelDelta, zoomMod;
       console.log('d3.event:', d3.event);
-      console.log('d3.event.scale:', d3.event.scale);
-      $scope.zoomScale = d3.event.scale;
+      console.log('d3.event.translate:', d3.event.translate);
+      if (d3.event.sourceEvent.type === "mousemove") {
+        wheelDelta = d3.event.sourceEvent.wheelDelta;
+        if (wheelDelta > 0) {
+          if ($scope.zoomScale > 3) {
+            return;
+          }
+          zoomMod = 0.1;
+        }
+        if (wheelDelta < 0) {
+          if ($scope.zoomScale < 0.4) {
+            return;
+          }
+          zoomMod = -0.1;
+        }
+        $scope.zoomScale = $scope.zoomScale + zoomMod;
+        $scope.translate = d3.event.translate;
+      }
       return applyZoom();
+    };
+    zoom = d3.behavior.zoom().on("zoom", function() {
+      return updateZoomScale();
     });
+    zoom.scaleExtent([0.4, 3.0]);
     svg.call(zoom);
     if ($rootScope.myToon) {
       renderToon();
@@ -314,7 +325,6 @@
     };
     return $http.get("/api/admin/alltoons").then(function(response) {
       $rootScope.allToons = response.data;
-      console.log('$rootScope.allToons:', $rootScope.allToons);
       if ($rootScope.myToon) {
         return $scope.admin.selectedToon = $rootScope.myToon.Id;
       }

@@ -37,7 +37,6 @@ angular.module(APP_NAME).controller 'AdminCtrl', ($scope, $rootScope, $http, $ti
 
     $http.get("/api/admin/alltoons").then (response) ->
         $rootScope.allToons = response.data
-        console.log '$rootScope.allToons:', $rootScope.allToons
         if $rootScope.myToon
             $scope.admin.selectedToon = $rootScope.myToon.Id
 

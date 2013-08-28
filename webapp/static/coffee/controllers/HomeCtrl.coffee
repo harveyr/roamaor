@@ -1,21 +1,33 @@
 angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $timeout) ->
 
-    mapColor = "#E7E7E7"
-    toonRadius = 5
-    scaleX = null
-    scaleY = null
-    $scope.renderedLocationIds = []
-    $scope.zoomScale = 1
+    # See ColorBrewer! https://github.com/mbostock/d3/wiki/Ordinal-Scales
 
     svgHeight = 500
+    map = $(".game-map")
     svg = d3.select("svg")
         .attr("height", svgHeight)
-        # .style("background-color", mapColor)
-        # .style("box-shadow", "1px 1px 1px #999")
 
-    map = $(".game-map")
     mapWidth = map.width()
     mapHeight = svgHeight + 56
+    svgWidth = parseInt(svg.style("width"))
+    svgHeight = parseInt(svg.style("height"))
+    svgWidthScale = svgWidth / $rootScope.worldWidth
+    svgHeightScale = svgHeight / $rootScope.worldHeight
+    zoomCenterX = svgWidth / 2
+    zoomCenterY = svgHeight / 2
+
+    initialXRange = svgWidth
+    initialYRange = svgHeight
+    $scope.zoomScale = 1
+    $scope.translate = [0, 0]
+
+    toonRadius = 5
+    xScale = d3.scale.linear()
+        .domain([0, $rootScope.worldWidth])
+        .range([0, initialXRange])
+    yScale = d3.scale.linear()
+        .domain([0, $rootScope.worldHeight])
+        .range([0, initialYRange])
 
     $scope.mapStyle =
         "background-size": "#{mapWidth}px #{mapHeight}px"
@@ -28,12 +40,10 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     myDestPath = svg.append("path")
         .attr("id", "my-dest-path")
 
-    toonSvgCoords = (toon) ->
-        {
-            x: toon.LocX + toonRadius
-            y: svg.attr("height") - toon.LocY - toonRadius
-        }
-
+    gameToMapCoords = (inputX, inputY) ->
+        scaled =
+            x: inputX * svgWidthScale + $scope.translate[0]
+            y: inputY * svgHeightScale + $scope.translate[1]
 
     mapToGameCoords = (inputX, inputY) ->
         svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth
@@ -41,15 +51,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         scaled =
             x: inputX / svgWidthScale
             y: inputY / svgHeightScale
-
-    gameToMapCoords = (inputX, inputY) ->
-        svgWidthScale = parseInt(svg.style("width")) / $rootScope.worldWidth
-        svgHeightScale = parseInt(svg.style("height")) / $rootScope.worldHeight
-        scaled =
-            x: inputX * svgWidthScale
-            y: inputY * svgHeightScale
-        # console.log 'gameToMapCoords scaled:', inputX, inputY, scaled
-        scaled
 
     $scope.applyZoom = _.throttle ->
         svg.selectAll("#my-toon")
@@ -64,7 +65,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
         myLoc = svg.selectAll("#my-toon")
             .data([coords])
-        console.log 'toon coords:', coords
 
         translate = "translate(#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
 
@@ -127,27 +127,22 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             .attr("opacity", 1)
             .attr("transform", "translate(0, #{yOffset})")
 
+    selectLocations = ->
+        d3.selectAll(".svg-town")
+
+    locationTransform = (d) ->
+        coords = gameToMapCoords(d.X1 + d.X2 / 2, d.Y1 + d.Y2 / 2)
+        "translate (#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
+
     renderLocations = ->
-        console.log 'renderLocations'
-        allCoords = []
 
         if !$rootScope.displayedLocations or $rootScope.displayedLocations.length == 0 
             return
 
-        _.each $rootScope.displayedLocations, (loc, idx) ->
-            coords = gameToMapCoords(loc.X1 + loc.X2 / 2, loc.Y1 + loc.Y2 / 2)
-            coords.id = loc.Id
-            allCoords.push coords
-
-        transformFunc = (d) ->
-            x = d.X1 + d.X2 / 2
-            y = d.Y1 + d.Y2 / 2
-            "translate (#{x}, #{y}) scale(#{$scope.zoomScale})"
-
         $timeout ->
-            locs = svg.selectAll(".svg-town")
+            locs = selectLocations()
                 .data($rootScope.displayedLocations)
-                .attr("transform", transformFunc)
+                .attr("transform", locationTransform)
 
             if locs.attr("opacity") < 1
                 locs.transition()
@@ -193,12 +188,29 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         renderLocations()
     , 300
 
+    updateZoomScale = ->
+        console.log 'd3.event:', d3.event
+        console.log 'd3.event.translate:', d3.event.translate
+
+        if d3.event.sourceEvent.type == "mousemove"
+            wheelDelta = d3.event.sourceEvent.wheelDelta
+            if wheelDelta > 0
+                if $scope.zoomScale > 3
+                    return
+                zoomMod = 0.1
+            if wheelDelta < 0
+                if $scope.zoomScale < 0.4
+                    return
+                zoomMod = -0.1
+
+            $scope.zoomScale = $scope.zoomScale + zoomMod
+            $scope.translate = d3.event.translate
+        applyZoom()
+
     zoom = d3.behavior.zoom()
         .on "zoom", ->
-            console.log 'd3.event:', d3.event
-            console.log 'd3.event.scale:', d3.event.scale
-            $scope.zoomScale = d3.event.scale
-            applyZoom()
+            updateZoomScale()
+    zoom.scaleExtent([0.4, 3.0])
 
     svg.call(zoom)
 
