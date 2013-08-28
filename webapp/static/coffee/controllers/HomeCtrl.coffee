@@ -4,6 +4,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     lastZoom = new Date()
 
+    healthColors = ["#FF000E", "#FF2D0B", "#FF5B08", "#FF8905", "#FFB702", "#D0EA00", "#A2EF00", "#73F400", "#45F900", "#17FF00"]
+
     svgHeight = 500
     map = $(".game-map")
     svg = d3.select("svg")
@@ -15,6 +17,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     svgHeight = parseInt(svg.style("height"))
     svgWidthScale = svgWidth / $rootScope.worldWidth
     svgHeightScale = svgHeight / $rootScope.worldHeight
+    walkPromise = null
 
     xScale = d3.scale.linear()
         # .domain([0, $rootScope.worldWidth])
@@ -63,31 +66,37 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     selectToonSvg = ->
         svg.selectAll("#my-toon")
 
-    walkToon = ->
+    walkToon = (step = 1) ->
+        $timeout.cancel walkPromise
         toon = $rootScope.myToon
-        toonSvg = selectToonSvg()
+        legs = selectToonSvg().select(".toon-legs")
+
         if toon.LocX == toon.DestX and toon.LocY == toon.DestY
-            toonSvg.select(".legs-walk").attr("opacity", 0)
-            toonSvg.select(".legs-stationary").attr("opacity", 1)
+            legs.attr("transform", null)
             return
 
         delay = 300
-        toonSvg.select(".legs-stationary").attr("opacity", 0)
-        
-        legs = toonSvg.select(".legs-walk")
-        legs.attr("opacity", 1)
-        legLines = legs.selectAll("line")
-            .data([1, -1])
 
-        if legLines.attr("transform")
-            legLines.attr("transform", "")
+        if step == 1
+            data = [20, 0]
         else
-            legLines.attr "transform", (d) ->
-                angle = d * 20
-                "rotate(#{angle}, 10, 10)"
+            data = [0, -20]
 
-        $timeout ->
-            walkToon()
+        legLines = legs.selectAll("line")
+            .data(data)
+            .attr "transform", (d) ->
+                if d == 0
+                    return ""
+                else
+                    return "rotate(#{d}, 10, 20)"
+
+            # console.log 'legLines:', legLines
+            # legLines.attr "transform", (d) ->
+            #     angle = d * 20
+            #     "rotate(#{angle}, 10, 20)"
+
+        walkPromise = $timeout ->
+            walkToon(step * -1)
         , delay
 
 
@@ -105,6 +114,8 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         maxHealthBarHeight = 15
         hpPercent = (toon.Hp / toon.MaxHp)
         healthBarHeight = hpPercent * maxHealthBarHeight
+        # healthBarColor = healthColors[Math.floor(hpPercent * 10) - 1]
+        console.log 'healthBarColor:', healthBarColor
         healthBarColor = "#15ff00"
         if hpPercent < .4
             healthBarColor = "red"
@@ -115,7 +126,7 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
             .transform
 
         if toonSvg.attr("opacity") < 1
-            toonSvg.selectAll("#my-health-bar")
+            toonSvg.selectAll(".toon-health-bar")
                 .attr("height", healthBarHeight)
                 .attr("y", maxHealthBarHeight - healthBarHeight + 1)
                 .style("fill", healthBarColor)
@@ -130,12 +141,11 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
                 .duration(100)
                 .attr("transform", translate)
 
-            toonSvg.selectAll("#my-health-bar")
+            toonSvg.selectAll(".toon-health-bar")
                 .transition()
                 .attr("height", healthBarHeight)
                 .attr("y", maxHealthBarHeight - healthBarHeight + 1)
                 .style("fill", healthBarColor)
-
 
     renderDestination = (destX, destY) ->
         yOffset = 10
@@ -206,15 +216,14 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     setDestination = (offsetX, offsetY) ->
         renderDestination(offsetX, offsetY)
-
-        console.log 'setDestination: ', [offsetX, offsetY], mapToGameCoords(offsetX, offsetY)
-        # postData = mapToGameCoords(destX, destY)
-        # console.log 'postData:', postData
-        # $http.post("/api/destination", postData).then (response) ->
-        #     if response.data.success
-        #         $rootScope.setMyToon response.data.toon
-        #     else 
-        #         $rootScope.alertUser "Failed to set destination: #{response.data.reason}" 
+        postData = mapToGameCoords(offsetX, offsetY)
+        console.log 'postData:', postData
+        $http.post("/api/destination", postData).then (response) ->
+            if response.data.success
+                $rootScope.setMyToon response.data.toon
+            else 
+                $rootScope.alertUser "Failed to set destination: #{response.data.reason}" 
+        walkToon()
 
     applyZoom = _.throttle ->
         renderToon()
@@ -241,10 +250,10 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
     if $rootScope.myToon
         renderToon()
-        walkToon()
 
     $rootScope.$watch "displayedLocations", ->
         renderLocations()
+        walkToon()
 
     $rootScope.$watch "myToon", ->
         if $rootScope.myToon

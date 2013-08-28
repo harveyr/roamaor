@@ -13,22 +13,26 @@
             <svg id="game-map-svg" 
                 xmlns="http://www.w3.org/2000/svg" version="1.1">
                 <g id="my-toon" opacity="0">
-                    <g class="legs-stationary">
-                        <line fill="none" stroke="#231F20" stroke-miterlimit="10" x1="7.17" y1="6.933" x2="7.17" y2="12.184"/>
-                        <line fill="none" stroke="#231F20" stroke-miterlimit="10" x1="10.186" y1="6.932" x2="10.186" y2="12.184"/>
+                    <g class="toon-legs">
+                        <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="5.514" y1="16.046" x2="5.514" y2="23.453"/>
+                        <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="10.258" y1="15.778" x2="10.258" y2="23.453"/>
                     </g>
-                    <g class="legs-walk" opacity="0">
-                        <line fill="none" stroke="#231F20" stroke-miterlimit="10" x1="8.242" y1="6.976" x2="10.227" y2="11.838"/>
-                        <line fill="none" stroke="#231F20" stroke-miterlimit="10" x1="9.234" y1="6.785" x2="7.106" y2="11.586"/>
-                    </g>
-                    <g class="body">
-                        <polygon fill="#BCBEC0" stroke="#000000" stroke-miterlimit="10" points="5.734,-4.947 2.946,1.668 5.38,1.305 4.378,7.721 
-                            11.158,6.63 13.603,5.005 14.637,-4.727  "/>
-                        <polygon fill="#BCBEC0" stroke="#000000" stroke-miterlimit="10" points="10.848,-9.05 2.65,-3.848 12.157,-4.023 18.158,-2.523    
-                            "/>
-                        <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="6.515" y1="-1.698" x2="8.763" y2="-2.523"/>
-                        <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="4.989" y1="3.805" x2="8.17" y2="2.453"/>
-                    </g>
+                    <g class="toon-body">
+                        <polygon fill="#A0A0A0" stroke="#000000" stroke-miterlimit="10" points="3.416,6.313 2.857,13.984 7.607,17.672 13.295,13.609 
+                            12.488,6.313    "/>
+                        <polygon fill="#A0A0A0" stroke="#000000" stroke-miterlimit="10" points="8.584,1.172 1.357,5.797 8.076,8.422 14.982,5.484    "/>
+                        <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="4.232,9.797 5.67,9.109 6.795,9.797 
+                                "/>
+                        <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="8.977,9.797 10.414,9.109 
+                            11.539,9.797    "/>
+                        <polyline fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" points="7.545,10.484 6.045,12.484 
+                            7.545,12.172    "/>
+                        <path fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" d="M5.514,14.109c0.219,0,3.906,0,3.906,0
+                            l0.838-0.562"/>
+                        <line fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="5.356" y1="9.797" x2="5.671" y2="9.797"/>
+                        <line fill="#A0A0A0" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" x1="10.101" y1="9.797" x2="10.415" y2="9.797"/>
+                   </g>
+                   <rect class="toon-health-bar" x="16.469" y="0.219" fill="#A0A0A0" stroke="#000000" stroke-width="0.25" stroke-miterlimit="10" width="3.25" height="14.469"/>
                 </g>
 
                 <g class="svg-town" ng-repeat="loc in displayedLocations" opacity="0">

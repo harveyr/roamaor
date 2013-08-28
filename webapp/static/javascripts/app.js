@@ -77,8 +77,9 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout) {
-    var applyZoom, gameToMapCoords, lastZoom, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, selectToonSvg, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, walkToon, xScale, yScale, zoom;
+    var applyZoom, gameToMapCoords, healthColors, lastZoom, lineFunc, locationTransform, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, renderDestination, renderLocations, renderToon, selectLocations, selectToonSvg, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, walkPromise, walkToon, xScale, yScale, zoom;
     lastZoom = new Date();
+    healthColors = ["#FF000E", "#FF2D0B", "#FF5B08", "#FF8905", "#FFB702", "#D0EA00", "#A2EF00", "#73F400", "#45F900", "#17FF00"];
     svgHeight = 500;
     map = $(".game-map");
     svg = d3.select("svg").attr("height", svgHeight);
@@ -88,6 +89,7 @@
     svgHeight = parseInt(svg.style("height"));
     svgWidthScale = svgWidth / $rootScope.worldWidth;
     svgHeightScale = svgHeight / $rootScope.worldHeight;
+    walkPromise = null;
     xScale = d3.scale.linear();
     yScale = d3.scale.linear();
     $scope.zoomScale = 1;
@@ -121,31 +123,33 @@
     selectToonSvg = function() {
       return svg.selectAll("#my-toon");
     };
-    walkToon = function() {
-      var delay, legLines, legs, toon, toonSvg;
+    walkToon = function(step) {
+      var data, delay, legLines, legs, toon;
+      if (step == null) {
+        step = 1;
+      }
+      $timeout.cancel(walkPromise);
       toon = $rootScope.myToon;
-      toonSvg = selectToonSvg();
+      legs = selectToonSvg().select(".toon-legs");
       if (toon.LocX === toon.DestX && toon.LocY === toon.DestY) {
-        toonSvg.select(".legs-walk").attr("opacity", 0);
-        toonSvg.select(".legs-stationary").attr("opacity", 1);
+        legs.attr("transform", null);
         return;
       }
       delay = 300;
-      toonSvg.select(".legs-stationary").attr("opacity", 0);
-      legs = toonSvg.select(".legs-walk");
-      legs.attr("opacity", 1);
-      legLines = legs.selectAll("line").data([1, -1]);
-      if (legLines.attr("transform")) {
-        legLines.attr("transform", "");
+      if (step === 1) {
+        data = [20, 0];
       } else {
-        legLines.attr("transform", function(d) {
-          var angle;
-          angle = d * 20;
-          return "rotate(" + angle + ", 10, 10)";
-        });
+        data = [0, -20];
       }
-      return $timeout(function() {
-        return walkToon();
+      legLines = legs.selectAll("line").data(data).attr("transform", function(d) {
+        if (d === 0) {
+          return "";
+        } else {
+          return "rotate(" + d + ", 10, 20)";
+        }
+      });
+      return walkPromise = $timeout(function() {
+        return walkToon(step * -1);
       }, delay);
     };
     renderToon = function() {
@@ -160,6 +164,7 @@
       maxHealthBarHeight = 15;
       hpPercent = toon.Hp / toon.MaxHp;
       healthBarHeight = hpPercent * maxHealthBarHeight;
+      console.log('healthBarColor:', healthBarColor);
       healthBarColor = "#15ff00";
       if (hpPercent < .4) {
         healthBarColor = "red";
@@ -168,11 +173,11 @@
       }
       toonSvg.selectAll("toon-legs").transform;
       if (toonSvg.attr("opacity") < 1) {
-        toonSvg.selectAll("#my-health-bar").attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
+        toonSvg.selectAll(".toon-health-bar").attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
         return toonSvg.attr("transform", translate).transition().delay(500).duration(500).attr("opacity", 1);
       } else {
         toonSvg.transition().duration(100).attr("transform", translate);
-        return toonSvg.selectAll("#my-health-bar").transition().attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
+        return toonSvg.selectAll(".toon-health-bar").transition().attr("height", healthBarHeight).attr("y", maxHealthBarHeight - healthBarHeight + 1).style("fill", healthBarColor);
       }
     };
     renderDestination = function(destX, destY) {
@@ -227,8 +232,18 @@
       }, 0);
     };
     setDestination = function(offsetX, offsetY) {
+      var postData;
       renderDestination(offsetX, offsetY);
-      return console.log('setDestination: ', [offsetX, offsetY], mapToGameCoords(offsetX, offsetY));
+      postData = mapToGameCoords(offsetX, offsetY);
+      console.log('postData:', postData);
+      $http.post("/api/destination", postData).then(function(response) {
+        if (response.data.success) {
+          return $rootScope.setMyToon(response.data.toon);
+        } else {
+          return $rootScope.alertUser("Failed to set destination: " + response.data.reason);
+        }
+      });
+      return walkToon();
     };
     applyZoom = _.throttle(function() {
       renderToon();
@@ -254,10 +269,10 @@
     });
     if ($rootScope.myToon) {
       renderToon();
-      walkToon();
     }
     $rootScope.$watch("displayedLocations", function() {
-      return renderLocations();
+      renderLocations();
+      return walkToon();
     });
     return $rootScope.$watch("myToon", function() {
       if ($rootScope.myToon) {
