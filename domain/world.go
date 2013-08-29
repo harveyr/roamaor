@@ -13,6 +13,8 @@ func CreateOrUpdateLocation(name string, locType int, danger float32, x int, y i
 	err := c.Find(map[string]string{"name": name}).One(&loc)
 	if err == nil {
 		log.Print("Updating location ", name)
+		loc.LocationType = locType
+		loc.Danger = danger
 		loc.X1 = x
 		loc.Y1 = y
 		loc.X2 = x + w

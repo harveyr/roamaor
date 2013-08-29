@@ -1,4 +1,4 @@
-angular.module(DIRECTIVE_MODULE).directive "toonLog", ($rootScope) ->
+angular.module(DIRECTIVE_MODULE).directive "toonLog", ($rootScope, GameConstants) ->
     directive =
         replace: true
         scope:
@@ -47,10 +47,10 @@ angular.module(DIRECTIVE_MODULE).directive "toonLog", ($rootScope) ->
             createdDate = parseDate(scope.item.Created)
             now = new Date()
             scope.age = now.getUTCMinutes() - createdDate.getUTCMinutes()
-
+            logTypes = GameConstants.get("logTypes")
             switch scope.item.LogType
 
-                when $rootScope.logTypes.fight
+                when logTypes.fight
                     scope.action = """man-danced with a <span class="dim">Level #{scope.item.Data.opponentLevel} #{scope.item.Data.opponentName}</span>."""
                     if scope.item.Data.victor
                         scope.labelText = "victory"
@@ -59,6 +59,6 @@ angular.module(DIRECTIVE_MODULE).directive "toonLog", ($rootScope) ->
                         scope.labelText = "defeat"
                         scope.labelClass = "defeat"
 
-                when $rootScope.logTypes.locationDiscovery
+                when logTypes.locationDiscovery
                     scope.action = "discovered the location of #{scope.item.Data.locationName}!"
 

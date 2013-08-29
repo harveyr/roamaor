@@ -1,6 +1,7 @@
 app = angular.module(APP_NAME, [
     "#{APP_NAME}.directives"
-]).run ($rootScope, $http) ->
+    "#{APP_NAME}.services"
+]).run ($rootScope, $http, GameConstants) ->
     $rootScope.appName = "Roamoar"
     $rootScope.myToon = null
     $rootScope.displayedLocations = []
@@ -14,9 +15,14 @@ app = angular.module(APP_NAME, [
         $rootScope.myToon = toon
 
     updateDisplayedLocations = (locations) ->
-        notDisplayed = _.difference(locations, $rootScope.displayedLocations)
-        $rootScope.displayedLocations = $rootScope.displayedLocations.concat(notDisplayed)
+        notDisplayed = []
+        displayedIds = _.pluck $rootScope.displayedLocations, 'Id'
+        _.each locations, (loc) ->
+            if displayedIds.indexOf(loc.Id) == -1 
+                notDisplayed.push loc
 
+        if notDisplayed.length > 0
+            $rootScope.displayedLocations = $rootScope.displayedLocations.concat(notDisplayed)
 
     $rootScope.fetchBundle = ->
         $http.get("/api/bootstrap").then (response) ->
@@ -29,7 +35,10 @@ app = angular.module(APP_NAME, [
             $rootScope.worldWidth = response.data.worldWidth
             $rootScope.myUser = response.data.user
             $rootScope.toonLogs = response.data.toonLogs
-            $rootScope.logTypes = response.data.logTypes
+
+            GameConstants.set "logTypes", response.data.logTypes
+            GameConstants.set "locationTypes", response.data.locationTypes
+
             if response.data.toon 
                 $rootScope.setMyToon(response.data.toon)
                 updateDisplayedLocations(response.data.visited)

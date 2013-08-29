@@ -1,10 +1,10 @@
-angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $timeout) ->
+angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $timeout, GameConstants) ->
 
     # See ColorBrewer! https://github.com/mbostock/d3/wiki/Ordinal-Scales
 
     lastZoom = new Date()
 
-    healthColors = ["#FF000E", "#FF2D0B", "#FF5B08", "#FF8905", "#FFB702", "#D0EA00", "#A2EF00", "#73F400", "#45F900", "#17FF00"]
+    redGreenGradient = ["#FF000E", "#FF2D0B", "#FF5B08", "#FF8905", "#FFB702", "#D0EA00", "#A2EF00", "#73F400", "#45F900", "#17FF00"]
 
     svgHeight = 500
     map = $(".game-map")
@@ -194,48 +194,44 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
 
 
     selectLocations = ->
-        d3.selectAll(".svg-town")
-
-    locationTransform = (d) ->
-        coords = gameToMapCoords(d.X1 + d.X2 / 2, d.Y1 + d.Y2 / 2)
-        "translate (#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
+        d3.selectAll(".svg-location")
 
     drawLocations = ->
         if !$rootScope.displayedLocations or $rootScope.displayedLocations.length == 0 
             return
 
+        types = GameConstants.get("locationTypes")
+
+        sortedLocations = _.sortBy $rootScope.displayedLocations, (loc) ->
+            -1 * ((loc.X2 - loc.X1) + (loc.Y2 - loc.Y1))
+
         $timeout ->
             locs = selectLocations()
-                .data($rootScope.displayedLocations)
-                .attr("transform", locationTransform)
+                .data(sortedLocations)
+                .attr("transform", (d) ->
+                    coords = gameToMapCoords(d.X1, d.Y1)
+                    "translate (#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
+                )
 
             if locs.attr("opacity") < 1
                 locs.transition()
                     .delay((d, i) -> i * 100)
                     .duration(300)
                     .attr("opacity", 1)
-                    .select(".location-span")
-                    .attr("width", (d) -> xScale(d.X2 - d.X1))
-                    .attr("height", (d) -> yScale(d.Y2 - d.Y1))
-                    .attr("transform", (d) ->
-                        x = xScale((d.X1 - d.X2) / 2 + 10)
-                        y = yScale((d.Y1 - d.Y2) / 2 + 10)
-                        "translate(#{x}, #{y})"
-                    )
-                    .attr("fill", "rgba(6, 212, 0, 0.3)")
 
-                # locs.insert("rect", "rect")
-                #     .attr("width", (d) -> )
-                #     .attr("height", (d) -> yScale(d.Y2 - d.Y1))
-
-            # color = "#555"
-            # locs.selectAll("polyline")
-            #     .attr("stroke", color)
-            # locs.selectAll("rect")
-            #     .attr("stroke", color)
-            # locs.selectAll("path")
-            #     .attr("stroke", color)
-
+                locs.select(".location-bounds")
+                    .attr("width", (d) -> Math.max(0, (d.X2 - d.X1)))
+                    .attr("height", (d) -> Math.max(0, (d.Y2 - d.Y1)))
+                    .attr("opacity", 0.3)
+                    .attr("stroke", "#000")
+                    .style("fill", (d) ->
+                        return redGreenGradient[10 - Math.floor(d.Danger * 10)])
+            locs.select(".location-town")
+                .attr("opacity", (d) ->
+                    if d.LocationType == types.town
+                        return 1
+                    0
+                )
         , 0
 
     setDestination = (offsetX, offsetY) ->
@@ -254,7 +250,6 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         walkToon()
 
     drawGrid = ->
-        console.log 'draw grid'
         grid = svg.select("#gridlines")
         gridX = grid.selectAll(".grid-line-x")
             .data(gridLinesX)
