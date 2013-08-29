@@ -90,11 +90,12 @@ type Being struct {
 	LocY      float64
 	DestX     float64
 	DestY     float64
+	locationsCached []Location
+	LocationsVisited []bson.ObjectId "omitempty"
 	BaseSpeed int
+	Weapon	  Weapon
 	Fights    int
 	FightsWon int
-	LocationsVisited []bson.ObjectId "omitempty"
-	Weapon	  Weapon
 }
 
 func CanCreateToon(name string) bool {
@@ -120,6 +121,7 @@ func NewToon(name string) *Being {
 	b.Hp = 60
 	b.BaseSpeed = 2
 	b.Created = time.Now().UTC()
+	b.locationsCached = nil
 
 	c := GetCollection(BEING_COLLECTION)
 	err := c.Insert(b)
@@ -211,6 +213,27 @@ func (b *Being) SinceLastTick() float64 {
 	}
 	duration := time.Now().Sub(b.LastTick)
 	return float64(duration) / float64(time.Second)
+}
+
+func (b *Being) Locations() []Location {
+	if b.locationsCached == nil {
+		b.locationsCached = FetchLocationsAt(b.LocX, b.LocY)
+	}
+	return b.locationsCached
+}
+
+func (b *Being) SmallestLocation() Location {
+	locs := b.Locations()
+	if len(locs) == 0 {
+		return Location{}
+	}
+	smallest := locs[0]
+	for _, loc := range locs[1:] {
+	    if loc.Width() + loc.Height() < smallest.Width() + smallest.Height() {
+	    	smallest = loc
+	    }
+	}
+	return smallest
 }
 
 func (b Being) Delete() {

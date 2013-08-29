@@ -7,7 +7,7 @@ const (
 	WORLD_HEIGHT  = 2000
 )
 
-func CreateOrUpdateLocation(name string, x int, y int, w int, h int) {
+func CreateOrUpdateLocation(name string, locType int, danger float32, x int, y int, w int, h int) {
 	c := GetCollection(LOCATION_COLLECTION)
 	var loc Location
 	err := c.Find(map[string]string{"name": name}).One(&loc)
@@ -20,7 +20,7 @@ func CreateOrUpdateLocation(name string, x int, y int, w int, h int) {
 		loc.Save()
 	} else {
 		log.Printf("Creating location %s (%s)", name, err)
-		NewLocation(name, x, y, w, h)
+		NewLocation(name, locType, danger, x, y, w, h)
 	}
 }
 
@@ -28,8 +28,10 @@ func InitWorldLocations() {
 	print("\n")
 	log.Print("--- Initializing World Locations ---")
 
-	CreateOrUpdateLocation("Newbville", 20, 20, 20, 20)
-	CreateOrUpdateLocation("Tonky", 100, 100, 50, 50)
+
+	CreateOrUpdateLocation("Lowlunds", LOCATION_REGION, 0.2, 0, 0, 200, 200)
+	CreateOrUpdateLocation("Newbville", LOCATION_TOWN, 0.0, 20, 20, 20, 20)
+	CreateOrUpdateLocation("Tonky", LOCATION_TOWN, 0.5, 100, 100, 50, 50)
 
 	log.Print("------------------------------------")
 	print("\n")

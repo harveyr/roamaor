@@ -8,8 +8,11 @@ import (
 
 func ShouldFight(b *Being, tickSeconds float64) (shouldFight bool) {
 	shouldFight = false
-	fightsPerHour := float64(0.3)
-	threshold := fightsPerHour / 3600 * tickSeconds
+
+	// Fights per hour whenn 1.0 danger
+	fightsPerHour := float64(2)
+	loc := b.SmallestLocation()
+	threshold := fightsPerHour / 3600 * tickSeconds * float64(loc.Danger)
 	if rand.Float64() < threshold {
 		shouldFight = true
 	}

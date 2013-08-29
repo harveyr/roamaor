@@ -109,7 +109,7 @@ func TestCreateAndDeleteToon(t *testing.T) {
 }
 
 func TestFetchLocationsAt(t *testing.T) {
-	loc := NewLocation("TestLocation", 50, 100, 5, 5)
+	loc := NewLocation("TestLocation", LOCATION_TOWN, 0.0, 50, 100, 5, 5)
 	locs := FetchLocationsAt(20, 20)
 	if len(locs) > 0 {
 		t.Error("There should be no locations at {20, 20}")
@@ -135,7 +135,7 @@ func TestFetchLocationsAt(t *testing.T) {
 func TestUpdateLocationsVisited(t *testing.T) {
 	toon := NewToon("Test Toon")
 	locationName := "Test Location"
-	loc := NewLocation(locationName, 100, 200, 10, 10)
+	loc := NewLocation(locationName, LOCATION_TOWN, 0.0, 100, 200, 10, 10)
 
 	toon.LocX = 10
 	toon.LocY = 10

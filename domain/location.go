@@ -8,23 +8,43 @@ import (
 
 const (
 	LOCATION_COLLECTION = "locations"
+	LOCATION_REGION = iota
+	LOCATION_MOUNTAIN = iota
+	LOCATION_TOWN = iota
 )
 
 type Location struct {
 	Id        bson.ObjectId "_id"
-	Name string
+	Name 	  string
     X1, Y1, X2, Y2 int
+    Danger    float32
+    LocationType  int
 }
 
-func NewLocation(name string, x int, y int, w int, h int) *Location {
+func LocationTypes() map[string]int {
+	return map[string]int{
+		"region": LOCATION_REGION,
+		"mountain": LOCATION_MOUNTAIN,
+		"town": LOCATION_TOWN,
+	}
+}
+
+func NewLocation(name string, locType int, danger float32, x int, y int, w int, h int) *Location {
 	c := GetCollection(LOCATION_COLLECTION)
-	l := &Location{Name: name, X1: x, Y1: y, X2: x + w, Y2: y + h}
+	l := &Location{
+		Name: name,
+		Danger: danger,
+		LocationType: locType,
+		X1: x,
+		Y1: y,
+		X2: x + w,
+		Y2: y + h,
+	}
 	l.Id = bson.NewObjectId()
 
 	if err := c.Insert(l); err != nil {
 		log.Printf("Failed to insert location %s (%s)", l, err)
 	}
-
 	return l
 }
 
@@ -38,6 +58,14 @@ func (l Location) Save() {
 	if err := c.UpdateId(l.Id, l); err != nil {
 		log.Printf("Failed to save location %s (%s)", l, err)
 	}
+}
+
+func (l Location) Width() int {
+	return l.X2 - l.X1
+}
+
+func (l Location) Height() int {
+	return l.Y2 - l.Y1
 }
 
 func FetchLocationsAt(x float64, y float64) []Location {

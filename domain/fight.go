@@ -8,6 +8,8 @@ import (
 	"math/rand"
 )
 
+var _ string = fmt.Sprintf("%d", 0)
+
 func Hit(hitter *Being, hittee *Being) {
 	damage := hitter.DamageDice().Roll()
 	// fmt.Printf("damage: %d\n", damage)
@@ -57,7 +59,6 @@ func WinFight(winner *Being, loser *Being) {
 	if winner.IsToon() {
 		logItem := LogFight(winner, loser, true)
 		if !loser.IsToon() && loser.Weapon.Level > winner.Weapon.Level {
-			fmt.Printf("Won weapon! %s", winner.Weapon)
 			winner.Weapon = loser.Weapon
 			logItem.SetAttr("weaponWonName", winner.Weapon.Name)
 			logItem.SetAttr("weaponWonLevel", winner.Weapon.Level)

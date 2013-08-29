@@ -25,7 +25,7 @@ angular.module(DIRECTIVE_MODULE).directive "toonSummary", ($rootScope) ->
                     Fights Won: {{fightsWon}} / {{fights}}
                 </p>
                 <p>
-                    Locations Visited: {{myToon.LocationsVisited}}
+                    Locations Visited: {{myToon.LocationsVisited.length}}
                 </p>
                 <p>
                     <div class="label">Weapon</div>

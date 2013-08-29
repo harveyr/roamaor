@@ -139,6 +139,7 @@ func bootstrapBundleHandler(w http.ResponseWriter, r *http.Request) {
 	data["success"] = true
 	data["worldWidth"] = domain.WORLD_WIDTH
 	data["worldHeight"] = domain.WORLD_HEIGHT
+	data["locationTypes"] = domain.LocationTypes()
 	data["user"] = user.Publicize()
 	if len(user.ToonId) > 0 {
 		toon := domain.FetchToonById(user.ToonId)
