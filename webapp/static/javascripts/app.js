@@ -399,7 +399,7 @@
         return -1 * ((loc.X2 - loc.X1) + (loc.Y2 - loc.Y1));
       });
       return $timeout(function() {
-        var locs;
+        var bounds, locs;
         locs = selectLocations().data(sortedLocations).attr("transform", function(d) {
           var coords;
           coords = gameToMapCoords(d.X1, d.Y1);
@@ -409,12 +409,15 @@
           locs.transition().delay(function(d, i) {
             return i * 100;
           }).duration(300).attr("opacity", 1);
-          locs.select(".location-bounds").attr("width", function(d) {
+          bounds = locs.select(".location-bounds").attr("width", function(d) {
             return Math.max(0, d.X2 - d.X1);
           }).attr("height", function(d) {
             return Math.max(0, d.Y2 - d.Y1);
           }).attr("opacity", 0.3).attr("stroke", "#000").style("fill", function(d) {
             return redGreenGradient[10 - Math.floor(d.Danger * 10)];
+          });
+          bounds.on("mousemove", function() {
+            return console.log('here!', this);
           });
         }
         return locs.select(".location-town").attr("opacity", function(d) {

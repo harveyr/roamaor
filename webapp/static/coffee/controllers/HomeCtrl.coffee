@@ -219,13 +219,17 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
                     .duration(300)
                     .attr("opacity", 1)
 
-                locs.select(".location-bounds")
+                bounds = locs.select(".location-bounds")
                     .attr("width", (d) -> Math.max(0, (d.X2 - d.X1)))
                     .attr("height", (d) -> Math.max(0, (d.Y2 - d.Y1)))
                     .attr("opacity", 0.3)
                     .attr("stroke", "#000")
                     .style("fill", (d) ->
                         return redGreenGradient[10 - Math.floor(d.Danger * 10)])
+
+                bounds.on "mousemove", ->
+                    console.log 'here!', this
+
             locs.select(".location-town")
                 .attr("opacity", (d) ->
                     if d.LocationType == types.town
