@@ -7249,12 +7249,12 @@ a.th {
   height: 573px;
   position: relative;
   top: -15px;
-  background-image: url("/static/img/mapbg.jpg");
-  background-repeat: no-repeat;
-  background-position: -3px 13px;
   padding-left: 37px;
   padding-top: 45px;
   padding-right: 33px;
+  background-image: url("/static/img/mapbg.jpg");
+  background-repeat: no-repeat;
+  background-position: -3px 13px;
 }
 
 /* line 118, ../sass/app.scss */
@@ -7287,4 +7287,12 @@ a.th {
 /* line 142, ../sass/app.scss */
 .dim {
   color: #b0b0b0;
+}
+
+/* line 147, ../sass/app.scss */
+.world-tooltip {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 10px;
+  border-radius: 4px;
 }

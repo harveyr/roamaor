@@ -196,6 +196,12 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
     selectLocations = ->
         d3.selectAll(".svg-location")
 
+    locationTooltip = _.throttle (location) ->
+        $(".world-tooltip").text("blah")
+            .css("top", yScale(location.Y1) + 5)
+            .css("left", xScale(location.X1) + 5)
+    , 100
+
     drawLocations = ->
         if !$rootScope.displayedLocations or $rootScope.displayedLocations.length == 0 
             return
@@ -208,10 +214,11 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
         $timeout ->
             locs = selectLocations()
                 .data(sortedLocations)
-                .attr("transform", (d) ->
-                    coords = gameToMapCoords(d.X1, d.Y1)
-                    "translate (#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
-                )
+
+            locs.attr("transform", (d) ->
+                coords = gameToMapCoords(d.X1, d.Y1)
+                "translate (#{coords.x}, #{coords.y}) scale(#{$scope.zoomScale})"
+            )
 
             if locs.attr("opacity") < 1
                 locs.transition()
@@ -227,15 +234,20 @@ angular.module(APP_NAME).controller 'HomeCtrl', ($scope, $rootScope, $http, $tim
                     .style("fill", (d) ->
                         return redGreenGradient[10 - Math.floor(d.Danger * 10)])
 
-                bounds.on "mousemove", ->
-                    console.log 'here!', this
+                locs.select(".location-town")
+                    .attr("opacity", (d) ->
+                        if d.LocationType == types.town
+                            return 1
+                        0
+                    )
+                    .attr("transform", (d) ->
+                        x = (d.X2 - d.X1) / 2 - 10
+                        y = (d.Y2 - d.Y1) / 2 - 10
+                        "translate(#{x}, #{y})"
+                    )
 
-            locs.select(".location-town")
-                .attr("opacity", (d) ->
-                    if d.LocationType == types.town
-                        return 1
-                    0
-                )
+                bounds.on "mousemove", (location) ->
+                    locationTooltip location
         , 0
 
     setDestination = (offsetX, offsetY) ->

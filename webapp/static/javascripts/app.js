@@ -225,7 +225,7 @@
   });
 
   angular.module(APP_NAME).controller('HomeCtrl', function($scope, $rootScope, $http, $timeout, GameConstants) {
-    var drawDestination, drawGrid, drawHealthBar, drawLocations, drawToon, gameToMapCoords, gridDiameter, gridLinesX, gridLinesY, lastZoom, lineFunc, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, redGreenGradient, selectLocations, selectToonSvg, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, updateView, walkPromise, walkToon, xScale, yScale, zoom;
+    var drawDestination, drawGrid, drawHealthBar, drawLocations, drawToon, gameToMapCoords, gridDiameter, gridLinesX, gridLinesY, lastZoom, lineFunc, locationTooltip, map, mapHeight, mapToGameCoords, mapWidth, myDestPath, redGreenGradient, selectLocations, selectToonSvg, setDestination, svg, svgHeight, svgHeightScale, svgWidth, svgWidthScale, updateView, walkPromise, walkToon, xScale, yScale, zoom;
     lastZoom = new Date();
     redGreenGradient = ["#FF000E", "#FF2D0B", "#FF5B08", "#FF8905", "#FFB702", "#D0EA00", "#A2EF00", "#73F400", "#45F900", "#17FF00"];
     svgHeight = 500;
@@ -389,6 +389,9 @@
     selectLocations = function() {
       return d3.selectAll(".svg-location");
     };
+    locationTooltip = _.throttle(function(location) {
+      return $(".world-tooltip").text("blah").css("top", yScale(location.Y1) + 5).css("left", xScale(location.X1) + 5);
+    }, 100);
     drawLocations = function() {
       var sortedLocations, types;
       if (!$rootScope.displayedLocations || $rootScope.displayedLocations.length === 0) {
@@ -400,7 +403,8 @@
       });
       return $timeout(function() {
         var bounds, locs;
-        locs = selectLocations().data(sortedLocations).attr("transform", function(d) {
+        locs = selectLocations().data(sortedLocations);
+        locs.attr("transform", function(d) {
           var coords;
           coords = gameToMapCoords(d.X1, d.Y1);
           return "translate (" + coords.x + ", " + coords.y + ") scale(" + $scope.zoomScale + ")";
@@ -416,16 +420,21 @@
           }).attr("opacity", 0.3).attr("stroke", "#000").style("fill", function(d) {
             return redGreenGradient[10 - Math.floor(d.Danger * 10)];
           });
-          bounds.on("mousemove", function() {
-            return console.log('here!', this);
+          locs.select(".location-town").attr("opacity", function(d) {
+            if (d.LocationType === types.town) {
+              return 1;
+            }
+            return 0;
+          }).attr("transform", function(d) {
+            var x, y;
+            x = (d.X2 - d.X1) / 2 - 10;
+            y = (d.Y2 - d.Y1) / 2 - 10;
+            return "translate(" + x + ", " + y + ")";
+          });
+          return bounds.on("mousemove", function(location) {
+            return locationTooltip(location);
           });
         }
-        return locs.select(".location-town").attr("opacity", function(d) {
-          if (d.LocationType === types.town) {
-            return 1;
-          }
-          return 0;
-        });
       }, 0);
     };
     setDestination = function(offsetX, offsetY) {
