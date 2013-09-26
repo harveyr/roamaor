@@ -2,7 +2,7 @@ Roamaor
 =======
 
 This is a spoof MMORPG created solely as an exercise in Go and D3js. The rest of the stack includes MongoDB, AngularJS,
-and Compass/Zurb/SASS for the markup and styling.
+and Compass/Sass/Zurb for the markup and styling.
 
 It is wildly incomplete and will be for some time to come.
 
